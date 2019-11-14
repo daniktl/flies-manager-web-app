@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Linii lotnicze
+{% endblock %}
+
+{% block header %}
+    <div class="container">
+        <div class="header-text">
+            Linii lotnicze
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block content %}
+    <div class="section-header">
+        Linii lotnicze i ich samoloty:
+    </div>
+    <table class="table table-sm table-hover">
+        <thead>
+        <tr>
+            <th>
+                Numer
+            </th>
+            <th>
+                Wylot
+            </th>
+            <th>
+                Lądowanie
+            </th>
+            <th>
+                Data
+            </th>
+            <th>
+                Godzina
+            </th>
+            <th>
+                Trwanie
+            </th>
+            <th>
+                Przewożnik
+            </th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th>
+                LOT1234
+            </th>
+            <th>
+                Poznań
+            </th>
+            <th>
+                Warszawa
+            </th>
+            <th>
+                1.11.2019
+            </th>
+            <th>
+                10:15
+            </th>
+            <th>
+                0:50
+            </th>
+            <th>
+                LOT
+            </th>
+            <th>
+                <button class="edit-button action-button"></button>
+            </th>
+        </tr>
+        <tr>
+            <th>
+                LOT1234
+            </th>
+            <th>
+                Poznań
+            </th>
+            <th>
+                Warszawa
+            </th>
+            <th>
+                8.11.2019
+            </th>
+            <th>
+                10:15
+            </th>
+            <th>
+                0:50
+            </th>
+            <th>
+                LOT
+            </th>
+            <th>
+                <button class="edit-button action-button"></button>
+            </th>
+        </tr>
+        <tr>
+            <th>
+                LOT1234
+            </th>
+            <th>
+                Poznań
+            </th>
+            <th>
+                Warszawa
+            </th>
+            <th>
+                15.11.2019
+            </th>
+            <th>
+                10:15
+            </th>
+            <th>
+                0:50
+            </th>
+            <th>
+                LOT
+            </th>
+            <th>
+                <button class="edit-button action-button"></button>
+            </th>
+        </tr>
+        </tbody>
+
+    </table>
+
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <div class="container">
+        <div class="find-fly">
+            <div class="section-header">
+                Znajdż swój lot
+            </div>
+            <form method="post" enctype="multipart/form-data">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Z</span>
+                    </div>
+                    <input type="text" class="form-control" name="from">
+                </div>
+
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Do</span>
+                    </div>
+                    <input type="text" class="form-control" name="to">
+                </div>
+
+
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Wylot</span>
+                    </div>
+                    <input type="date" class="form-control" name="go-date">
+                </div>
+
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Powrót</span>
+                    </div>
+                    <input type="date" class="form-control" name="return-date">
+                </div>
+
+                <button type="submit" class="btn btn-primary" name="find">Wyszukaj</button>
+            </form>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block content %}
+    <div>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Asperiores atque dolor dolorem eligendi eos hic
+        incidunt iure nostrum numquam optio quae quas quasi quod repellat repudiandae sapiente sed, sequi sunt.
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Distinctio est iusto mollitia natus saepe? Maiores
+        numquam obcaecati officiis, quas ut voluptatibus. Aliquam atque culpa distinctio id nemo nesciunt placeat vel!
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ad doloremque earum enim facere fugiat, illum itaque
+        maiores minima nisi odio optio pariatur repellendus sed. Dicta ipsa omnis quisquam tempora totam!
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Asperiores delectus deleniti dignissimos eius
+        excepturi expedita, fuga illum laborum nam natus officiis provident quis quo ratione reiciendis sapiente sunt
+        veniam. Cupiditate.
+    </div>
+
+{% endblock %}
