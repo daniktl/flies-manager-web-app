@@ -44,15 +44,40 @@
 {% endblock %}
 
 {% block content %}
-    <div>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Asperiores atque dolor dolorem eligendi eos hic
-        incidunt iure nostrum numquam optio quae quas quasi quod repellat repudiandae sapiente sed, sequi sunt.
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Distinctio est iusto mollitia natus saepe? Maiores
-        numquam obcaecati officiis, quas ut voluptatibus. Aliquam atque culpa distinctio id nemo nesciunt placeat vel!
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ad doloremque earum enim facere fugiat, illum itaque
-        maiores minima nisi odio optio pariatur repellendus sed. Dicta ipsa omnis quisquam tempora totam!
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Asperiores delectus deleniti dignissimos eius
-        excepturi expedita, fuga illum laborum nam natus officiis provident quis quo ratione reiciendis sapiente sunt
-        veniam. Cupiditate.
+    <div class="index-info-group">
+        <div class="index-info">
+            <img src="{{ url_for("static", filename="travel.png") }}" class="logo">
+            <div class="index-info-header">
+                Wszędzie
+            </div>
+        </div>
+
+
+        To Twój świat, a z nami go odkryjesz. Znajdź najlepsze ceny wśród milionów lotów, hoteli i wypożyczalni
+        samochodów, aby zaplanować idealną podróż.
+
+    </div>
+
+    <div class="index-info-group">
+        <div class="index-info">
+            <img src="{{ url_for("static", filename="travel2.jpg") }}" class="logo">
+            <div class="index-info-header">
+                Prosto
+            </div>
+        </div>
+        Żadnych ukrytych opłat. Żadnych nieczystych zagrań. Z nami zawsze wiesz, dokąd trafiają Twoje pieniądze.
+        Zrelaksuj się, zanim zaczniesz urlop.
+    </div>
+    <div class="index-info-group">
+        <div class="index-info">
+            <img src="{{ url_for("static", filename="travel3.jpg") }}" class="logo">
+            <div class="index-info-header">
+                Podróżuj po swojemu
+            </div>
+        </div>
+        Wiesz, dokąd chcesz się udać? Sprawdź, kiedy najlepiej dokonać rezerwacji. Masz więcej czasu? Znajdź okazje
+        na
+        krótkie wypady i niesamowite przygody
     </div>
 
 {% endblock %}
