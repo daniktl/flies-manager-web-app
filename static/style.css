@@ -60,6 +60,8 @@ html {
     border-left: none!important;
     font-size: 25px;
     font-weight: 300!important;
+    padding-top: 0;
+    margin-top: 0;
 }
 
 .header-text {
@@ -81,18 +83,23 @@ html {
 }
 
 .edit-button {
-    width: 35px;
-    height: 35px;
-    background-color: transparent;
     background-image: url("/static/pencil.png");
-    background-size: cover;
-    border: none;
-    margin: 0!important;
+}
+
+.more-button {
+    background-image: url("/static/more.png");
 }
 
 .action-button {
+    width: 35px;
+    height: 35px;
+    background-color: transparent;
     transition: .3s;
     border-radius: 10px;
+    background-size: cover;
+    border: none;
+    margin: 0!important;
+    outline: none!important;
 }
 
 .action-button:hover {
