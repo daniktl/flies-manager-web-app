@@ -14,117 +14,82 @@ Linii lotnicze
 {% endblock %}
 
 {% block content %}
+
     <div class="section-header">
-        Linii lotnicze i ich samoloty:
+        Nowa linia lotnicza:
     </div>
+    <form method="post" enctype="multipart/form-data">
+
+
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="from">Nazwa</label>
+                <input type="text" class="form-control" id="nazwa" name="nazwa" placeholder="LOT">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="kraj">Kraj</label>
+                <select id="kraj" class="form-control" name="kraj">
+                    <option selected>Polska</option>
+                </select>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" name="new">Dodaj</button>
+    </form>
+
+    <hr>
+
+    <div class="section-header">
+        Linii lotnicze:
+    </div>
+    {% if not linie %}
+    <div class="no-content"></div>
+    {% else %}
     <table class="table table-sm table-hover">
         <thead>
         <tr>
             <th>
-                Numer
+                Nazwa
             </th>
             <th>
-                Wylot
+                Kraj
             </th>
             <th>
-                Lądowanie
+                Liczba samolotów
             </th>
             <th>
-                Data
+                Data założenia
             </th>
-            <th>
-                Godzina
-            </th>
-            <th>
-                Trwanie
-            </th>
-            <th>
-                Przewożnik
-            </th>
+
             <th></th>
         </tr>
         </thead>
         <tbody>
+        {% for linia in linie %}
         <tr>
             <th>
-                LOT1234
+                <a href="{{ url_for('line_name', line=linia.nazwa) }}">{{ linia.nazwa }}</a>
             </th>
             <th>
-                Poznań
+                {{ linia.kraj }}
             </th>
             <th>
-                Warszawa
+                {{ linia.liczba_samolotow() }}
             </th>
             <th>
-                1.11.2019
+                {{ linia.data_zalozenia }}
             </th>
-            <th>
-                10:15
-            </th>
-            <th>
-                0:50
-            </th>
-            <th>
-                LOT
-            </th>
+
             <th>
                 <button class="edit-button action-button"></button>
             </th>
         </tr>
-        <tr>
-            <th>
-                LOT1234
-            </th>
-            <th>
-                Poznań
-            </th>
-            <th>
-                Warszawa
-            </th>
-            <th>
-                8.11.2019
-            </th>
-            <th>
-                10:15
-            </th>
-            <th>
-                0:50
-            </th>
-            <th>
-                LOT
-            </th>
-            <th>
-                <button class="edit-button action-button"></button>
-            </th>
-        </tr>
-        <tr>
-            <th>
-                LOT1234
-            </th>
-            <th>
-                Poznań
-            </th>
-            <th>
-                Warszawa
-            </th>
-            <th>
-                15.11.2019
-            </th>
-            <th>
-                10:15
-            </th>
-            <th>
-                0:50
-            </th>
-            <th>
-                LOT
-            </th>
-            <th>
-                <button class="edit-button action-button"></button>
-            </th>
-        </tr>
+        {% endfor %}
+
         </tbody>
 
     </table>
+    {% endif %}
 
 {% endblock %}

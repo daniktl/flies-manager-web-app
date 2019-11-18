@@ -178,3 +178,9 @@ html {
 .index-info-group + .index-info-group {
     margin-top: 30px;
 }
+
+.no-content {
+    font-size: 30px;
+    font-weight: 300;
+    content: "No content";
+}

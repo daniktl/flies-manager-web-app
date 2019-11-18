@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{ linia.nazwa }}
+{% endblock %}
+
+{% block header %}
+    <div class="container">
+        <div class="header-text">
+            {{ linia.nazwa }}
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block content %}
+
+    {#    <div class="section-header">Informacja dotycząca linii lotniczej {{ linia.nazwa }}:</div>#}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Strona główna</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('lines') }}">Linie lotnicze</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ linia.nazwa }}</li>
+        </ol>
+    </nav>
+
+    <div class="section-header">
+        Dodaj nowy samolot dla tej linii lotniczej:
+    </div>
+    <form method="post" enctype="multipart/form-data">
+
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="from">Number boczny</label>
+                <input type="text" class="form-control" id="nr_boczny" name="nr_boczny" placeholder="XXX1234">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="kraj">Kraj</label>
+                <select id="kraj" class="form-control" name="kraj">
+                    <option selected>Polska</option>
+                </select>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" name="new">Dodaj</button>
+    </form>
+
+    <hr>
+
+    <div class="section-header">
+        Istniejące samoloty:
+    </div>
+    {% if not samoloty %}
+        <div class="no-content"></div>
+    {% else %}
+        <table class="table table-sm table-hover">
+            <thead>
+            <tr>
+                <th>
+                    Nr boczny
+                </th>
+                <th>
+                    Max zasięg
+                </th>
+                <th>
+                    Marka
+                </th>
+                <th>
+                    Model
+                </th>
+                <th>
+                    Przebieg
+                </th>
+                <th>
+                    Pojemność
+                </th>
+
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for samolot in samoloty %}
+                <tr>
+                    <th>
+                        {{ samolot.nr_boczny }}
+                    </th>
+                    <th>
+                        {{ samolot.max_zasieg }}
+                    </th>
+                    <th>
+                        {{ samolot.marka }}
+                    </th>
+                    <th>
+                        {{ samolot.model }}
+                    </th>
+                    <th>
+                        {{ samolot.przebieg }}
+                    </th>
+                    <th>
+                        {{ samolot.pojemnosc }}
+                    </th>
+
+                    <th>
+                        <button class="edit-button action-button"></button>
+                    </th>
+                </tr>
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+    {% endif %}
+
+{% endblock %}
