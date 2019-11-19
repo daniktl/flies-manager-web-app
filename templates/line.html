@@ -36,14 +36,30 @@
                 <input type="text" class="form-control" id="nr_boczny" name="nr_boczny" placeholder="XXX1234">
             </div>
             <div class="form-group col-md-6">
-                <label for="kraj">Kraj</label>
-                <select id="kraj" class="form-control" name="kraj">
-                    <option selected>Polska</option>
-                </select>
+                <label for="from">Maksymalny zasięg (km)</label>
+                <input type="number" class="form-control" id="zasieg" name="zasieg" placeholder="1200">
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block" name="new">Dodaj</button>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="from">Marka</label>
+                <input type="text" class="form-control" id="marka" name="marka" placeholder="TU">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="from">Model</label>
+                <input type="text" class="form-control" id="model" name="model" placeholder="104">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-12">
+                <label for="from">Pojemność (osób)</label>
+                <input type="number" class="form-control" id="pojemnosc" name="pojemnosc" placeholder="100">
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" name="new-samolot">Dodaj</button>
     </form>
 
     <hr>
@@ -102,7 +118,7 @@
                     </th>
 
                     <th>
-                        <button class="edit-button action-button"></button>
+                       <button class="edit-button action-button" data-toggle="modal" data-target="#modal-samolot-{{ samolot.nr_boczny }}"></button>
                     </th>
                 </tr>
             {% endfor %}
@@ -110,6 +126,30 @@
             </tbody>
 
         </table>
+        {% for samolot in samoloty %}
+
+            <div class="modal fade" id="modal-samolot-{{ samolot.nr_boczny }}" tabindex="-1" role="dialog"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <form class="modal-content" method="post" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalCenterTitle">Zmień informację o samolocie {{ samolot.nr_boczny }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            ...
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-danger" name="remove" value="{{ samolot.nr_boczny }}">Usuń</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+                            <button type="submit" class="btn btn-primary" name="edit" value="{{ samolot.nr_boczny }}">Zapisz</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
     {% endif %}
 
 {% endblock %}

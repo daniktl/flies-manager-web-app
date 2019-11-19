@@ -1,4 +1,5 @@
-from sqlalchemy import create_engine, String, Integer, Column, DateTime, Boolean, Text, desc, func, ForeignKey, ForeignKeyConstraint
+from sqlalchemy import create_engine, String, Integer, Column, DateTime, Boolean, Text, desc, func, ForeignKey, \
+    ForeignKeyConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exc import IntegrityError, DisconnectionError, ProgrammingError, OperationalError
 from sqlalchemy.orm import sessionmaker, relationship, scoped_session
@@ -11,21 +12,19 @@ from contextlib import contextmanager
 
 from flask import Flask, url_for, render_template, abort, request
 from flask_sqlalchemy import SQLAlchemy
+import urllib
 
 app = Flask(__name__)
 
+# create database on your local machine and fill this line with your credentials (replace uppercase words):
+#                                               mysql://USERNAME:PASSWORD@localhost/DATABASE?charset=utf8
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://admin_flies:FA$#$3awfa3afsd@localhost/flies?charset=utf8'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# DB_location = 'mysql://admin_flies:FA$#$3awfa3afsd@localhost/flies?charset=utf8'
-#
-# Base = declarative_base()
-#
-# engine = create_engine(DB_location)
-
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 @contextmanager
 def session_handler():
@@ -42,8 +41,13 @@ def session_handler():
         session.rollback()
 
 
-class User(db.Model):
+def get_countries_list():
+    with open(os.path.join(dir_path, "data", "countries")) as file:
+        ls = file.read().splitlines()
+        return ls
 
+
+class User(db.Model):
     __tablename__ = 'user'
 
     user_id = Column('id_u', Integer, primary_key=True, autoincrement=True)
@@ -53,12 +57,13 @@ class User(db.Model):
     imie = Column('imie', String(32), nullable=False)
     nazwisko = Column('nazwisko', String(32), nullable=False)
 
+    rabat = relationship("Rabat", cascade="all")
+
     def is_admin(self):
         return self.typ == 'admin'
 
 
 class Rabat(db.Model):
-
     __tablename__ = 'rabat'
 
     kod = Column('kod', String(10), primary_key=True, nullable=False)
@@ -66,23 +71,26 @@ class Rabat(db.Model):
     data_waznosci = Column('data_waznosci', DateTime, nullable=False)
 
     user_id = Column("user_id_u", Integer, ForeignKey(User.user_id), nullable=False)
-    user = relationship("User", cascade="all")
+    user = relationship("User")
 
 
 class LiniaLotnicza(db.Model):
-
     __tablename__ = 'linia_lotnicza'
 
     nazwa = Column('nazwa', String(25), primary_key=True, nullable=False)
     kraj = Column('kraj', String(25))
     data_zalozenia = Column('data_zalozenie', DateTime, nullable=False)
 
+    samolot = relationship('Samolot', cascade="all")
+
     def liczba_samolotow(self):
         return pokaz_samoloty_linia(self.nazwa)
 
+    def get_nazwa_safe(self):
+        return urllib.parse.quote(self.nazwa.replace(" ", "_"))
+
 
 class Samolot(db.Model):
-
     __tablename__ = 'samolot'
 
     nr_boczny = Column('nr_boczny', String(10), primary_key=True, nullable=False)
@@ -93,7 +101,7 @@ class Samolot(db.Model):
     pojemnosc = Column('pojemnosc', Integer, nullable=False)
 
     linia_lotnicza_nazwa = Column('linia_lotnicza_nazwa', String(25), ForeignKey(LiniaLotnicza.nazwa), nullable=False)
-    linia_lotnicza = relationship('LiniaLotnicza', cascade="all")
+    linia_lotnicza = relationship('LiniaLotnicza')
 
 
 def pokaz_samoloty_linia(nazwa):
@@ -102,15 +110,44 @@ def pokaz_samoloty_linia(nazwa):
         return liczba
 
 
-def dodaj_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc):
+def check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc):
     with session_handler() as db_session:
         samolot = db_session.query(Samolot).filter(Samolot.nr_boczny == nr_boczny).first()
         if samolot:
-            return ['danger', "Samolot z takim numerrem bocznym już istnieje"]
-        nowy_samolot = Samolot(nr_boczny=nr_boczny, marka=marka, model=model, pojemnosc=pojemnosc, linia_lotnicza_nazwa=linia_nazwa)
+            return False, ['danger', f"Samolot z numerem bocznym {nr_boczny} już istnieje ({samolot.linia_lotnicza_nazwa})"]
+        if len(marka) > 15 or len(model) > 15:
+            return False, ['danger', "Długość atrybutów marka i model powinna być nie większa niż 15"]
+        if not pokaz_linie(linia_nazwa):
+            return False, ['danger', f"Linia lotnicza {linia_nazwa} nie istnieje. Spróbuj jeszcze raz"]
+        if not isinstance(pojemnosc, int):
+            if isinstance(pojemnosc, str):
+                if not pojemnosc.isnumeric():
+                    return False, ['danger', "Pojemnośc powinna być liczbą"]
+            else:
+                return False, ['danger', "Pojemnośc powinna być liczbą"]
+        return True, None
+
+
+def dodaj_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, zasieg=None):
+    with session_handler() as db_session:
+        good, message = check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc)
+        if not good:
+            return message
+        pojemnosc = int(pojemnosc)
+        nowy_samolot = Samolot(nr_boczny=nr_boczny, marka=marka, model=model, pojemnosc=pojemnosc,
+                               linia_lotnicza_nazwa=linia_nazwa, max_zasieg=zasieg)
         db_session.add(nowy_samolot)
         db_session.commit()
         return ['success', "Samolot został dodany"]
+
+
+def usun_samolot(nr_boczny):
+    with session_handler() as db_session:
+        samolot = db_session.query(Samolot).filter(Samolot.nr_boczny == nr_boczny).first()
+        if not samolot:
+            return ['danger', f'Samolot o numerze bocnzym {nr_boczny} nie istnieje']
+        db_session.delete(samolot)
+        return ['success', f"Samolot o numerze bocznym {nr_boczny} został usunięty"]
 
 
 def dodaj_linie(nazwa, kraj=None, data_zalozenia=datetime.datetime.now()):
@@ -121,6 +158,15 @@ def dodaj_linie(nazwa, kraj=None, data_zalozenia=datetime.datetime.now()):
         nowa_linia = LiniaLotnicza(nazwa=nazwa, kraj=kraj, data_zalozenia=data_zalozenia)
         db_session.add(nowa_linia)
         return ['success', "Linia została dodana"]
+
+
+def usun_linie(nazwa):
+    with session_handler() as db_session:
+        linia = db_session.query(LiniaLotnicza).filter(LiniaLotnicza.nazwa == nazwa).first()
+        if not linia:
+            return ['danget', "Nie istnieje linii lotniczej o podanej nazwie"]
+        db_session.delete(linia)
+        return ['success', "Linia została usunięta"]
 
 
 def pokaz_linie(line=None):
@@ -144,5 +190,3 @@ def pokaz_samoloty(linia=None):
 if __name__ == '__main__':
     # db.drop_all()
     db.create_all()
-    dodaj_linie()
-    # dodaj_samolot()

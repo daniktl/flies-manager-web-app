@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}
-Linii lotnicze
+    Linii lotnicze
 {% endblock %}
 
 {% block header %}
@@ -21,7 +21,6 @@ Linii lotnicze
     <form method="post" enctype="multipart/form-data">
 
 
-
         <div class="form-row">
             <div class="form-group col-md-6">
                 <label for="from">Nazwa</label>
@@ -30,7 +29,9 @@ Linii lotnicze
             <div class="form-group col-md-6">
                 <label for="kraj">Kraj</label>
                 <select id="kraj" class="form-control" name="kraj">
-                    <option selected>Polska</option>
+                    {% for kraj in kraje %}
+                        <option>{{ kraj }}</option>
+                    {% endfor %}
                 </select>
             </div>
         </div>
@@ -44,52 +45,77 @@ Linii lotnicze
         Linii lotnicze:
     </div>
     {% if not linie %}
-    <div class="no-content"></div>
+        <div class="no-content"></div>
     {% else %}
-    <table class="table table-sm table-hover">
-        <thead>
-        <tr>
-            <th>
-                Nazwa
-            </th>
-            <th>
-                Kraj
-            </th>
-            <th>
-                Liczba samolotów
-            </th>
-            <th>
-                Data założenia
-            </th>
+        <table class="table table-sm table-hover">
+            <thead>
+            <tr>
+                <th>
+                    Nazwa
+                </th>
+                <th>
+                    Kraj
+                </th>
+                <th>
+                    Liczba samolotów
+                </th>
+                <th>
+                    Data założenia
+                </th>
 
-            <th></th>
-        </tr>
-        </thead>
-        <tbody>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for linia in linie %}
+                <tr>
+                    <th>
+                        <a href="{{ url_for('line_name', line=linia.nazwa) }}">{{ linia.nazwa }}</a>
+                    </th>
+                    <th>
+                        {{ linia.kraj }}
+                    </th>
+                    <th>
+                        {{ linia.liczba_samolotow() }}
+                    </th>
+                    <th>
+                        {{ linia.data_zalozenia }}
+                    </th>
+
+                    <th>
+                        <button class="edit-button action-button" data-toggle="modal" data-target="#modal-linia-{{ linia.get_nazwa_safe() }}"></button>
+                    </th>
+                </tr>
+            {% endfor %}
+
+            </tbody>
+
+        </table>
         {% for linia in linie %}
-        <tr>
-            <th>
-                <a href="{{ url_for('line_name', line=linia.nazwa) }}">{{ linia.nazwa }}</a>
-            </th>
-            <th>
-                {{ linia.kraj }}
-            </th>
-            <th>
-                {{ linia.liczba_samolotow() }}
-            </th>
-            <th>
-                {{ linia.data_zalozenia }}
-            </th>
 
-            <th>
-                <button class="edit-button action-button"></button>
-            </th>
-        </tr>
+            <div class="modal fade" id="modal-linia-{{ linia.get_nazwa_safe() }}" tabindex="-1" role="dialog"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <form class="modal-content" method="post" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalCenterTitle">Zmień linię {{ linia.nazwa }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            ...
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-danger" name="remove" value="{{ linia.nazwa }}">Usuń</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+                            <button type="submit" class="btn btn-primary" name="edit" value="{{ linia.nazwa }}">Zapisz</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         {% endfor %}
 
-        </tbody>
-
-    </table>
     {% endif %}
 
 {% endblock %}

@@ -182,5 +182,8 @@ html {
 .no-content {
     font-size: 30px;
     font-weight: 300;
+}
+
+.no-content:after {
     content: "No content";
 }

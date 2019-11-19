@@ -22,8 +22,9 @@
         <div class="form-group">
             <label for="line">Linia lotnicza</label>
             <select id="line" name="line" class="form-control">
-                <option selected>Choose...</option>
-                <option>...</option>
+                {% for linia in linie %}
+                    <option>{{ linia.nazwa }}</option>
+                {% endfor %}
             </select>
         </div>
 
@@ -53,7 +54,7 @@
             <div class="input-group-prepend">
                 <span class="input-group-text">PLN</span>
             </div>
-            <input type="number" class="form-control" id="price" name="price" value="50">
+            <input type="number" class="form-control" id="price" name="price" placeholder="50">
         </div>
         <button type="submit" class="btn btn-primary btn-block" name="new">Dodaj</button>
     </form>
@@ -83,10 +84,13 @@
                 Godzina
             </th>
             <th>
-                Trwanie
+                Czas podróży
             </th>
             <th>
-                Cena podstawowa
+                Cena
+            </th>
+            <th>
+                Linia lotnicza
             </th>
             <th></th>
         </tr>
@@ -110,6 +114,9 @@
             </th>
             <th>
                 0:50
+            </th>
+            <th>
+                50 zł
             </th>
             <th>
                 LOT
@@ -138,6 +145,9 @@
                 0:50
             </th>
             <th>
+                150 zł
+            </th>
+            <th>
                 LOT
             </th>
             <th>
@@ -162,6 +172,9 @@
             </th>
             <th>
                 0:50
+            </th>
+            <th>
+                70 zł
             </th>
             <th>
                 LOT
