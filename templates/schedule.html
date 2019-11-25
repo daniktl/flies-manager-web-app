@@ -22,9 +22,11 @@
         <div class="form-group">
             <label for="line">Linia lotnicza</label>
             <select id="line" name="line" class="form-control">
-                {% for linia in linie %}
-                    <option>{{ linia.nazwa }}</option>
-                {% endfor %}
+                {% if linie %}
+                    {% for linia in linie %}
+                        <option>{{ linia.nazwa }}</option>
+                    {% endfor %}
+                {% endif %}
             </select>
         </div>
 

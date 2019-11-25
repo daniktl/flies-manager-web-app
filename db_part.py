@@ -82,6 +82,7 @@ class LiniaLotnicza(db.Model):
     data_zalozenia = Column('data_zalozenie', DateTime, nullable=False)
 
     samolot = relationship('Samolot', cascade="all")
+    pilot = relationship('Pilot', cascade='all')
 
     def liczba_samolotow(self):
         return pokaz_samoloty_linia(self.nazwa)
@@ -103,6 +104,23 @@ class Samolot(db.Model):
     linia_lotnicza_nazwa = Column('linia_lotnicza_nazwa', String(25), ForeignKey(LiniaLotnicza.nazwa), nullable=False)
     linia_lotnicza = relationship('LiniaLotnicza')
 
+
+class Pilot(db.Model):
+    __tablename__ = 'pilot'
+
+    id_pil = Column('id_pil', Integer, primary_key=True, autoincrement=True)
+    imie = Column('imie', String(30), nullable=False)
+    nazwisko = Column('nazwisko', String(30), nullable=False)
+    data_dolaczenia = Column('data_dolaczenia', DateTime)
+
+    linia_lotnicza_nazwa = Column('linia_lotnicza_nazwa', String(25), ForeignKey(LiniaLotnicza.nazwa), nullable=False)
+    linia_lotnicza = relationship('LiniaLotnicza')
+
+##############################################
+#           FUNKCJE
+##############################################
+
+# ######### samoloty
 
 def pokaz_samoloty_linia(nazwa):
     with session_handler() as db_session:
@@ -150,6 +168,18 @@ def usun_samolot(nr_boczny):
         return ['success', f"Samolot o numerze bocznym {nr_boczny} został usunięty"]
 
 
+def pokaz_samoloty(linia=None):
+    with session_handler() as db_session:
+        if linia:
+            samoloty = db_session.query(Samolot).filter(Samolot.linia_lotnicza_nazwa == linia).all()
+        else:
+            samoloty = db_session.query(Samolot).all()
+        return samoloty
+
+
+# ######## linie
+
+
 def dodaj_linie(nazwa, kraj=None, data_zalozenia=datetime.datetime.now()):
     with session_handler() as db_session:
         linia_nazwa = db_session.query(LiniaLotnicza).filter(LiniaLotnicza.nazwa == nazwa).first()
@@ -164,7 +194,7 @@ def usun_linie(nazwa):
     with session_handler() as db_session:
         linia = db_session.query(LiniaLotnicza).filter(LiniaLotnicza.nazwa == nazwa).first()
         if not linia:
-            return ['danget', "Nie istnieje linii lotniczej o podanej nazwie"]
+            return ['danger', "Nie istnieje linii lotniczej o podanej nazwie"]
         db_session.delete(linia)
         return ['success', "Linia została usunięta"]
 
@@ -178,15 +208,33 @@ def pokaz_linie(line=None):
         return linie
 
 
-def pokaz_samoloty(linia=None):
+# ######## piloci
+
+
+def pokaz_pilotow(linia=None):
     with session_handler() as db_session:
         if linia:
-            samoloty = db_session.query(Samolot).filter(Samolot.linia_lotnicza_nazwa == linia).all()
+            piloci = db_session.query(Pilot).filter(Pilot.linia_lotnicza_nazwa == linia).all()
         else:
-            samoloty = db_session.query(Samolot).all()
-        return samoloty
+            piloci = db_session.query(Pilot).all()
+        return piloci
+
+
+def dodaj_pilota(imie, nazwisko, linia_nazwa):
+    with session_handler() as db_session:
+        if isinstance(imie, str) and isinstance(nazwisko, str):
+            if len(imie) < 30 and len(nazwisko) < 30:
+                nowy_pilot = Pilot(imie=imie, nazwisko=nazwisko, data_dolaczenia=datetime.datetime.now(), linia_lotnicza_nazwa=linia_nazwa)
+                db_session.add(nowy_pilot)
+                return ['success', 'Nowy pilot został dodany']
+            return ['danger', "Długośc imienia i nazwiska powinna zawierać maksymalnie 30 znakóœ"]
+        return ['danger', "Dane nie są typu string. Sprawdż działanie programu"]
+
+
+db.create_all()
 
 
 if __name__ == '__main__':
     # db.drop_all()
-    db.create_all()
+    pass
+

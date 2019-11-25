@@ -24,7 +24,8 @@
         </ol>
     </nav>
 
-    <div class="section-header">
+    <div class="section-header">Samoloty</div>
+    <div class="subsection-header">
         Dodaj nowy samolot dla tej linii lotniczej:
     </div>
     <form method="post" enctype="multipart/form-data">
@@ -64,7 +65,7 @@
 
     <hr>
 
-    <div class="section-header">
+    <div class="subsection-header">
         Istniejące samoloty:
     </div>
     {% if not samoloty %}
@@ -142,9 +143,108 @@
                             ...
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" class="btn btn-danger" name="remove" value="{{ samolot.nr_boczny }}">Usuń</button>
+                            <button type="submit" class="btn btn-danger" name="remove-samolot" value="{{ samolot.nr_boczny }}">Usuń</button>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
-                            <button type="submit" class="btn btn-primary" name="edit" value="{{ samolot.nr_boczny }}">Zapisz</button>
+                            <button type="submit" class="btn btn-primary" name="edit-samolot" value="{{ samolot.nr_boczny }}">Zapisz</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <hr style="margin: 50px 0">
+    <div class="section-header">Piloci</div>
+
+    <div class="subsection-header">
+        Dodaj nowego pilota dla tej linii lotniczej:
+    </div>
+    <form method="post" enctype="multipart/form-data">
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="from">Imię</label>
+                <input type="text" class="form-control" id="new-imie" name="imie" placeholder="Grzegosz">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="from">Nazwisko</label>
+                <input type="text" class="form-control" id="new-nazwisko" name="nazwisko" placeholder="Brzęczyszczykiewicz">
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" name="new-pilot">Dodaj</button>
+    </form>
+
+    <hr>
+
+     {% if not piloci %}
+        <div class="no-content"></div>
+    {% else %}
+        <table class="table table-sm table-hover">
+            <thead>
+            <tr>
+                <th>
+                    ID
+                </th>
+                <th>
+                    Imię
+                </th>
+                <th>
+                    Nazwisko
+                </th>
+                <th>
+                    Data zatrudnienia
+                </th>
+
+
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for pilot in piloci %}
+                <tr>
+                    <th>
+                        {{ pilot.id_pil }}
+                    </th>
+                    <th>
+                        {{ pilot.imie }}
+                    </th>
+                    <th>
+                        {{ pilot.nazwisko }}
+                    </th>
+                    <th>
+                        {{ pilot.data_dolaczenia }}
+                    </th>
+
+
+                    <th>
+                       <button class="edit-button action-button" data-toggle="modal" data-target="#modal-samolot-{{ pilot.id_pil }}"></button>
+                    </th>
+                </tr>
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+        {% for pilot in piloci %}
+
+            <div class="modal fade" id="modal-samolot-{{ pilot.id_pil }}" tabindex="-1" role="dialog"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <form class="modal-content" method="post" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalCenterTitle">Zmień informację o pilocie {{ pilot.imie }} {{ pilot.nazwisko }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            ...
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-danger" name="remove-pilot" value="{{ pilot.id_pil }}">Usuń</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+                            <button type="submit" class="btn btn-primary" name="edit-pilot" value="{{ pilot.id_pil }}">Zapisz</button>
                         </div>
                     </form>
                 </div>
