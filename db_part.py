@@ -208,6 +208,11 @@ def pokaz_linie(line=None):
         return linie
 
 
+def zmodyfikuj_linie(nazwa, new_nazwa, kraj):
+    # TODO
+    pass
+
+
 # ######## piloci
 
 
@@ -229,6 +234,16 @@ def dodaj_pilota(imie, nazwisko, linia_nazwa):
                 return ['success', 'Nowy pilot został dodany']
             return ['danger', "Długośc imienia i nazwiska powinna zawierać maksymalnie 30 znakóœ"]
         return ['danger', "Dane nie są typu string. Sprawdż działanie programu"]
+
+
+def usun_pilota(id_pil):
+    # TODO
+    pass
+
+
+def zmodyfikuj_pilota(id_pil, imie, nazwisko):
+    # TODO
+    pass
 
 
 db.create_all()
