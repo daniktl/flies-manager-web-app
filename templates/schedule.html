@@ -33,11 +33,23 @@
         <div class="form-row">
             <div class="form-group col-md-6">
                 <label for="from">Skąd</label>
-                <input type="text" class="form-control" id="from" name="from" placeholder="Warszawa">
+            <select class="form-control" id="from" name="from">
+                {% if lotniska %}
+                    {% for lotnisko in lotniska %}
+                        <option value="{{ lotnisko.kod }}">{{ lotnisko.miasto }} ({{ lotnisko.kod }})</option>
+                    {% endfor %}
+                {% endif %}
+            </select>
             </div>
             <div class="form-group col-md-6">
                 <label for="to">Dokąd</label>
-                <input type="text" class="form-control" id="to" name="to" placeholder="Poznań">
+                <select class="form-control" id="to" name="to">
+                {% if lotniska %}
+                    {% for lotnisko in lotniska %}
+                        <option value="{{ lotnisko.kod }}">{{ lotnisko.miasto }} ({{ lotnisko.kod }})</option>
+                    {% endfor %}
+                {% endif %}
+            </select>
             </div>
         </div>
         <div class="form-row">

@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError, DisconnectionError, ProgrammingError,
 from sqlalchemy.orm import sessionmaker, relationship, scoped_session
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.sql.expression import false, true, case, not_, and_
-import os, numpy, datetime, warnings, time, random
+import os, numpy, datetime, warnings, time, random, json
 from multiprocessing import Process, Manager, Semaphore
 from multiprocessing.managers import BaseManager
 from contextlib import contextmanager
@@ -16,9 +16,22 @@ import urllib
 
 app = Flask(__name__)
 
-# create database on your local machine and fill this line with your credentials (replace uppercase words):
-#                                               mysql://USERNAME:PASSWORD@localhost/DATABASE?charset=utf8
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://admin_flies:FA$#$3awfa3afsd@localhost/flies?charset=utf8'
+with open("data/db_credentials") as file:
+    db_credentials = json.load(file)
+
+
+#   Go to the data/db_credentials file
+# | data
+# | --> db_credentials
+#   and replace credentials with your created before
+
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://{username}:{password}@{host}/{db_name}?charset=utf8'.format(
+    username=db_credentials['username'],
+    password=db_credentials['password'],
+    host=db_credentials['host'],
+    db_name=db_credentials['database_name']
+)
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -247,13 +260,29 @@ def dodaj_pilota(imie, nazwisko, linia_nazwa):
 
 
 def usun_pilota(id_pil):
-    # TODO
-    pass
+    with session_handler() as db_session:
+        pilot = db_session.query(Pilot).filter(Pilot.id_pil == id_pil).first()
+        if not pilot:
+            return ['danger', "Pilot o danym identyfikatorze nie istnieje"]
+        else:
+            name = pilot.imie
+            surname = pilot.nazwisko
+            db_session.delete(pilot)
+            return ["success", f"Pilot {name} {surname} został usunięty"]
 
 
 def zmodyfikuj_pilota(id_pil, imie, nazwisko):
-    # TODO
-    pass
+    with session_handler() as db_session:
+        # TODO
+        pass
+
+# ############### lotniska
+
+
+def pokaz_lotniska():
+    with session_handler() as db_session:
+        result = db_session.query(Lotnisko).order_by(Lotnisko.kod).all()
+        return result
 
 
 def dodaj_lotnisko(kod, m_na_mapie, kraj, miasto, strefa_czasowa):
@@ -280,10 +309,25 @@ def dodaj_lotnisko(kod, m_na_mapie, kraj, miasto, strefa_czasowa):
         return ['success', f"Lotnisko {kod} zostało dodane"]
 
 
+def zmodyfikuj_lotnisko(kod, nowy_kod, m_na_mapie, kraj, miasto, strefa_czasowa):
+    # TODO
+    pass
+
+
+def usun_lotnisko(kod):
+    with session_handler() as db_session:
+        lotnisko = db_session.query(Lotnisko).filter(Lotnisko.kod == kod).first()
+        if lotnisko:
+            db_session.delete(lotnisko)
+            return ['success', f"Lotnisko {kod} zostało usunięte"]
+        else:
+            return ['danger', f"Lotnisko o kodzie {kod} nie istnieje"]
+
+
 db.create_all()
 
 
 if __name__ == '__main__':
-    # db.drop_all()
+    db.drop_all()
     pass
 

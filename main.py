@@ -14,7 +14,8 @@ def flights():
 @app.route('/schedule', methods=['GET', 'POST'])
 def schedule():
     linie = pokaz_linie()
-    return render_template("schedule.html", linie=linie)
+    lotniska = pokaz_lotniska()
+    return render_template("schedule.html", linie=linie, lotniska=lotniska)
 
 
 @app.route('/lines', methods=['GET', 'POST'])
@@ -60,8 +61,15 @@ def airports():
         if 'new' in req:
             notification = dodaj_lotnisko(kod=req['code'], kraj=req['country'],
                                           miasto=req['city'], m_na_mapie=req['map'], strefa_czasowa=req['timezone'])
+        elif 'edit' in req:
+            notification = zmodyfikuj_lotnisko(kod=req['edit'], nowy_kod=req['code'], kraj=req['country'],
+                                               miasto=req['city'], m_na_mapie=req['map'],
+                                               strefa_czasowa=req['timezone'])
+        elif 'remove' in req:
+            notification = usun_lotnisko(kod=req['remove'])
     kraje = get_countries_list()
-    return render_template('airports.html', kraje=kraje, notification=notification)
+    lotniska = pokaz_lotniska()
+    return render_template('airports.html', kraje=kraje, notification=notification, lotniska=lotniska)
 
 
 @app.route('/account', methods=['GET', 'POST'])

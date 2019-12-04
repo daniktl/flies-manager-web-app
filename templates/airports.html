@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}
-Lotniska
+    Lotniska
 {% endblock %}
 
 {% block header %}
@@ -20,8 +20,8 @@ Lotniska
     <form method="post" enctype="multipart/form-data">
 
         <div class="form-group">
-            <label for="code">Kod międzynarodowy</label>
-            <input id="code" type="text" name="code" class="form-control">
+            <label for="code">Kod międzynarodowy (do 4 znaków)</label>
+            <input id="code" type="text" name="code" class="form-control" placeholder="PZN">
         </div>
 
         <div class="form-row">
@@ -29,7 +29,7 @@ Lotniska
                 <label for="country">Kraj</label>
                 <select id="country" name="country" class="form-control">
                     {% for kraj in kraje %}
-                    <option>{{ kraj }}</option>
+                        <option>{{ kraj }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -47,7 +47,11 @@ Lotniska
                 <label for="timezone">Strefa czasowa</label>
                 <select id="timezone" name="timezone" class="form-control">
                     {% for x in range(-11, 15) %}
-                        <option>{{ x }}</option>
+                        {% if x == 1 %}
+                            <option selected>{{ x }}</option>
+                        {% else %}
+                            <option>{{ x }}</option>
+                        {% endif %}
                     {% endfor %}
                 </select>
             </div>
@@ -59,129 +63,151 @@ Lotniska
     <hr>
 
     <div class="section-header">
-        Harmonogram lotów sortowany wg numeru lotów:
+        Aktualne lotniska w bazie:
     </div>
+    {% if not lotniska %}
+        <div class="no-content"></div>
+    {% else %}
+        <table class="table table-sm table-hover">
+            <thead>
+            <tr>
+                <th>
+                    Kod
+                </th>
+                <th>
+                    Kraj
+                </th>
+                <th>
+                    Miasto
+                </th>
+                <th>
+                    Miejsce na mapie
+                </th>
+                <th>
+                    Strefa czasowa
+                </th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for lotnisko in lotniska %}
+                <tr>
+                    <th>
+                        {{ lotnisko.kod }}
+                    </th>
+                    <th>
+                        {{ lotnisko.kraj }}
+                    </th>
+                    <th>
+                        {{ lotnisko.miasto }}
+                    </th>
+                    <th>
+                        {{ lotnisko.m_na_mapie }}
+                    </th>
+                    <th>
+                        {{ lotnisko.strefa_czasowa }}
+                    </th>
+                    <th>
+                        <button class="edit-button action-button" data-toggle="modal"
+                                data-target="#modal-lotnisko-{{ lotnisko.kod }}"></button>
+                    </th>
+                </tr>
+            {% endfor %}
 
-    <table class="table table-sm table-hover">
-        <thead>
-        <tr>
-            <th>
-                Numer
-            </th>
-            <th>
-                Wylot
-            </th>
-            <th>
-                Lądowanie
-            </th>
-            <th>
-                Dzień tygodnia
-            </th>
-            <th>
-                Godzina
-            </th>
-            <th>
-                Czas podróży
-            </th>
-            <th>
-                Cena
-            </th>
-            <th>
-                Linia lotnicza
-            </th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <th>
-                LOT1234
-            </th>
-            <th>
-                Poznań
-            </th>
-            <th>
-                Warszawa
-            </th>
-            <th>
-                Poniedziałek
-            </th>
-            <th>
-                10:15
-            </th>
-            <th>
-                0:50
-            </th>
-            <th>
-                50 zł
-            </th>
-            <th>
-                LOT
-            </th>
-            <th>
-                <button class="edit-button action-button"></button>
-            </th>
-        </tr>
-        <tr>
-            <th>
-                LOT1235
-            </th>
-            <th>
-                Poznań
-            </th>
-            <th>
-                Warszawa
-            </th>
-            <th>
-                Środa
-            </th>
-            <th>
-                10:15
-            </th>
-            <th>
-                0:50
-            </th>
-            <th>
-                150 zł
-            </th>
-            <th>
-                LOT
-            </th>
-            <th>
-                <button class="edit-button action-button"></button>
-            </th>
-        </tr>
-        <tr>
-            <th>
-                LOT1236
-            </th>
-            <th>
-                Poznań
-            </th>
-            <th>
-                Warszawa
-            </th>
-            <th>
-                Czwartek
-            </th>
-            <th>
-                10:15
-            </th>
-            <th>
-                0:50
-            </th>
-            <th>
-                70 zł
-            </th>
-            <th>
-                LOT
-            </th>
-            <th>
-                <button class="edit-button action-button"></button>
-            </th>
-        </tr>
-        </tbody>
+            </tbody>
 
-    </table>
+        </table>
+        {% for lotnisko in lotniska %}
+            <div class="modal fade" id="modal-lotnisko-{{ lotnisko.kod }}" tabindex="-1" role="dialog"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <form class="modal-content" method="post" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalCenterTitle">Zmień lotnisko {{ lotnisko.kod }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table">
+                                <tbody>
+                                <tr>
+                                    <th>
+                                        <label for="edit-code">Kod</label>
+                                    </th>
+                                    <th>
+                                        <input class="form-control" type="text" name="code" id="edit-code"
+                                               value="{{ lotnisko.kod }}">
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <label for="edit-country">Kraj</label>
+                                    </th>
+                                    <th>
+                                        <select id="edit-country" name="country" class="form-control">
+                                            {% for kraj in kraje %}
+                                                {% if kraj == lotnisko.kraj %}
+                                                    <option selected>{{ kraj }}</option>
+                                                {% else %}
+                                                    <option>{{ kraj }}</option>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </select>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <label for="edit-city">Miasto</label>
+                                    </th>
+                                    <th>
+                                        <input class="form-control" type="text" name="miasto" id="edit-city"
+                                               value="{{ lotnisko.miasto }}">
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <label for="edit-map">Miejsce na mapie</label>
+                                    </th>
+                                    <th>
+                                        <input class="form-control" type="text" name="map" id="edit-map"
+                                               value="{{ lotnisko.m_na_mapie }}">
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <label for="edit-timezone">Strefa czasowa</label>
+                                    </th>
+                                    <th>
+                                        <select id="edit-timezone" name="timezone" class="form-control">
+                                            {% for x in range(-11, 15) %}
+                                                {% if x == lotnisko.strefa_czasowa %}
+                                                    <option selected>{{ x }}</option>
+                                                {% else %}
+                                                    <option>{{ x }}</option>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </select>
+                                    </th>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-danger" name="remove" value="{{ lotnisko.kod }}">
+                                Usuń
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                Zamknij
+                            </button>
+                            <button type="submit" class="btn btn-primary" name="edit" value="{{ lotnisko.kod }}">
+                                Zapisz
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
 
 {% endblock %}
