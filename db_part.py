@@ -116,6 +116,16 @@ class Pilot(db.Model):
     linia_lotnicza_nazwa = Column('linia_lotnicza_nazwa', String(25), ForeignKey(LiniaLotnicza.nazwa), nullable=False)
     linia_lotnicza = relationship('LiniaLotnicza')
 
+
+class Lotnisko(db.Model):
+    __tablename__ = 'lotnisko'
+
+    kod = Column('kod_miedzynarodowy', String(4), primary_key=True)
+    m_na_mapie = Column('miejsce_na_mapie', String(100), nullable=False)
+    kraj = Column('kraj', String(30), nullable=False)
+    miasto = Column('miasto', String(20), nullable=False)
+    strefa_czasowa = Column('strefa_czasowa', Integer, nullable=False)
+
 ##############################################
 #           FUNKCJE
 ##############################################
@@ -226,14 +236,14 @@ def pokaz_pilotow(linia=None):
 
 
 def dodaj_pilota(imie, nazwisko, linia_nazwa):
-    with session_handler() as db_session:
-        if isinstance(imie, str) and isinstance(nazwisko, str):
-            if len(imie) < 30 and len(nazwisko) < 30:
+    if isinstance(imie, str) and isinstance(nazwisko, str):
+        if len(imie) < 30 and len(nazwisko) < 30:
+            with session_handler() as db_session:
                 nowy_pilot = Pilot(imie=imie, nazwisko=nazwisko, data_dolaczenia=datetime.datetime.now(), linia_lotnicza_nazwa=linia_nazwa)
                 db_session.add(nowy_pilot)
                 return ['success', 'Nowy pilot został dodany']
-            return ['danger', "Długośc imienia i nazwiska powinna zawierać maksymalnie 30 znakóœ"]
-        return ['danger', "Dane nie są typu string. Sprawdż działanie programu"]
+        return ['danger', "Długośc imienia i nazwiska powinna zawierać maksymalnie 30 znakóœ"]
+    return ['danger', "Dane nie są typu string. Sprawdż działanie programu"]
 
 
 def usun_pilota(id_pil):
@@ -244,6 +254,30 @@ def usun_pilota(id_pil):
 def zmodyfikuj_pilota(id_pil, imie, nazwisko):
     # TODO
     pass
+
+
+def dodaj_lotnisko(kod, m_na_mapie, kraj, miasto, strefa_czasowa):
+    if any([x == "" for x in [kod, m_na_mapie, kraj, miasto, strefa_czasowa]]):
+        return ['danger', "Żadne pole nie może być puste"]
+    if len(kod) > 4:
+        return ["danger", "Długość kodu międzynarodowego jest większa od dozwolonej (4)"]
+    if len(m_na_mapie) > 100:
+        return ["danger", "Długość miejsca na mapie jest większa od dozwolonej (100)"]
+    if len(kraj) > 30:
+        return ["danger", "Długość nazwy kraju jest większa od dozwolonej (30)"]
+    if len(miasto) > 20:
+        return ["danger", "Długość nazwy miasta jest większa od dozwolonej (20)"]
+    if not isinstance(strefa_czasowa, str):
+        return ["danger", "Strefa czasowa jest pusta"]
+    if not strefa_czasowa.isnumeric():
+        return ['danger', "Strefa czasowa musi być liczbą"]
+    with session_handler() as db_session:
+        ex_lotnisko = db_session.query(Lotnisko).filter(Lotnisko.kod == kod).first()
+        if ex_lotnisko:
+            return ['danger', "Lotnisko z podanym kodem międzynarodowym już zostało dodane"]
+        new_lotnisko = Lotnisko(kod=kod, m_na_mapie=m_na_mapie, kraj=kraj, miasto=miasto, strefa_czasowa=strefa_czasowa)
+        db_session.add(new_lotnisko)
+        return ['success', f"Lotnisko {kod} zostało dodane"]
 
 
 db.create_all()

@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Lotniska
+{% endblock %}
+
+{% block header %}
+    <div class="container">
+        <div class="header-text">
+            Lotniska
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block content %}
+    <div class="section-header">
+        Dodaj nowe lotnisko:
+    </div>
+    <form method="post" enctype="multipart/form-data">
+
+        <div class="form-group">
+            <label for="code">Kod międzynarodowy</label>
+            <input id="code" type="text" name="code" class="form-control">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="country">Kraj</label>
+                <select id="country" name="country" class="form-control">
+                    {% for kraj in kraje %}
+                    <option>{{ kraj }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="city">Miasto</label>
+                <input type="text" class="form-control" id="city" name="city" placeholder="Poznań">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="time_start">Miejsce na mapie</label>
+                <input type="text" class="form-control" id="map" name="map" placeholder="52.4199508,16.8264271">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="timezone">Strefa czasowa</label>
+                <select id="timezone" name="timezone" class="form-control">
+                    {% for x in range(-11, 15) %}
+                        <option>{{ x }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" name="new">Dodaj</button>
+    </form>
+
+    <hr>
+
+    <div class="section-header">
+        Harmonogram lotów sortowany wg numeru lotów:
+    </div>
+
+    <table class="table table-sm table-hover">
+        <thead>
+        <tr>
+            <th>
+                Numer
+            </th>
+            <th>
+                Wylot
+            </th>
+            <th>
+                Lądowanie
+            </th>
+            <th>
+                Dzień tygodnia
+            </th>
+            <th>
+                Godzina
+            </th>
+            <th>
+                Czas podróży
+            </th>
+            <th>
+                Cena
+            </th>
+            <th>
+                Linia lotnicza
+            </th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th>
+                LOT1234
+            </th>
+            <th>
+                Poznań
+            </th>
+            <th>
+                Warszawa
+            </th>
+            <th>
+                Poniedziałek
+            </th>
+            <th>
+                10:15
+            </th>
+            <th>
+                0:50
+            </th>
+            <th>
+                50 zł
+            </th>
+            <th>
+                LOT
+            </th>
+            <th>
+                <button class="edit-button action-button"></button>
+            </th>
+        </tr>
+        <tr>
+            <th>
+                LOT1235
+            </th>
+            <th>
+                Poznań
+            </th>
+            <th>
+                Warszawa
+            </th>
+            <th>
+                Środa
+            </th>
+            <th>
+                10:15
+            </th>
+            <th>
+                0:50
+            </th>
+            <th>
+                150 zł
+            </th>
+            <th>
+                LOT
+            </th>
+            <th>
+                <button class="edit-button action-button"></button>
+            </th>
+        </tr>
+        <tr>
+            <th>
+                LOT1236
+            </th>
+            <th>
+                Poznań
+            </th>
+            <th>
+                Warszawa
+            </th>
+            <th>
+                Czwartek
+            </th>
+            <th>
+                10:15
+            </th>
+            <th>
+                0:50
+            </th>
+            <th>
+                70 zł
+            </th>
+            <th>
+                LOT
+            </th>
+            <th>
+                <button class="edit-button action-button"></button>
+            </th>
+        </tr>
+        </tbody>
+
+    </table>
+
+{% endblock %}

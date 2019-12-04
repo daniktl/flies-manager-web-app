@@ -52,6 +52,18 @@ def line_name(line):
     return render_template("line.html", linia=linia, samoloty=samoloty, piloci=piloci, notification=notification)
 
 
+@app.route('/airports', methods=['GET', 'POST'])
+def airports():
+    notification = None
+    if request.method == 'POST':
+        req = request.values.to_dict()
+        if 'new' in req:
+            notification = dodaj_lotnisko(kod=req['code'], kraj=req['country'],
+                                          miasto=req['city'], m_na_mapie=req['map'], strefa_czasowa=req['timezone'])
+    kraje = get_countries_list()
+    return render_template('airports.html', kraje=kraje, notification=notification)
+
+
 @app.route('/account', methods=['GET', 'POST'])
 def account():
     return render_template('account.html')
