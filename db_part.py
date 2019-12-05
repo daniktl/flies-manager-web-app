@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, String, Integer, Column, DateTime, Boolean, Text, desc, func, ForeignKey, \
-    ForeignKeyConstraint
+    ForeignKeyConstraint, Float, Time
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exc import IntegrityError, DisconnectionError, ProgrammingError, OperationalError
 from sqlalchemy.orm import sessionmaker, relationship, scoped_session
@@ -10,15 +10,16 @@ from multiprocessing import Process, Manager, Semaphore
 from multiprocessing.managers import BaseManager
 from contextlib import contextmanager
 
-from flask import Flask, url_for, render_template, abort, request
+from flask import Flask, url_for, render_template, abort, request, redirect, make_response
 from flask_sqlalchemy import SQLAlchemy
-import urllib
+import urllib, re
+from passlib.hash import bcrypt
+from string import ascii_letters, digits
 
 app = Flask(__name__)
 
 with open("data/db_credentials") as file:
     db_credentials = json.load(file)
-
 
 #   Go to the data/db_credentials file
 # | data
@@ -39,6 +40,13 @@ db = SQLAlchemy(app)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
+
+def check_empty(x):
+    if isinstance(x, list):
+        if all([y != "" for y in x]):
+            return False
+    return True
+
 @contextmanager
 def session_handler():
     session = db.session
@@ -46,11 +54,11 @@ def session_handler():
         session.flush()
         yield session
         session.commit()
-    except Exception as exp:
-        print(exp)
-        session.rollback()
     except IntegrityError:
         print("Already exists")
+        session.rollback()
+    except Exception as exp:
+        print(exp)
         session.rollback()
 
 
@@ -60,20 +68,46 @@ def get_countries_list():
         return ls
 
 
+days_pl = {
+    0: "Poniedziałek",
+    1: "Wtorek",
+    2: "Środa",
+    3: "Czwartek",
+    4: "Piątek",
+    5: "Sobota",
+    6: "Niedziela"
+}
+
+
 class User(db.Model):
     __tablename__ = 'user'
 
     user_id = Column('id_u', Integer, primary_key=True, autoincrement=True)
-    haslo = Column('haslo', String(32), nullable=False)
+    haslo = Column('haslo', String(300), nullable=False)
     typ = Column('typ', String(32), default='user')
     email = Column('email', String(32), nullable=False)
     imie = Column('imie', String(32), nullable=False)
     nazwisko = Column('nazwisko', String(32), nullable=False)
+    token = Column("token", String(64), nullable=False)
+
+    def __init__(self, email, password, name, surname, type):
+        self.email = email
+        self.haslo = bcrypt.encrypt(password)
+        self.imie = name
+        self.nazwisko = surname
+        self.typ = type
+        self.token = "".join([random.choice(ascii_letters+digits) for _ in range(64)])
+
+    def validate_password(self, password):
+        return bcrypt.verify(password, self.haslo)
 
     rabat = relationship("Rabat", cascade="all")
 
     def is_admin(self):
         return self.typ == 'admin'
+
+    def get_type(self):
+        return "Użytkownik" if self.typ == "user" else "Administrator"
 
 
 class Rabat(db.Model):
@@ -96,6 +130,7 @@ class LiniaLotnicza(db.Model):
 
     samolot = relationship('Samolot', cascade="all")
     pilot = relationship('Pilot', cascade='all')
+    harmonogram = relationship("Harmonogram", cascade='all')
 
     def liczba_samolotow(self):
         return pokaz_samoloty_linia(self.nazwa)
@@ -139,6 +174,39 @@ class Lotnisko(db.Model):
     miasto = Column('miasto', String(20), nullable=False)
     strefa_czasowa = Column('strefa_czasowa', Integer, nullable=False)
 
+    harmonogram_start = relationship("Harmonogram", foreign_keys="[Harmonogram.start_lotnisko_nazwa]", cascade="delete")
+    harmonogram_finish = relationship("Harmonogram", foreign_keys="[Harmonogram.finish_lotnisko_nazwa]",
+                                      cascade="delete")
+
+
+class Harmonogram(db.Model):
+    __tablename__ = 'harmonogram'
+
+    nr_lotu = Column("nr_lotu", String(8), primary_key=True)
+    dzien_tygodnia = Column("dzien_tygodnia", Integer, nullable=False)
+    start_godzina = Column("start_godzina", Time, nullable=False)
+    finish_godzina = Column("finish_godzina", Time, nullable=False)
+    cena_podstawowa = Column("cena_podstawowa", Float(precision=2), nullable=False)
+
+    start_lotnisko_nazwa = Column("start_lotnisko", ForeignKey(Lotnisko.kod), nullable=False)
+    start_lotnisko = relationship("Lotnisko", foreign_keys=[start_lotnisko_nazwa])
+
+    finish_lotnisko_nazwa = Column("finish_lotnisko", ForeignKey(Lotnisko.kod), nullable=False)
+    finish_lotnisko = relationship("Lotnisko", foreign_keys=[finish_lotnisko_nazwa])
+
+    linia_lotnicza_nazwa = Column("linia_lotnicza", ForeignKey(LiniaLotnicza.nazwa), nullable=False)
+    linia_lotnicza = relationship("LiniaLotnicza", foreign_keys=[linia_lotnicza_nazwa])
+
+    def get_dzien_tygodnia(self):
+        return days_pl[self.dzien_tygodnia]
+
+    def get_start_godzina(self):
+        return datetime.time.strftime(self.start_godzina, "%H:%M")
+
+    def get_finish_godzina(self):
+        return datetime.time.strftime(self.finish_godzina, "%H:%M")
+
+
 ##############################################
 #           FUNKCJE
 ##############################################
@@ -155,7 +223,8 @@ def check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc):
     with session_handler() as db_session:
         samolot = db_session.query(Samolot).filter(Samolot.nr_boczny == nr_boczny).first()
         if samolot:
-            return False, ['danger', f"Samolot z numerem bocznym {nr_boczny} już istnieje ({samolot.linia_lotnicza_nazwa})"]
+            return False, ['danger',
+                           f"Samolot z numerem bocznym {nr_boczny} już istnieje ({samolot.linia_lotnicza_nazwa})"]
         if len(marka) > 15 or len(model) > 15:
             return False, ['danger', "Długość atrybutów marka i model powinna być nie większa niż 15"]
         if not pokaz_linie(linia_nazwa):
@@ -252,7 +321,8 @@ def dodaj_pilota(imie, nazwisko, linia_nazwa):
     if isinstance(imie, str) and isinstance(nazwisko, str):
         if len(imie) < 30 and len(nazwisko) < 30:
             with session_handler() as db_session:
-                nowy_pilot = Pilot(imie=imie, nazwisko=nazwisko, data_dolaczenia=datetime.datetime.now(), linia_lotnicza_nazwa=linia_nazwa)
+                nowy_pilot = Pilot(imie=imie, nazwisko=nazwisko, data_dolaczenia=datetime.datetime.now(),
+                                   linia_lotnicza_nazwa=linia_nazwa)
                 db_session.add(nowy_pilot)
                 return ['success', 'Nowy pilot został dodany']
         return ['danger', "Długośc imienia i nazwiska powinna zawierać maksymalnie 30 znakóœ"]
@@ -275,6 +345,7 @@ def zmodyfikuj_pilota(id_pil, imie, nazwisko):
     with session_handler() as db_session:
         # TODO
         pass
+
 
 # ############### lotniska
 
@@ -324,10 +395,125 @@ def usun_lotnisko(kod):
             return ['danger', f"Lotnisko o kodzie {kod} nie istnieje"]
 
 
-db.create_all()
+# ############# harmonogram
+
+def pokaz_harmonogram(linia_lotnicza=None):
+    with session_handler() as db_session:
+        if linia_lotnicza:
+            result = db_session.query(Harmonogram).filter(Harmonogram.linia_lotnicza_nazwa == linia_lotnicza).order_by(
+                Harmonogram.nr_lotu).all()
+        else:
+            # if it doesn't work - log into your root account on mysql and enter:
+            #           SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
+            result = db_session.query(Harmonogram).group_by(Harmonogram.linia_lotnicza_nazwa).order_by(
+                Harmonogram.nr_lotu).all()
+        return result
 
 
-if __name__ == '__main__':
-    db.drop_all()
+def dodaj_harmonogram(nr_lotu, linia_lotnicza, start_lotnisko, finish_lotnisko, dzien_tygodnia, start_godzina,
+                      finish_godzina, cena_podstawowa):
+    if any(x == "" for x in
+           [linia_lotnicza, start_lotnisko, finish_lotnisko, dzien_tygodnia, start_godzina, finish_godzina,
+            cena_podstawowa]):
+        return ['danger', "Wszystkie pola są obowiązkowe"]
+    if len(nr_lotu) != 8:
+        return ["danger", "Długośc numeru lotu musi być równa 8"]
+    with session_handler() as db_session:
+        if db_session.query(Harmonogram).filter(Harmonogram.nr_lotu).first():
+            return ['danger', "Lot o danym numerze już istnieje"]
+        for lotnisko in [start_lotnisko, finish_lotnisko]:
+            if not db_session.query(Lotnisko).filter(Lotnisko.kod == lotnisko).first():
+                return ["danger", "Lotnisko o danym kodzie międzynarodowym nie istnieje"]
+        if not db_session.query(LiniaLotnicza).filter(LiniaLotnicza.nazwa == linia_lotnicza).first():
+            return ["danger", "Taka linia lotnicza nie istnieje"]
+        if not isinstance(dzien_tygodnia, str) or not dzien_tygodnia.isnumeric() or int(dzien_tygodnia) not in range(7):
+            return ['danger', "Niepoprawny dzień tygodnia"]
+        try:
+            time_start = datetime.datetime.strptime(start_godzina, "%H:%M")
+            time_finish = datetime.datetime.strptime(finish_godzina, "%H:%M")
+        except:
+            return ['danger', "Niepoprawny format godziny startu bądż lądowania"]
+        if not isinstance(cena_podstawowa, str) or not cena_podstawowa.isnumeric():
+            return ["danger", "Niepoprawny format ceny"]
+        new_harmonogram = Harmonogram(nr_lotu=nr_lotu, linia_lotnicza_nazwa=linia_lotnicza, start_godzina=time_start,
+                                      finish_godzina=time_finish, start_lotnisko_nazwa=start_lotnisko, dzien_tygodnia=int(dzien_tygodnia),
+                                      finish_lotnisko_nazwa=finish_lotnisko, cena_podstawowa=float(cena_podstawowa))
+        db_session.add(new_harmonogram)
+        return ["success", f"Nowy wpis o numerze lotu {nr_lotu} został dodany"]
+
+
+def usun_harmonogram(nr_lotu):
+    with session_handler() as db_session:
+        harmonogram = db_session.query(Harmonogram).filter(Harmonogram.nr_lotu == nr_lotu).first()
+        if not harmonogram:
+            return ["danger", f"Lot o numerze {nr_lotu} nie istnieje"]
+        else:
+            db_session.delete(harmonogram)
+            return ["success", f"Lot o numerze {nr_lotu} został usunięty"]
+
+
+def zmodyfikuj_harmonogram(nr_lotu, nowy_nr_lotu, linia_lotnicza, start_lotnisko, finish_lotnisko, dzien_tygodnia, start_godzina,
+                      finish_godzina, cena_podstawowa):
+    # TODO
     pass
 
+# ############ user
+
+
+def pokaz_user(user_id=None):
+    with session_handler() as db_session:
+        if user_id:
+            result = db_session.query(User).filter(User.user_id == user_id).first()
+        else:
+            result = db_session.query(User).all()
+        return result
+
+
+def dodaj_user(imie, nazwisko, email, password, password_repeat, u_type):
+    if check_empty([imie, nazwisko, email, password, password_repeat, type]):
+        return ["danger", "Wszystkie atrybuty są obowiązkowe"]
+    if not isinstance(email, str) or email.index("@") == -1:
+        return ['danger', "Niepoprawny format email"]
+    if not re.search(r'\d', password) or not re.search(r'[A-Z]', password) or not re.search(r'[a-z]', password):
+        return ["danger", "Hasło jest bardzo słabe. Musi zawierać conajmniej 1 liczbę, co najmniej 1 dużą literę i co najmniej jedbą małą"]
+    if password != password_repeat:
+        return ["danger", "Hasła wprowadzone w dwóch polach nie są równe"]
+    if u_type not in ["user", "admin"]:
+        return ["danger", "Niepoprawny typ hasła"]
+    with session_handler() as db_session:
+        ex_user = db_session.query(User).filter(User.email == email).first()
+        if ex_user:
+            return ['danger', "Użytkownik o podanym email już istnieje"]
+        new_user = User(name=imie, surname=nazwisko, email=email, password=password, type=u_type)
+        db_session.add(new_user)
+        return ["success", "Użytkownik został dodany"]
+    pass
+
+
+def usun_user(user_id):
+    with session_handler() as db_session:
+        user = db_session.query(User).filter(User.user_id == user_id).first()
+        if not user:
+            return ["danger", "Użytkownik o danym identyfikatorze nie istnieje"]
+        else:
+            name = user.imie
+            surname = user.nazwisko
+            db_session.delete(user)
+            return ["success", f"Użytkownik {name} {surname} został usunięty"]
+
+
+def check_user_credentials(email, password):
+    with session_handler() as db_session:
+        user = db_session.query(User).filter(User.email == email).first()
+        if not user:
+            return None, ["danger", "Użytkownik z takim email nie istnieje"]
+        if not user.validate_password(password):
+            return None, ["danger", "Niepoprawne hasło"]
+        return user, None
+
+
+db.create_all()
+
+if __name__ == '__main__':
+    # db.drop_all()
+    pass

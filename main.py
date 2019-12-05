@@ -1,6 +1,15 @@
 from db_part import *
 
 
+@app.before_request
+def check_is_logged_in():
+    user_id = request.cookies.get("user_id")
+    if not user_id:
+        if len(pokaz_user()) != 0:
+            if not any(x not in request.path for x in ['static']):
+                return redirect(url_for("login"))
+
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     return render_template("index.html")
@@ -13,9 +22,21 @@ def flights():
 
 @app.route('/schedule', methods=['GET', 'POST'])
 def schedule():
+    notification = None
+    if request.method == "POST":
+        req = request.values.to_dict()
+        if 'new' in req:
+            notification = dodaj_harmonogram(nr_lotu=req['nr_flight'], linia_lotnicza=req['line'],
+                                             start_lotnisko=req['from'], finish_lotnisko=req['to'],
+                                             dzien_tygodnia=req['day'], start_godzina=req['time_start'],
+                                             finish_godzina=req['time_finish'], cena_podstawowa=req['price'])
+        elif 'remove' in req:
+            notification = usun_harmonogram(nr_lotu=req['remove'])
     linie = pokaz_linie()
     lotniska = pokaz_lotniska()
-    return render_template("schedule.html", linie=linie, lotniska=lotniska)
+    harmonogram = pokaz_harmonogram()
+    return render_template("schedule.html", linie=linie, lotniska=lotniska, harmonogram=harmonogram, days=days_pl,
+                           notification=notification)
 
 
 @app.route('/lines', methods=['GET', 'POST'])
@@ -79,7 +100,33 @@ def account():
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
-    return render_template('admin.html')
+    notification = None
+    if request.method == "POST":
+        req = request.values.to_dict()
+        if 'new' in req:
+            notification = dodaj_user(email=req['email'], password=req['password'],
+                                      password_repeat=req['password-repeat'], imie=req['name'], nazwisko=req['surname'],
+                                      u_type=req['type'])
+        elif 'remove' in req:
+            notification = usun_user(user_id=req['remove'])
+    users = pokaz_user()
+    return render_template('admin.html', users=users, notification=notification)
+
+
+@app.route('/login', methods=["GET", "POST"])
+def login():
+    notification = None
+    if request.method == "POST":
+        req = request.values.to_dict()
+        if 'email' in req:
+            user, notification = check_user_credentials(req['email'], req['password'])
+            if user:
+                resp = make_response(redirect(index))
+                resp.set_cookie("user_id", str(user.user_id))
+                resp.set_cookie("user_token", user.token)
+                resp.set_cookie("user_type", user.typ)
+                return resp
+    return render_template("login.html", notification=notification)
 
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}
-Administrator
+    Administrator
 {% endblock %}
 
 {% block header %}
@@ -14,6 +14,130 @@ Administrator
 {% endblock %}
 
 {% block content %}
+    <div class="section-header">
+        Nowy użytkownik
+    </div>
+    <form method="post" enctype="multipart/form-data">
 
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="name">Imię</label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="Grzegorz">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="surname">Nazwisko</label>
+                <input type="text" id="surname" class="form-control" name="surname" placeholder="Brzęczyszczykiewicz">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="example@example.com" class="form-control">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="password">Haslo</label>
+                <input type="text" class="form-control" id="password" name="password" placeholder="Password123">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="password-repeat">Powtórz hasło</label>
+                <input type="text" id="password-repeat" class="form-control" name="password-repeat" placeholder="Password123">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="type">Typ konta</label>
+            <select id="type" name="type" class="form-control">
+                <option value="user" selected>Użytkownik</option>
+                <option value="admin">Administrator</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" name="new">Dodaj</button>
+    </form>
+
+    <hr>
+
+    <div class="section-header">
+        Użytkownicy:
+    </div>
+    {% if not users %}
+        <div class="no-content"></div>
+    {% else %}
+        <table class="table table-sm table-hover">
+            <thead>
+            <tr>
+                <th>
+                    Imię
+                </th>
+                <th>
+                    Nazwisko
+                </th>
+                <th>
+                    Email
+                </th>
+                <th>
+                    Typ konta
+                </th>
+
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for user in users %}
+                <tr>
+                    <th>
+                        {{ user.imie }}
+                    </th>
+                    <th>
+                        {{ user.nazwisko }}
+                    </th>
+                    <th>
+                        {{ user.email }}
+                    </th>
+                    <th>
+                        {{ user.get_type() }}
+                    </th>
+
+                    <th>
+                        <button class="edit-button action-button" data-toggle="modal"
+                                data-target="#modal-user-{{ user.user_id }}"></button>
+                    </th>
+                </tr>
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+        {% for user in users %}
+
+            <div class="modal fade" id="modal-user-{{ user.user_id }}" tabindex="-1" role="dialog"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <form class="modal-content" method="post" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalCenterTitle">Zmień użytkownika {{ user.imie }} {{ user.nazwisko }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            {# TODO #}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-danger" name="remove" value="{{ user.user_id }}">Usuń
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+                            <button type="submit" class="btn btn-primary" name="edit" value="{{ user.user_id }}">Zapisz
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+
+    {% endif %}
 
 {% endblock %}

@@ -20,6 +20,11 @@
     <form method="post" enctype="multipart/form-data">
 
         <div class="form-group">
+            <label for="nr_flight">Numer lotu (8 znaków)</label>
+            <input type="text" class="form-control" id="nr_flight" name="nr_flight" placeholder="LOT12345">
+        </div>
+
+        <div class="form-group">
             <label for="line">Linia lotnicza</label>
             <select id="line" name="line" class="form-control">
                 {% if linie %}
@@ -33,25 +38,35 @@
         <div class="form-row">
             <div class="form-group col-md-6">
                 <label for="from">Skąd</label>
-            <select class="form-control" id="from" name="from">
-                {% if lotniska %}
-                    {% for lotnisko in lotniska %}
-                        <option value="{{ lotnisko.kod }}">{{ lotnisko.miasto }} ({{ lotnisko.kod }})</option>
-                    {% endfor %}
-                {% endif %}
-            </select>
+                <select class="form-control" id="from" name="from">
+                    {% if lotniska %}
+                        {% for lotnisko in lotniska %}
+                            <option value="{{ lotnisko.kod }}">{{ lotnisko.miasto }} ({{ lotnisko.kod }})</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
             </div>
             <div class="form-group col-md-6">
                 <label for="to">Dokąd</label>
                 <select class="form-control" id="to" name="to">
-                {% if lotniska %}
-                    {% for lotnisko in lotniska %}
-                        <option value="{{ lotnisko.kod }}">{{ lotnisko.miasto }} ({{ lotnisko.kod }})</option>
-                    {% endfor %}
-                {% endif %}
-            </select>
+                    {% if lotniska %}
+                        {% for lotnisko in lotniska %}
+                            <option value="{{ lotnisko.kod }}">{{ lotnisko.miasto }} ({{ lotnisko.kod }})</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
             </div>
         </div>
+
+        <div class="form-group">
+            <label for="day">Dzień tygodnia</label>
+            <select id="day" name="day" class="form-control">
+                {% for day in days %}
+                    <option value="{{ day }}">{{ days[day] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
         <div class="form-row">
             <div class="form-group col-md-6">
                 <label for="time_start">Godzina wylotu</label>
@@ -78,127 +93,99 @@
     <div class="section-header">
         Harmonogram lotów sortowany wg numeru lotów:
     </div>
+    {% if not harmonogram %}
+        <div class="no-content"></div>
+    {% else %}
+        <table class="table table-sm table-hover">
+            <thead>
+            <tr>
+                <th>
+                    Numer
+                </th>
+                <th>
+                    Wylot
+                </th>
+                <th>
+                    Lądowanie
+                </th>
+                <th>
+                    Dzień tygodnia
+                </th>
+                <th>
+                    Godzina
+                </th>
+                <th>
+                    Czas podróży
+                </th>
+                <th>
+                    Cena
+                </th>
+                <th>
+                    Linia lotnicza
+                </th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for wpis in harmonogram %}
+                <tr>
+                    <th>
+                        {{ wpis.nr_lotu }}
+                    </th>
+                    <th>
+                        <a href="{{ url_for("airports") }}#{{ wpis.start_lotnisko_nazwa }}">{{ wpis.start_lotnisko_nazwa }}</a>
+                    </th>
+                    <th>
+                        <a href="{{ url_for("airports") }}#{{ wpis.finish_lotnisko_nazwa }}">{{ wpis.finish_lotnisko_nazwa }}</a>
+                    </th>
+                    <th>
+                        {{ wpis.get_dzien_tygodnia() }}
+                    </th>
+                    <th>
+                        {{ wpis.get_start_godzina() }}
+                    </th>
+                    <th>
+                        {{ wpis.get_finish_godzina() }}
+                    </th>
+                    <th>
+                        {{ wpis.cena_podstawowa }} zł
+                    </th>
+                    <th>
+                        <a href="{{ url_for("line_name", line=wpis.linia_lotnicza_nazwa) }}">{{ wpis.linia_lotnicza_nazwa }}</a>
+                    </th>
+                    <th>
+                        <button class="edit-button action-button" data-toggle="modal"
+                                data-target="#modal-schedule-{{ wpis.nr_lotu }}"></button>
+                    </th>
+                </tr>
+            {% endfor %}
+            </tbody>
 
-    <table class="table table-sm table-hover">
-        <thead>
-        <tr>
-            <th>
-                Numer
-            </th>
-            <th>
-                Wylot
-            </th>
-            <th>
-                Lądowanie
-            </th>
-            <th>
-                Dzień tygodnia
-            </th>
-            <th>
-                Godzina
-            </th>
-            <th>
-                Czas podróży
-            </th>
-            <th>
-                Cena
-            </th>
-            <th>
-                Linia lotnicza
-            </th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <th>
-                LOT1234
-            </th>
-            <th>
-                Poznań
-            </th>
-            <th>
-                Warszawa
-            </th>
-            <th>
-                Poniedziałek
-            </th>
-            <th>
-                10:15
-            </th>
-            <th>
-                0:50
-            </th>
-            <th>
-                50 zł
-            </th>
-            <th>
-                LOT
-            </th>
-            <th>
-                <button class="edit-button action-button"></button>
-            </th>
-        </tr>
-        <tr>
-            <th>
-                LOT1235
-            </th>
-            <th>
-                Poznań
-            </th>
-            <th>
-                Warszawa
-            </th>
-            <th>
-                Środa
-            </th>
-            <th>
-                10:15
-            </th>
-            <th>
-                0:50
-            </th>
-            <th>
-                150 zł
-            </th>
-            <th>
-                LOT
-            </th>
-            <th>
-                <button class="edit-button action-button"></button>
-            </th>
-        </tr>
-        <tr>
-            <th>
-                LOT1236
-            </th>
-            <th>
-                Poznań
-            </th>
-            <th>
-                Warszawa
-            </th>
-            <th>
-                Czwartek
-            </th>
-            <th>
-                10:15
-            </th>
-            <th>
-                0:50
-            </th>
-            <th>
-                70 zł
-            </th>
-            <th>
-                LOT
-            </th>
-            <th>
-                <button class="edit-button action-button"></button>
-            </th>
-        </tr>
-        </tbody>
+        </table>
+        {% for wpis in harmonogram %}
 
-    </table>
+            <div class="modal fade" id="modal-schedule-{{ wpis.nr_lotu }}" tabindex="-1" role="dialog"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <form class="modal-content" method="post" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalCenterTitle">Zmień lot o numerze {{ wpis.nr_lotu }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                        {# TODO #}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-danger" name="remove" value="{{ wpis.nr_lotu }}">Usuń</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+                            <button type="submit" class="btn btn-primary" name="edit" value="{{ wpis.nr_lotu }}">Zapisz</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
 
 {% endblock %}
