@@ -23,8 +23,8 @@
           href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600&display=swap&subset=cyrillic,cyrillic-ext">
 
     <title>{% block title %}MyLot{% endblock %}</title>
+    <script src="{{ url_for("static", filename="actions.js") }}"></script>
     {% block script %}
-
     {% endblock %}
 </head>
 
@@ -73,6 +73,10 @@
             <li class="nav-item">
                 <img class="nav-icon" src="{{ url_for("static", filename="admin.png") }}">
                 <a class="nav-link" href="{{ url_for('admin') }}">Konta klientów</a>
+            </li>
+            <li class="nav-item">
+                <img class="nav-icon" src="{{ url_for("static", filename="door.png") }}">
+                <a class="nav-link" href="{{ url_for('logout') }}">Wyloguj się</a>
             </li>
 
         </ul>

@@ -460,10 +460,12 @@ def zmodyfikuj_harmonogram(nr_lotu, nowy_nr_lotu, linia_lotnicza, start_lotnisko
 # ############ user
 
 
-def pokaz_user(user_id=None):
+def pokaz_user(user_id=None, email=None):
     with session_handler() as db_session:
         if user_id:
             result = db_session.query(User).filter(User.user_id == user_id).first()
+        elif email:
+            result = db_session.query(User).filter(User.email == email).first()
         else:
             result = db_session.query(User).all()
         return result

@@ -6,7 +6,7 @@ def check_is_logged_in():
     user_id = request.cookies.get("user_id")
     if not user_id:
         if len(pokaz_user()) != 0:
-            if not any(x not in request.path for x in ['static']):
+            if not any(x in request.path for x in ["login", 'static']):
                 return redirect(url_for("login"))
 
 
@@ -113,20 +113,45 @@ def admin():
     return render_template('admin.html', users=users, notification=notification)
 
 
+def log_in(user):
+    resp = make_response(redirect(url_for("index")))
+    resp.set_cookie("user_id", str(user.user_id))
+    resp.set_cookie("user_token", user.token)
+    resp.set_cookie("user_type", user.typ)
+    return resp
+
+
 @app.route('/login', methods=["GET", "POST"])
 def login():
     notification = None
     if request.method == "POST":
         req = request.values.to_dict()
-        if 'email' in req:
-            user, notification = check_user_credentials(req['email'], req['password'])
+        if 'login' in req:
+            user, notification = check_user_credentials(req['email'], req['current-password'])
             if user:
-                resp = make_response(redirect(index))
-                resp.set_cookie("user_id", str(user.user_id))
-                resp.set_cookie("user_token", user.token)
-                resp.set_cookie("user_type", user.typ)
-                return resp
+                # resp = make_response(redirect(index))
+                # resp.set_cookie("user_id", str(user.user_id))
+                # resp.set_cookie("user_token", user.token)
+                # resp.set_cookie("user_type", user.typ)
+                return log_in(user)
+        elif "signup" in req:
+            notification = dodaj_user(imie=req['name'], nazwisko=req['surname'], email=req['email'],
+                                      password=req['current-password'], password_repeat=req['password-repeat'],
+                                      u_type="user")
+            if notification[0] == "success":
+                user = pokaz_user(email=req['email'])
+                if user:
+                    return log_in(user)
     return render_template("login.html", notification=notification)
+
+
+@app.route("/logout")
+def logout():
+    resp = make_response(redirect(url_for("login")))
+    resp.set_cookie("user_id", "", expires=0)
+    resp.set_cookie("user_token", "", expires=0)
+    resp.set_cookie("user_type", "", expires=0)
+    return resp
 
 
 if __name__ == '__main__':

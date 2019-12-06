@@ -10,18 +10,81 @@
 
 {% block login %}
     <div class="login-bg">
-        <div class="login-field">
-            <div class="login-title">Zaloguj się</div>
-            <form class="login-body" method="post" enctype="multipart/form-data">
+        <div class="login-field" id="login_form">
+            <div class="login-title">
+                <a href="javascript:void(0)" onclick="switchLogin()" class="login-option active" data-target="signin">Zaloguj
+                    się</a>
+                <a href="javascript:void(0)" onclick="switchLogin()" class="login-option" data-target="signup">Zarejestruj
+                    się</a>
+            </div>
+            {% if notification %}
+                {% if notification[0]=='success' %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <h4 class="alert-heading">Done!</h4>
+                        <p>{{ notification[1] }}</p>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% elif notification[0]=='danger' %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <h4 class="alert-heading">Oops...</h4>
+                        <p>{{ notification[1] }}</p>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% elif notification[0]=='warning' %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <h4 class="alert-heading">Warning</h4>
+                        <p>{{ notification[1] }}</p>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            <form class="login-body signin" id="signin" method="post" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input name="email" id="email" type="text" class="form-control" placeholder="example@example.com">
                 </div>
                 <div class="form-group">
                     <label for="password">Hasło</label>
-                    <input name="password" id="password" type="password" class="form-control" placeholder="********">
+                    <input name="current-password" id="password" type="password" class="form-control"
+                           placeholder="********">
                 </div>
-                <button class="btn btn-primary btn-block" type="submit">Załoguj się</button>
+                <button class="btn btn-primary btn-block" name="login" type="submit">Załoguj się</button>
+            </form>
+
+            <form class="login-body signup hidden" id="signup" method="post" enctype="multipart/form-data">
+
+                <div class="form-group">
+                    <label for="new-name">Imię</label>
+                    <input name="name" id="new-name" type="text" class="form-control" placeholder="Grzegorz">
+                </div>
+                <div class="form-group">
+                    <label for="new-surname">Nazwisko</label>
+                    <input name="surname" id="new-surname" type="text" class="form-control"
+                           placeholder="Brzerzęszczykiewicz">
+                </div>
+                <div class="form-group">
+                    <label for="new-email">Email</label>
+                    <input name="email" id="new-email" type="email" class="form-control"
+                           placeholder="example@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="new-password">Hasło</label>
+                    <input name="current-password" id="new-password" type="password" class="form-control"
+                           placeholder="********">
+                </div>
+                <div class="form-group">
+                    <label for="new-password-repeat">Powtórz hasło</label>
+                    <input name="password-repeat" id="new-password-repeat" type="password" class="form-control"
+                           placeholder="********">
+                </div>
+                <button class="btn btn-info btn-block" name="signup" type="submit">Zarejestruj się</button>
             </form>
         </div>
     </div>
