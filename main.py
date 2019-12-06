@@ -1,6 +1,15 @@
 from db_part import *
 
 
+def get_current_user_type():
+    return request.cookies.get("user_type")
+
+
+@app.context_processor
+def global_vars():
+    return dict(user_type=get_current_user_type())
+
+
 @app.before_request
 def check_is_logged_in():
     user_id = request.cookies.get("user_id")
