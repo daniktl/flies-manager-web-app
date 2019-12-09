@@ -34,13 +34,42 @@ html {
     display: inline-block !important;
 }
 
+.navbar-brand {
+    padding: 10px;
+}
+
+.navlink.logout {
+    color: coral!important;
+}
+
+.nav-item + .nav-item {
+    margin-left: 10px;
+}
+
+.nav-item {
+    transition: .2s;
+    padding: 5px 10px;
+}
+
+.nav-item:hover {
+    background-color: #cdcdcd;
+}
+
+.navbar {
+    padding: 0!important;
+}
+
+.navbar-collapse {
+    margin: 0!important;
+}
+
 .header {
     width: 100%;
     left: 0;
     top: 0;
     min-height: 250px;
     z-index: -1;
-    background-image: url("/static/bg3.jpg");
+    background-image: url("/static/bg2.jpg");
     background-size: cover;
     background-position: center;
     padding-top: 70px;
@@ -71,12 +100,28 @@ html {
 }
 
 .section-header {
-    border-left: 5px grey solid;
-    padding-left: 10px;
-    font-size: 25px;
+    /*border-left: 5px grey solid;*/
+    /*padding-left: 10px;*/
+    font-size: 35px;
+    font-weight: 700;
     margin-top: 15px;
     margin-bottom: 15px;
 }
+
+
+.subsection-header {
+    /*border-left: 3px #a3a3a3 solid;*/
+    /*padding-left: 10px;*/
+    font-size: 30px;
+    font-weight: 600;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+/*.table thead tr th {*/
+/*    background: #484848;*/
+/*    color: #ededed;*/
+/*}*/
 
 .table tbody tr th {
     font-weight: 400 !important;
@@ -129,15 +174,6 @@ html {
 
 .nav-item {
     white-space: nowrap;
-}
-
-
-.subsection-header {
-    border-left: 3px #a3a3a3 solid;
-    padding-left: 10px;
-    font-size: 20px;
-    margin-top: 10px;
-    margin-bottom: 10px;
 }
 
 .navbar {
@@ -249,4 +285,29 @@ html {
 .login-option:hover, .login-option.active {
     color: black;
     text-decoration: none !important;
+}
+
+
+.new-btn {
+    float: right;
+    margin-top: 10px;
+    background-color: transparent;
+    background-image: url("/static/new.png");
+    border: 0!important;
+    outline: none!important;
+    width: 35px;
+    height: 35px;
+    background-size: cover;
+    cursor: pointer;
+}
+
+.new-btn.large {
+    width: 45px;
+    height: 45px;
+}
+
+.collapse-new {
+    /*border-bottom: 1px grey solid;*/
+    margin-bottom: 20px;
+    padding-top: 10px;
 }

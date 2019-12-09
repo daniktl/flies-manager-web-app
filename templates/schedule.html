@@ -14,84 +14,87 @@
 {% endblock %}
 
 {% block content %}
-    <div class="section-header">
-        Nowy wpis:
-    </div>
-    <form method="post" enctype="multipart/form-data">
 
-        <div class="form-group">
-            <label for="nr_flight">Numer lotu (8 znaków)</label>
-            <input type="text" class="form-control" id="nr_flight" name="nr_flight" placeholder="LOT12345">
-        </div>
+    <button class="new-data new-btn" type="button" data-toggle="collapse" data-target="#collapseNewData"
+            aria-expanded="false" aria-controls="collapseNewData">
+    </button>
+    <form method="post" class="collapse collapse-new" id="collapseNewData" enctype="multipart/form-data">
+        <div class="card card-body">
+            <div class="subsection-header">Nowy wpis</div>
+            <div class="form-group">
+                <label for="nr_flight">Numer lotu (8 znaków)</label>
+                <input type="text" class="form-control" id="nr_flight" name="nr_flight" placeholder="LOT12345">
+            </div>
 
-        <div class="form-group">
-            <label for="line">Linia lotnicza</label>
-            <select id="line" name="line" class="form-control">
-                {% if linie %}
-                    {% for linia in linie %}
-                        <option>{{ linia.nazwa }}</option>
+            <div class="form-group">
+                <label for="line">Linia lotnicza</label>
+                <select id="line" name="line" class="form-control">
+                    {% if linie %}
+                        {% for linia in linie %}
+                            <option>{{ linia.nazwa }}</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="from">Skąd</label>
+                    <select class="form-control" id="from" name="from">
+                        {% if lotniska %}
+                            {% for lotnisko in lotniska %}
+                                <option value="{{ lotnisko.kod }}">{{ lotnisko.miasto }} ({{ lotnisko.kod }})</option>
+                            {% endfor %}
+                        {% endif %}
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="to">Dokąd</label>
+                    <select class="form-control" id="to" name="to">
+                        {% if lotniska %}
+                            {% for lotnisko in lotniska %}
+                                <option value="{{ lotnisko.kod }}">{{ lotnisko.miasto }} ({{ lotnisko.kod }})</option>
+                            {% endfor %}
+                        {% endif %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="day">Dzień tygodnia</label>
+                <select id="day" name="day" class="form-control">
+                    {% for day in days %}
+                        <option value="{{ day }}">{{ days[day] }}</option>
                     {% endfor %}
-                {% endif %}
-            </select>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                <label for="from">Skąd</label>
-                <select class="form-control" id="from" name="from">
-                    {% if lotniska %}
-                        {% for lotnisko in lotniska %}
-                            <option value="{{ lotnisko.kod }}">{{ lotnisko.miasto }} ({{ lotnisko.kod }})</option>
-                        {% endfor %}
-                    {% endif %}
                 </select>
             </div>
-            <div class="form-group col-md-6">
-                <label for="to">Dokąd</label>
-                <select class="form-control" id="to" name="to">
-                    {% if lotniska %}
-                        {% for lotnisko in lotniska %}
-                            <option value="{{ lotnisko.kod }}">{{ lotnisko.miasto }} ({{ lotnisko.kod }})</option>
-                        {% endfor %}
-                    {% endif %}
-                </select>
-            </div>
-        </div>
 
-        <div class="form-group">
-            <label for="day">Dzień tygodnia</label>
-            <select id="day" name="day" class="form-control">
-                {% for day in days %}
-                    <option value="{{ day }}">{{ days[day] }}</option>
-                {% endfor %}
-            </select>
-        </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="time_start">Godzina wylotu</label>
+                    <input type="time" class="form-control" id="time_start" name="time_start" value="10:00">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="time_finish">Godzina lądowania</label>
+                    <input type="time" class="form-control" id="time_finish" name="time_finish" value="11:00">
+                </div>
+            </div>
+            <label for="price">Cena podstawowa</label>
+            <div class="input-group mb-3">
 
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                <label for="time_start">Godzina wylotu</label>
-                <input type="time" class="form-control" id="time_start" name="time_start" value="10:00">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">PLN</span>
+                </div>
+                <input type="number" class="form-control" id="price" name="price" placeholder="50">
             </div>
-            <div class="form-group col-md-6">
-                <label for="time_finish">Godzina lądowania</label>
-                <input type="time" class="form-control" id="time_finish" name="time_finish" value="11:00">
-            </div>
+            <button type="submit" class="btn btn-primary btn-block" name="new">Dodaj</button>
         </div>
-        <label for="price">Cena podstawowa</label>
-        <div class="input-group mb-3">
-
-            <div class="input-group-prepend">
-                <span class="input-group-text">PLN</span>
-            </div>
-            <input type="number" class="form-control" id="price" name="price" placeholder="50">
-        </div>
-        <button type="submit" class="btn btn-primary btn-block" name="new">Dodaj</button>
     </form>
 
-    <hr>
 
-    <div class="section-header">
-        Harmonogram lotów sortowany wg numeru lotów:
+
+    <div class="subsection-header">
+        Aktualny harmonogram lotów:
     </div>
     {% if not harmonogram %}
         <div class="no-content"></div>
@@ -165,22 +168,26 @@
         {% for wpis in harmonogram %}
 
             <div class="modal fade" id="modal-schedule-{{ wpis.nr_lotu }}" tabindex="-1" role="dialog"
-                aria-hidden="true">
+                 aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered" role="document">
                     <form class="modal-content" method="post" enctype="multipart/form-data">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalCenterTitle">Zmień lot o numerze {{ wpis.nr_lotu }}</h5>
+                            <h5 class="modal-title" id="exampleModalCenterTitle">Zmień lot o
+                                numerze {{ wpis.nr_lotu }}</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div class="modal-body">
-                        {# TODO #}
+                            {# TODO #}
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" class="btn btn-danger" name="remove" value="{{ wpis.nr_lotu }}">Usuń</button>
+                            <button type="submit" class="btn btn-danger" name="remove" value="{{ wpis.nr_lotu }}">Usuń
+                            </button>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
-                            <button type="submit" class="btn btn-primary" name="edit" value="{{ wpis.nr_lotu }}">Zapisz</button>
+                            <button type="submit" class="btn btn-primary" name="edit" value="{{ wpis.nr_lotu }}">
+                                Zapisz
+                            </button>
                         </div>
                     </form>
                 </div>

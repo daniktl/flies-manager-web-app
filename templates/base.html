@@ -72,15 +72,21 @@
                     </li>
                 {% endif %}
 
-                <li class="nav-item">
-                    <img class="nav-icon" src="{{ url_for("static", filename="door.png") }}">
-                    <a class="nav-link" href="{{ url_for('logout') }}">Wyloguj się</a>
-                </li>
+{#                <li class="nav-item">#}
+{#                    #}
+{#                </li>#}
 
             </ul>
             <form class="form-inline my-2 my-lg-0">
-                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-primary my-2 my-sm-0" type="submit">Search</button>
+                <div class="nav-item">
+                    {% if user_type %}
+                        <img class="nav-icon" src="{{ url_for("static", filename="door.png") }}">
+                        <a class="nav-link logout" style="color: #656565!important;" href="{{ url_for('logout') }}">Wyloguj się</a>
+                    {% else %}
+                        <img class="nav-icon" src="{{ url_for("static", filename="login.png") }}">
+                        <a class="nav-link logout" style="color: #3150a4!important;" href="{{ url_for('login') }}">Zaloguj się</a>
+                    {% endif %}
+                </div>
             </form>
         </div>
     </nav>

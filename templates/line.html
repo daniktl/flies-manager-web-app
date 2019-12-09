@@ -24,49 +24,50 @@
         </ol>
     </nav>
 
-    <div class="section-header">Samoloty</div>
-    <div class="subsection-header">
-        Dodaj nowy samolot dla tej linii lotniczej:
-    </div>
-    <form method="post" enctype="multipart/form-data">
 
+    <button class="new-data new-btn" type="button" data-toggle="collapse" data-target="#collapseNewDataPlane"
+            aria-expanded="false" aria-controls="collapseNewDataPlane">
+    </button>
+    <form method="post" class="collapse collapse-new" id="collapseNewDataPlane" enctype="multipart/form-data">
+        <div class="card card-body">
+            <div class="subsection-header">
+                Nowy samolot:
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="from">Number boczny</label>
+                    <input type="text" class="form-control" id="nr_boczny" name="nr_boczny" placeholder="XXX1234">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="from">Maksymalny zasięg (km)</label>
+                    <input type="number" class="form-control" id="zasieg" name="zasieg" placeholder="1200">
+                </div>
+            </div>
 
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                <label for="from">Number boczny</label>
-                <input type="text" class="form-control" id="nr_boczny" name="nr_boczny" placeholder="XXX1234">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="from">Marka</label>
+                    <input type="text" class="form-control" id="marka" name="marka" placeholder="TU">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="from">Model</label>
+                    <input type="text" class="form-control" id="model" name="model" placeholder="104">
+                </div>
             </div>
-            <div class="form-group col-md-6">
-                <label for="from">Maksymalny zasięg (km)</label>
-                <input type="number" class="form-control" id="zasieg" name="zasieg" placeholder="1200">
+
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label for="from">Pojemność (osób)</label>
+                    <input type="number" class="form-control" id="pojemnosc" name="pojemnosc" placeholder="100">
+                </div>
             </div>
+
+            <button type="submit" class="btn btn-primary btn-block" name="new-samolot">Dodaj</button>
         </div>
-
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                <label for="from">Marka</label>
-                <input type="text" class="form-control" id="marka" name="marka" placeholder="TU">
-            </div>
-            <div class="form-group col-md-6">
-                <label for="from">Model</label>
-                <input type="text" class="form-control" id="model" name="model" placeholder="104">
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group col-md-12">
-                <label for="from">Pojemność (osób)</label>
-                <input type="number" class="form-control" id="pojemnosc" name="pojemnosc" placeholder="100">
-            </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-block" name="new-samolot">Dodaj</button>
     </form>
 
-    <hr>
-
     <div class="subsection-header">
-        Istniejące samoloty:
+        Samoloty:
     </div>
     {% if not samoloty %}
         <div class="no-content"></div>
@@ -160,29 +161,33 @@
     {% endif %}
 
     <hr style="margin: 50px 0">
-    <div class="section-header">Piloci</div>
 
-    <div class="subsection-header">
-        Dodaj nowego pilota dla tej linii lotniczej:
-    </div>
-    <form method="post" enctype="multipart/form-data">
+    <button class="new-data new-btn" type="button" data-toggle="collapse" data-target="#collapseNewDataPilot"
+            aria-expanded="false" aria-controls="collapseNewDataPilot">
+    </button>
+    <form method="post" class="collapse collapse-new" id="collapseNewDataPilot" enctype="multipart/form-data">
+        <div class="card card-body">
+            <div class="subsection-header">
+                Nowy pilot:
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="from">Imię</label>
+                    <input type="text" class="form-control" id="new-imie" name="imie" placeholder="Grzegosz">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="from">Nazwisko</label>
+                    <input type="text" class="form-control" id="new-nazwisko" name="nazwisko"
+                           placeholder="Brzęczyszczykiewicz">
+                </div>
+            </div>
 
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                <label for="from">Imię</label>
-                <input type="text" class="form-control" id="new-imie" name="imie" placeholder="Grzegosz">
-            </div>
-            <div class="form-group col-md-6">
-                <label for="from">Nazwisko</label>
-                <input type="text" class="form-control" id="new-nazwisko" name="nazwisko"
-                       placeholder="Brzęczyszczykiewicz">
-            </div>
+            <button type="submit" class="btn btn-primary btn-block" name="new-pilot">Dodaj</button>
         </div>
-
-        <button type="submit" class="btn btn-primary btn-block" name="new-pilot">Dodaj</button>
     </form>
 
-    <hr>
+    <div class="subsection-header">Piloci</div>
+
 
     {% if not piloci %}
         <div class="no-content"></div>
@@ -255,7 +260,8 @@
                                         <label for="edit-{{ pilot.id_pil }}-name">Imię</label>
                                     </th>
                                     <th>
-                                        <input class="form-control" type="text" name="name" id="edit-{{ pilot.id_pil }}-name"
+                                        <input class="form-control" type="text" name="name"
+                                               id="edit-{{ pilot.id_pil }}-name"
                                                value="{{ pilot.imie }}">
                                     </th>
 
@@ -265,7 +271,8 @@
                                         <label for="edit-{{ pilot.id_pil }}-surname">Nazwisko</label>
                                     </th>
                                     <th>
-                                        <input class="form-control" type="text" name="surname" id="edit-{{ pilot.id_pil }}-surname"
+                                        <input class="form-control" type="text" name="surname"
+                                               id="edit-{{ pilot.id_pil }}-surname"
                                                value="{{ pilot.nazwisko }}">
                                     </th>
                                 </tr>

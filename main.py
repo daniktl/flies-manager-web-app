@@ -10,13 +10,13 @@ def global_vars():
     return dict(user_type=get_current_user_type())
 
 
-@app.before_request
-def check_is_logged_in():
-    user_id = request.cookies.get("user_id")
-    if not user_id:
-        if len(pokaz_user()) != 0:
-            if not any(x in request.path for x in ["login", 'static']):
-                return redirect(url_for("login"))
+# @app.before_request
+# def check_is_logged_in():
+#     user_id = request.cookies.get("user_id")
+#     if not user_id:
+#         if len(pokaz_user()) != 0:
+#             if not any(x in request.path for x in ["login", 'static']):
+#                 return redirect(url_for("login"))
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -163,7 +163,7 @@ def login():
 
 @app.route("/logout")
 def logout():
-    resp = make_response(redirect(url_for("login")))
+    resp = make_response(redirect(url_for("index")))
     resp.set_cookie("user_id", "", expires=0)
     resp.set_cookie("user_token", "", expires=0)
     resp.set_cookie("user_type", "", expires=0)

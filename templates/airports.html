@@ -14,56 +14,58 @@
 {% endblock %}
 
 {% block content %}
-    <div class="section-header">
-        Dodaj nowe lotnisko:
-    </div>
-    <form method="post" enctype="multipart/form-data">
 
-        <div class="form-group">
-            <label for="code">Kod międzynarodowy (do 4 znaków)</label>
-            <input id="code" type="text" name="code" class="form-control" placeholder="PZN">
-        </div>
+    <button class="new-data new-btn" type="button" data-toggle="collapse" data-target="#collapseNewData"
+            aria-expanded="false" aria-controls="collapseNewData">
+    </button>
+    <form class="collapse collapse-new" id="collapseNewData" method="post" enctype="multipart/form-data">
+        <div class="card card-body">
+            <div class="subsection-header">Nowe lotnisko</div>
+            <div class="form-group">
+                <label for="code">Kod międzynarodowy (do 4 znaków)</label>
+                <input id="code" type="text" name="code" class="form-control" placeholder="PZN">
+            </div>
 
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                <label for="country">Kraj</label>
-                <select id="country" name="country" class="form-control">
-                    {% for kraj in kraje %}
-                        <option>{{ kraj }}</option>
-                    {% endfor %}
-                </select>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="country">Kraj</label>
+                    <select id="country" name="country" class="form-control">
+                        {% for kraj in kraje %}
+                            <option>{{ kraj }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="city">Miasto</label>
+                    <input type="text" class="form-control" id="city" name="city" placeholder="Poznań">
+                </div>
             </div>
-            <div class="form-group col-md-6">
-                <label for="city">Miasto</label>
-                <input type="text" class="form-control" id="city" name="city" placeholder="Poznań">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="time_start">Miejsce na mapie</label>
+                    <input type="text" class="form-control" id="map" name="map" placeholder="52.4199508,16.8264271">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="timezone">Strefa czasowa</label>
+                    <select id="timezone" name="timezone" class="form-control">
+                        {% for x in range(-11, 15) %}
+                            {% if x == 1 %}
+                                <option selected>{{ x }}</option>
+                            {% else %}
+                                <option>{{ x }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                <label for="time_start">Miejsce na mapie</label>
-                <input type="text" class="form-control" id="map" name="map" placeholder="52.4199508,16.8264271">
-            </div>
-            <div class="form-group col-md-6">
-                <label for="timezone">Strefa czasowa</label>
-                <select id="timezone" name="timezone" class="form-control">
-                    {% for x in range(-11, 15) %}
-                        {% if x == 1 %}
-                            <option selected>{{ x }}</option>
-                        {% else %}
-                            <option>{{ x }}</option>
-                        {% endif %}
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
 
-        <button type="submit" class="btn btn-primary btn-block" name="new">Dodaj</button>
+            <button type="submit" class="btn btn-primary btn-block" name="new">Dodaj</button>
+        </div>
     </form>
 
-    <hr>
 
-    <div class="section-header">
-        Aktualne lotniska w bazie:
+    <div class="subsection-header">
+        Istniejące lotniska:
     </div>
     {% if not lotniska %}
         <div class="no-content"></div>
@@ -131,15 +133,15 @@
                         <div class="modal-body">
                             <table class="table">
                                 <tbody>
-{#                                <tr>#}
-{#                                    <th>#}
-{#                                        <label for="edit-code">Kod</label>#}
-{#                                    </th>#}
-{#                                    <th>#}
-{#                                        <input class="form-control" type="text" name="code" id="edit-code"#}
-{#                                               value="{{ lotnisko.kod }}">#}
-{#                                    </th>#}
-{#                                </tr>#}
+                                {#                                <tr>#}
+                                {#                                    <th>#}
+                                {#                                        <label for="edit-code">Kod</label>#}
+                                {#                                    </th>#}
+                                {#                                    <th>#}
+                                {#                                        <input class="form-control" type="text" name="code" id="edit-code"#}
+                                {#                                               value="{{ lotnisko.kod }}">#}
+                                {#                                    </th>#}
+                                {#                                </tr>#}
                                 <tr>
                                     <th>
                                         <label for="edit-country">Kraj</label>

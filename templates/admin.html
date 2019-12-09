@@ -14,12 +14,12 @@
 {% endblock %}
 
 {% block content %}
-    <div class="section-header">
-        Nowy użytkownik
-    </div>
-    <form method="post" enctype="multipart/form-data">
-
-
+    <button class="new-data new-btn" type="button" data-toggle="collapse" data-target="#collapseNewData"
+            aria-expanded="false" aria-controls="collapseNewData">
+    </button>
+    <form class="collapse collapse-new" id="collapseNewData" method="post" enctype="multipart/form-data">
+        <div class="card card-body">
+            <div class="subsection-header">Nowy użytkownik</div>
         <div class="form-row">
             <div class="form-group col-md-6">
                 <label for="name">Imię</label>
@@ -56,11 +56,11 @@
         </div>
 
         <button type="submit" class="btn btn-primary btn-block" name="new">Dodaj</button>
+        </div>
     </form>
 
-    <hr>
 
-    <div class="section-header">
+    <div class="subsection-header">
         Użytkownicy:
     </div>
     {% if not users %}

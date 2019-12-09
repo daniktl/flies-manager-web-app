@@ -15,33 +15,35 @@
 
 {% block content %}
 
-    <div class="section-header">
-        Nowa linia lotnicza:
-    </div>
-    <form method="post" enctype="multipart/form-data">
 
+    <button class="new-data new-btn" type="button" data-toggle="collapse" data-target="#collapseNewData"
+            aria-expanded="false" aria-controls="collapseNewData">
+    </button>
+    <form method="post" class="collapse collapse-new" id="collapseNewData" enctype="multipart/form-data">
+        <div class="card card-body">
+            <div class="subsection-header">
+                Nowa linia lotnicza:
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="from">Nazwa</label>
+                    <input type="text" class="form-control" id="nazwa" name="nazwa" placeholder="LOT">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="kraj">Kraj</label>
+                    <select id="kraj" class="form-control" name="kraj">
+                        {% for kraj in kraje %}
+                            <option>{{ kraj }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
 
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                <label for="from">Nazwa</label>
-                <input type="text" class="form-control" id="nazwa" name="nazwa" placeholder="LOT">
-            </div>
-            <div class="form-group col-md-6">
-                <label for="kraj">Kraj</label>
-                <select id="kraj" class="form-control" name="kraj">
-                    {% for kraj in kraje %}
-                        <option>{{ kraj }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+            <button type="submit" class="btn btn-primary btn-block" name="new">Dodaj</button>
         </div>
-
-        <button type="submit" class="btn btn-primary btn-block" name="new">Dodaj</button>
     </form>
 
-    <hr>
-
-    <div class="section-header">
+    <div class="subsection-header">
         Linii lotnicze:
     </div>
     {% if not linie %}
@@ -83,7 +85,8 @@
                     </th>
 
                     <th>
-                        <button class="edit-button action-button" data-toggle="modal" data-target="#modal-linia-{{ linia.get_nazwa_safe() }}"></button>
+                        <button class="edit-button action-button" data-toggle="modal"
+                                data-target="#modal-linia-{{ linia.get_nazwa_safe() }}"></button>
                     </th>
                 </tr>
             {% endfor %}
@@ -94,7 +97,7 @@
         {% for linia in linie %}
 
             <div class="modal fade" id="modal-linia-{{ linia.get_nazwa_safe() }}" tabindex="-1" role="dialog"
-                aria-hidden="true">
+                 aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered" role="document">
                     <form class="modal-content" method="post" enctype="multipart/form-data">
                         <div class="modal-header">
@@ -104,12 +107,14 @@
                             </button>
                         </div>
                         <div class="modal-body">
-                        {# TODO #}
+                            {# TODO #}
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" class="btn btn-danger" name="remove" value="{{ linia.nazwa }}">Usuń</button>
+                            <button type="submit" class="btn btn-danger" name="remove" value="{{ linia.nazwa }}">Usuń
+                            </button>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
-                            <button type="submit" class="btn btn-primary" name="edit" value="{{ linia.nazwa }}">Zapisz</button>
+                            <button type="submit" class="btn btn-primary" name="edit" value="{{ linia.nazwa }}">Zapisz
+                            </button>
                         </div>
                     </form>
                 </div>
