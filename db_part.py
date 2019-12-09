@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, String, Integer, Column, DateTime, Boolean
     ForeignKeyConstraint, Float, Time
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exc import IntegrityError, DisconnectionError, ProgrammingError, OperationalError
-from sqlalchemy.orm import sessionmaker, relationship, scoped_session
+from sqlalchemy.orm import sessionmaker, relationship, scoped_session, backref
 from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.sql.expression import false, true, case, not_, and_
 import os, numpy, datetime, warnings, time, random, json
@@ -47,6 +47,7 @@ def check_empty(x):
             return False
     return True
 
+
 @contextmanager
 def session_handler():
     session = db.session
@@ -54,8 +55,8 @@ def session_handler():
         session.flush()
         yield session
         session.commit()
-    except IntegrityError:
-        print("Already exists")
+    except IntegrityError as exp:
+        print("Already exists", exp)
         session.rollback()
     except Exception as exp:
         print(exp)
@@ -96,7 +97,7 @@ class User(db.Model):
         self.imie = name
         self.nazwisko = surname
         self.typ = type
-        self.token = "".join([random.choice(ascii_letters+digits) for _ in range(64)])
+        self.token = "".join([random.choice(ascii_letters + digits) for _ in range(64)])
 
     def validate_password(self, password):
         return bcrypt.verify(password, self.haslo)
@@ -174,9 +175,10 @@ class Lotnisko(db.Model):
     miasto = Column('miasto', String(20), nullable=False)
     strefa_czasowa = Column('strefa_czasowa', Integer, nullable=False)
 
-    harmonogram_start = relationship("Harmonogram", foreign_keys="[Harmonogram.start_lotnisko_nazwa]", cascade="delete")
+    harmonogram_start = relationship("Harmonogram", foreign_keys="[Harmonogram.start_lotnisko_nazwa]",
+                                     cascade="all")
     harmonogram_finish = relationship("Harmonogram", foreign_keys="[Harmonogram.finish_lotnisko_nazwa]",
-                                      cascade="delete")
+                                      cascade="all")
 
 
 class Harmonogram(db.Model):
@@ -192,7 +194,7 @@ class Harmonogram(db.Model):
     start_lotnisko = relationship("Lotnisko", foreign_keys=[start_lotnisko_nazwa])
 
     finish_lotnisko_nazwa = Column("finish_lotnisko", ForeignKey(Lotnisko.kod), nullable=False)
-    finish_lotnisko = relationship("Lotnisko", foreign_keys=[finish_lotnisko_nazwa])
+    finish_lotnisko = relationship("Lotnisko", foreign_keys=[finish_lotnisko_nazwa], backref=backref("finish_lotnisko_nazwa"))
 
     linia_lotnicza_nazwa = Column("linia_lotnicza", ForeignKey(LiniaLotnicza.nazwa), nullable=False)
     linia_lotnicza = relationship("LiniaLotnicza", foreign_keys=[linia_lotnicza_nazwa])
@@ -223,32 +225,49 @@ def check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc):
     with session_handler() as db_session:
         samolot = db_session.query(Samolot).filter(Samolot.nr_boczny == nr_boczny).first()
         if samolot:
-            return False, ['danger',
+            return ['danger',
                            f"Samolot z numerem bocznym {nr_boczny} już istnieje ({samolot.linia_lotnicza_nazwa})"]
         if len(marka) > 15 or len(model) > 15:
-            return False, ['danger', "Długość atrybutów marka i model powinna być nie większa niż 15"]
+            return ['danger', "Długość atrybutów marka i model powinna być nie większa niż 15"]
         if not pokaz_linie(linia_nazwa):
-            return False, ['danger', f"Linia lotnicza {linia_nazwa} nie istnieje. Spróbuj jeszcze raz"]
+            return ['danger', f"Linia lotnicza {linia_nazwa} nie istnieje. Spróbuj jeszcze raz"]
         if not isinstance(pojemnosc, int):
             if isinstance(pojemnosc, str):
                 if not pojemnosc.isnumeric():
-                    return False, ['danger', "Pojemnośc powinna być liczbą"]
+                    return ['danger', "Pojemnośc powinna być liczbą"]
             else:
-                return False, ['danger', "Pojemnośc powinna być liczbą"]
-        return True, None
+                return ['danger', "Pojemnośc powinna być liczbą"]
+        return None
 
 
 def dodaj_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, zasieg=None):
+    error = check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc)
+    if error:
+        return error
     with session_handler() as db_session:
-        good, message = check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc)
-        if not good:
-            return message
         pojemnosc = int(pojemnosc)
         nowy_samolot = Samolot(nr_boczny=nr_boczny, marka=marka, model=model, pojemnosc=pojemnosc,
                                linia_lotnicza_nazwa=linia_nazwa, max_zasieg=zasieg)
         db_session.add(nowy_samolot)
         db_session.commit()
         return ['success', "Samolot został dodany"]
+
+
+def zmodyfikuj_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, zasieg=None):
+    error = check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc)
+    if error:
+        return error
+    with session_handler() as db_session:
+        pojemnosc = int(pojemnosc)
+        samolot = db_session.query(Samolot).filter(Samolot.nr_boczny == nr_boczny).first()
+        if not samolot:
+            return ['danger', f"Samolot o numerze bocznym {nr_boczny} nie istnieje"]
+        samolot.marka = marka
+        samolot.model = model
+        samolot.pojemnosc = pojemnosc
+        samolot.linia_lotnicza_nazwa = linia_nazwa
+        samolot.max_zasieg = zasieg
+        return ['success', f"Dane o samolocie {nr_boczny} zostały zmodyfikowane"]
 
 
 def usun_samolot(nr_boczny):
@@ -317,23 +336,29 @@ def pokaz_pilotow(linia=None):
         return piloci
 
 
+def check_data_pilot(imie, nazwisko):
+    if not isinstance(imie, str) or not isinstance(nazwisko, str):
+        return ['danger', "Niepoprawny format dla pól imię i nazwisko"]
+    if len(imie) > 30 or len(nazwisko) > 30:
+        return ['danger', "Imię lub nazwisko ma długość większą niż to jest dozwolone (30 znaków)"]
+
+
 def dodaj_pilota(imie, nazwisko, linia_nazwa):
-    if isinstance(imie, str) and isinstance(nazwisko, str):
-        if len(imie) < 30 and len(nazwisko) < 30:
-            with session_handler() as db_session:
-                nowy_pilot = Pilot(imie=imie, nazwisko=nazwisko, data_dolaczenia=datetime.datetime.now(),
-                                   linia_lotnicza_nazwa=linia_nazwa)
-                db_session.add(nowy_pilot)
-                return ['success', 'Nowy pilot został dodany']
-        return ['danger', "Długośc imienia i nazwiska powinna zawierać maksymalnie 30 znakóœ"]
-    return ['danger', "Dane nie są typu string. Sprawdż działanie programu"]
+    res = check_data_pilot(imie, nazwisko)
+    if res:
+        return res
+    with session_handler() as db_session:
+        nowy_pilot = Pilot(imie=imie, nazwisko=nazwisko, data_dolaczenia=datetime.datetime.now(),
+                           linia_lotnicza_nazwa=linia_nazwa)
+        db_session.add(nowy_pilot)
+        return ['success', 'Nowy pilot został dodany']
 
 
 def usun_pilota(id_pil):
     with session_handler() as db_session:
         pilot = db_session.query(Pilot).filter(Pilot.id_pil == id_pil).first()
         if not pilot:
-            return ['danger', "Pilot o danym identyfikatorze nie istnieje"]
+            return ['danger', f"Pilot o identyfikatorze {id_pil} nie istnieje"]
         else:
             name = pilot.imie
             surname = pilot.nazwisko
@@ -342,9 +367,16 @@ def usun_pilota(id_pil):
 
 
 def zmodyfikuj_pilota(id_pil, imie, nazwisko):
+    res = check_data_pilot(imie, nazwisko)
+    if res:
+        return res
     with session_handler() as db_session:
-        # TODO
-        pass
+        pilot = db_session.query(Pilot).filter(Pilot.id_pil == id_pil).first()
+        if not pilot:
+            return ["danger", f"Pilot o id {id_pil} nie istnieje"]
+        pilot.imie = imie
+        pilot.nazwisko = nazwisko
+        return ["success", f"Dane pilota {imie} {nazwisko} zostały zmienione"]
 
 
 # ############### lotniska
@@ -356,7 +388,7 @@ def pokaz_lotniska():
         return result
 
 
-def dodaj_lotnisko(kod, m_na_mapie, kraj, miasto, strefa_czasowa):
+def check_data_lotnisko(kod, m_na_mapie, kraj, miasto, strefa_czasowa):
     if any([x == "" for x in [kod, m_na_mapie, kraj, miasto, strefa_czasowa]]):
         return ['danger', "Żadne pole nie może być puste"]
     if len(kod) > 4:
@@ -371,6 +403,13 @@ def dodaj_lotnisko(kod, m_na_mapie, kraj, miasto, strefa_czasowa):
         return ["danger", "Strefa czasowa jest pusta"]
     if not strefa_czasowa.isnumeric():
         return ['danger', "Strefa czasowa musi być liczbą"]
+    return None
+
+
+def dodaj_lotnisko(kod, m_na_mapie, kraj, miasto, strefa_czasowa):
+    error = check_data_lotnisko(kod, m_na_mapie, kraj, miasto, strefa_czasowa)
+    if error:
+        return error
     with session_handler() as db_session:
         ex_lotnisko = db_session.query(Lotnisko).filter(Lotnisko.kod == kod).first()
         if ex_lotnisko:
@@ -381,7 +420,18 @@ def dodaj_lotnisko(kod, m_na_mapie, kraj, miasto, strefa_czasowa):
 
 
 def zmodyfikuj_lotnisko(kod, nowy_kod, m_na_mapie, kraj, miasto, strefa_czasowa):
-    # TODO
+    check_data_lotnisko(nowy_kod, m_na_mapie, kraj, miasto, strefa_czasowa)
+    with session_handler() as db_session:
+        ex_lotnisko = db_session.query(Lotnisko).filter(Lotnisko.kod == kod).first()
+        if not ex_lotnisko:
+            return ['danger', f"Lotnisko o kodzie międzynarodowym {kod} nie istnieje"]
+        # if kod != nowy_kod:
+        ex_lotnisko.kod = nowy_kod
+        ex_lotnisko.m_na_mapie = m_na_mapie
+        ex_lotnisko.kraj = kraj
+        ex_lotnisko.miasto = miasto
+        ex_lotnisko.strefa_czasowa = strefa_czasowa
+        return ['success', f"Lotnisko o kodzie międzynarodowym {nowy_kod} zostało zmienione"]
     pass
 
 
@@ -429,15 +479,16 @@ def dodaj_harmonogram(nr_lotu, linia_lotnicza, start_lotnisko, finish_lotnisko, 
         if not isinstance(dzien_tygodnia, str) or not dzien_tygodnia.isnumeric() or int(dzien_tygodnia) not in range(7):
             return ['danger', "Niepoprawny dzień tygodnia"]
         try:
-            time_start = datetime.datetime.strptime(start_godzina, "%H:%M")
-            time_finish = datetime.datetime.strptime(finish_godzina, "%H:%M")
+            time_start = datetime.datetime.strptime(start_godzina, "%H:%M").time()
+            time_finish = datetime.datetime.strptime(finish_godzina, "%H:%M").time()
         except:
             return ['danger', "Niepoprawny format godziny startu bądż lądowania"]
         if not isinstance(cena_podstawowa, str) or not cena_podstawowa.isnumeric():
             return ["danger", "Niepoprawny format ceny"]
         new_harmonogram = Harmonogram(nr_lotu=nr_lotu, linia_lotnicza_nazwa=linia_lotnicza, start_godzina=time_start,
-                                      finish_godzina=time_finish, start_lotnisko_nazwa=start_lotnisko, dzien_tygodnia=int(dzien_tygodnia),
-                                      finish_lotnisko_nazwa=finish_lotnisko, cena_podstawowa=float(cena_podstawowa))
+                                      finish_godzina=time_finish, start_lotnisko_nazwa=start_lotnisko,
+                                      dzien_tygodnia=int(dzien_tygodnia), finish_lotnisko_nazwa=finish_lotnisko,
+                                      cena_podstawowa=float(cena_podstawowa))
         db_session.add(new_harmonogram)
         return ["success", f"Nowy wpis o numerze lotu {nr_lotu} został dodany"]
 
@@ -452,10 +503,12 @@ def usun_harmonogram(nr_lotu):
             return ["success", f"Lot o numerze {nr_lotu} został usunięty"]
 
 
-def zmodyfikuj_harmonogram(nr_lotu, nowy_nr_lotu, linia_lotnicza, start_lotnisko, finish_lotnisko, dzien_tygodnia, start_godzina,
-                      finish_godzina, cena_podstawowa):
+def zmodyfikuj_harmonogram(nr_lotu, nowy_nr_lotu, linia_lotnicza, start_lotnisko, finish_lotnisko, dzien_tygodnia,
+                           start_godzina,
+                           finish_godzina, cena_podstawowa):
     # TODO
     pass
+
 
 # ############ user
 
@@ -477,7 +530,8 @@ def dodaj_user(imie, nazwisko, email, password, password_repeat, u_type):
     if not isinstance(email, str) or email.index("@") == -1:
         return ['danger', "Niepoprawny format email"]
     if not re.search(r'\d', password) or not re.search(r'[A-Z]', password) or not re.search(r'[a-z]', password):
-        return ["danger", "Hasło jest bardzo słabe. Musi zawierać conajmniej 1 liczbę, co najmniej 1 dużą literę i co najmniej jedbą małą"]
+        return ["danger",
+                "Hasło jest bardzo słabe. Musi zawierać conajmniej 1 liczbę, co najmniej 1 dużą literę i co najmniej jedbą małą"]
     if password != password_repeat:
         return ["danger", "Hasła wprowadzone w dwóch polach nie są równe"]
     if u_type not in ["user", "admin"]:

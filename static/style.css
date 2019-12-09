@@ -208,7 +208,7 @@ html {
     border-radius: 20px;
     transform: translate(-50%, -50%);
     padding: 0 15px;
-    transition: .2s;
+    transition: 400ms;
 }
 
 .login-title {
@@ -218,8 +218,8 @@ html {
 }
 
 .login-body {
-    height: auto;
-    transition: .2s;
+    /*height: auto;*/
+    transition: height 100ms;
 }
 
 .login-body.hidden {

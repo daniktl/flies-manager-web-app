@@ -1,7 +1,8 @@
 let ls_login = document.getElementsByClassName("login-option");
 
 function switchLogin() {
-    console.log("here");
+    let to_hide = null;
+    let to_show = null;
     for (let i=0; i< ls_login.length; i++){
         console.log(ls_login[i].id);
         if (ls_login[i].classList.contains("active")) {
@@ -10,17 +11,21 @@ function switchLogin() {
             ls_login[i].classList.add("active");
         }
     }
+
     let ls_child = document.getElementsByClassName("login-body");
     for (let i=0; i<ls_child.length; i++){
         if (ls_child[i].classList.contains("hidden")) {
-            ls_child[i].classList.remove("hidden");
-            // ls_child[i].style.height = "0";
+            to_show = ls_child[i];
         }else{
             ls_child[i].classList.add("hidden");
-            // let h = ls_child[i].offsetHeight;
-            // ls_child[i].style.height = h+"px";
+            ls_child[i].style.height = "";
         }
     }
+    setTimeout(function () {
+        to_show.classList.remove("hidden");
+    let h = to_show.offsetHeight;
+    to_show.style.height = h.toString()+"px";
+    }, 100, false)
 
 }
 
