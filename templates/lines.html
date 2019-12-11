@@ -107,7 +107,27 @@
                             </button>
                         </div>
                         <div class="modal-body">
-                            {# TODO #}
+                            <table class="table">
+                                <tbody>
+                                <tr>
+                                    <th>
+                                        <label for="edit-{{ linia.nazwa }}-kraj">Kraj</label>
+                                    </th>
+                                    <th>
+                                        <select id="kraj" class="form-control" name="kraj">
+                                            {% for kraj in kraje %}
+                                                {% if kraj == linia.kraj %}
+                                                <option selected>{{ kraj }}</option>
+                                                {% else %}
+                                                <option>{{ kraj }}</option>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </select>
+                                    </th>
+
+                                </tr>
+                                </tbody>
+                            </table>
                         </div>
                         <div class="modal-footer">
                             <button type="submit" class="btn btn-danger" name="remove" value="{{ linia.nazwa }}">Usuń

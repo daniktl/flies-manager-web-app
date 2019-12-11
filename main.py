@@ -55,6 +55,9 @@ def lines():
         req = request.values.to_dict()
         if 'new' in req:
             notification = dodaj_linie(req['nazwa'], req['kraj'])
+        elif 'edit' in req:
+            # TODO
+            notification = zmodyfikuj_linie(req['edit'], req['edit'], req['kraj'])
         if 'remove' in req:
             notification = usun_linie(nazwa=req['remove'])
     linie = pokaz_linie()
