@@ -103,6 +103,7 @@ class User(db.Model):
         return bcrypt.verify(password, self.haslo)
 
     rabat = relationship("Rabat", cascade="all")
+    podroz = relationship("Podroz", cascade="all")
 
     def is_admin(self):
         return self.typ == 'admin'
@@ -152,6 +153,7 @@ class Samolot(db.Model):
 
     linia_lotnicza_nazwa = Column('linia_lotnicza_nazwa', String(25), ForeignKey(LiniaLotnicza.nazwa), nullable=False)
     linia_lotnicza = relationship('LiniaLotnicza')
+    realizacja_lotu = relationship('RealizacjaLotu')
 
 
 class Pilot(db.Model):
@@ -164,6 +166,9 @@ class Pilot(db.Model):
 
     linia_lotnicza_nazwa = Column('linia_lotnicza_nazwa', String(25), ForeignKey(LiniaLotnicza.nazwa), nullable=False)
     linia_lotnicza = relationship('LiniaLotnicza')
+
+    realizacja1 = relationship("RealizacjaLotu", foreign_keys="[RealizacjaLotu.pilot_id_pil1]", cascade="all")
+    realizacja2 = relationship("RealizacjaLotu", foreign_keys="[RealizacjaLotu.pilot_id_pil2]", cascade="all")
 
 
 class Lotnisko(db.Model):
@@ -194,7 +199,8 @@ class Harmonogram(db.Model):
     start_lotnisko = relationship("Lotnisko", foreign_keys=[start_lotnisko_nazwa])
 
     finish_lotnisko_nazwa = Column("finish_lotnisko", ForeignKey(Lotnisko.kod), nullable=False)
-    finish_lotnisko = relationship("Lotnisko", foreign_keys=[finish_lotnisko_nazwa], backref=backref("finish_lotnisko_nazwa"))
+    finish_lotnisko = relationship("Lotnisko", foreign_keys=[finish_lotnisko_nazwa],
+                                   backref=backref("finish_lotnisko_nazwa"))
 
     linia_lotnicza_nazwa = Column("linia_lotnicza", ForeignKey(LiniaLotnicza.nazwa), nullable=False)
     linia_lotnicza = relationship("LiniaLotnicza", foreign_keys=[linia_lotnicza_nazwa])
@@ -207,6 +213,54 @@ class Harmonogram(db.Model):
 
     def get_finish_godzina(self):
         return datetime.time.strftime(self.finish_godzina, "%H:%M")
+
+
+class Podroz(db.Model):
+    __tablename__ = 'podroz'
+
+    nr_rezerwacji = Column('nr_rezerwacji', Integer, primary_key=True, autoincrement=True)
+    cena = Column('cena', Float(2), nullable=False)
+
+    user_id_u = Column('user_id_u', Integer, ForeignKey(User.user_id), nullable=False)
+    user = relationship('User')
+
+    polaczenie = relationship('Polaczenie')
+
+
+class RealizacjaLotu(db.Model):
+    __tablename__ = 'realizacja_lotu'
+
+    id_rlotu = Column('id_rlotu', Integer, primary_key=True, nullable=False)
+    data = Column('data', DateTime, nullable=False)
+    ilosc_pasazerow = Column('ilosc_pasazerow', Integer, nullable=False)
+
+    harmonogram_nr_lotu = Column('harmonogram_nr_lotu', String(9), ForeignKey(Harmonogram.nr_lotu), nullable=False)
+    harmonogram = relationship('Harmonogram')
+
+    samolot_nr_boczny = Column('samolot_nr_boczny', String(10), ForeignKey(Samolot.nr_boczny), nullable=False)
+    samolot = relationship('Samolot')
+
+    pilot_id_pil1 = Column("pilot_id_pil1", ForeignKey(Pilot.id_pil), nullable=False)
+    pilot1 = relationship("Pilot", foreign_keys=[pilot_id_pil1])
+
+    pilot_id_pil2 = Column("pilot_id_pil2", ForeignKey(Pilot.id_pil), nullable=False)
+    pilot2 = relationship("Pilot", foreign_keys=[pilot_id_pil2], backref=backref("pilot_id_pil2"))
+
+
+class Polaczenie(db.Model):
+    __tabelname__ = 'polaczenie'
+
+    nr_miejsca = Column('nr_miejsca', String(3), nullable=False)
+    bagaz = Column('bagaz', String(5), nullable=False)
+    kolejnosc = Column('kolejnosc', Integer, nullable=False)
+
+    realizacja_lotu_id_rlotu = Column('realizacja_lotu_id_rlotu',
+                                      Integer, ForeignKey(RealizacjaLotu.id_rlotu), primary_key=True, nullable=False)
+    realizacja_lotu = relationship('RealizacjaLotu')
+
+    podroz_nr_rezerwacji = Column('podroz_nr_rezerwacji', Integer,
+                                  ForeignKey(Podroz.nr_rezerwacji), primary_key=True, nullable=False)
+    podroz = relationship('Podroz')
 
 
 ##############################################
@@ -226,7 +280,7 @@ def check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc):
         samolot = db_session.query(Samolot).filter(Samolot.nr_boczny == nr_boczny).first()
         if samolot:
             return ['danger',
-                           f"Samolot z numerem bocznym {nr_boczny} już istnieje ({samolot.linia_lotnicza_nazwa})"]
+                    f"Samolot z numerem bocznym {nr_boczny} już istnieje ({samolot.linia_lotnicza_nazwa})"]
         if len(marka) > 15 or len(model) > 15:
             return ['danger', "Długość atrybutów marka i model powinna być nie większa niż 15"]
         if not pokaz_linie(linia_nazwa):
@@ -566,6 +620,18 @@ def check_user_credentials(email, password):
         if not user.validate_password(password):
             return None, ["danger", "Niepoprawne hasło"]
         return user, None
+
+
+# ############ realizacja lotu
+def pokaz_realizacje_lotow(data=None, start=None, finish=None):
+    with session_handler() as db_session:
+        if data and start and finish:
+            realizacja_lotow = db_session.query(RealizacjaLotu).filter(RealizacjaLotu.data == data and
+                                                                       Harmonogram.start_lotnisko_nazwa == start and
+                                                                       Harmonogram.finish_lotnisko_nazwa == finish).all()
+        else:
+            realizacja_lotow = db_session.query(RealizacjaLotu).all()
+        return realizacja_lotow
 
 
 db.create_all()
