@@ -373,9 +373,14 @@ def pokaz_linie(line=None):
         return linie
 
 
-def zmodyfikuj_linie(nazwa, new_nazwa, kraj):
-    # TODO
-    pass
+def zmodyfikuj_linie(nazwa, new_nazwa, new_kraj):
+    with session_handler() as db_session:
+        linia = db_session.query(LiniaLotnicza).filter(LiniaLotnicza.nazwa == nazwa).first()
+        if not linia:
+            return ['danger', "Linia lotnicza z taką nazwą nie istnieje"]
+        linia.nazwa = new_nazwa
+        linia.kraj = new_kraj
+        return ['success', f"Dane o linii {nazwa} zostały zmodyfikowane"]
 
 
 # ######## piloci
@@ -626,12 +631,62 @@ def check_user_credentials(email, password):
 def pokaz_realizacje_lotow(data=None, start=None, finish=None):
     with session_handler() as db_session:
         if data and start and finish:
-            realizacja_lotow = db_session.query(RealizacjaLotu).filter(RealizacjaLotu.data == data and
-                                                                       Harmonogram.start_lotnisko_nazwa == start and
-                                                                       Harmonogram.finish_lotnisko_nazwa == finish).all()
+            realizacja_lotow = db_session.query(RealizacjaLotu, Harmonogram). \
+                filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
+                filter(RealizacjaLotu.data == data and Harmonogram.start_lotnisko_nazwa == start and
+                       Harmonogram.finish_lotnisko_nazwa == finish).all()
         else:
             realizacja_lotow = db_session.query(RealizacjaLotu).all()
         return realizacja_lotow
+
+
+def dodaj_realizacje_lotu(data, numer_lotu, samolot, pilot1, pilot2):
+    if check_empty([data, numer_lotu, samolot, pilot1, pilot2]):
+        return ["danger", "Wszystkie atrybuty są obowiązkowe"]
+    if not isinstance(data, DateTime):
+        return ['danger', "Niepoprawny format daty"]
+    with session_handler() as db_session:
+        if db_session.query(RealizacjaLotu).filter(RealizacjaLotu.data == data
+                                                   and RealizacjaLotu.harmonogram_nr_lotu == numer_lotu).first():
+            return ['danger', "Lot o danym numerze w tym dniu już istnieje"]
+        if not db_session.query(Samolot).filter(Samolot.nr_boczny == samolot).first():
+            return ['danger', "Nie istenie samolot o danym numerze"]
+        if not db_session.query(Harmonogram).filter(Harmonogram.nr_lotu == numer_lotu).first():
+            return ['danger', "Brak lotu o podanym numerze"]
+        for pilot in [pilot1, pilot2]:
+            if not db_session.query(Pilot).filter(Pilot.id_pil == pilot).first():
+                return ["danger", "Pilot o danym identyfikatorze nie istnieje"]
+        nowa_realizacja_lotu = RealizacjaLotu(data=data, harmonogram_nr_lotu=numer_lotu, samolot_nr_boczny=samolot,
+                                              pilot_id_pil1=pilot1, pilot_id_pil2=pilot2, ilosc_pasazerow=0)
+
+        db_session.add(nowa_realizacja_lotu)
+        return ["success", f"Nowa realizacja lotu {numer_lotu} w dniu {data} została dodana"]
+
+
+def usun_realizacje_lotu(data, numer):
+    with session_handler() as db_session:
+        realizacja = db_session.query(RealizacjaLotu).filter(RealizacjaLotu.data == data
+                                                             and RealizacjaLotu.harmonogram_nr_lotu == numer).first()
+        if not realizacja:
+            return ["danger", f"Brak realizacji lotu {numer} w dniu {data}"]
+        else:
+            db_session.delete(realizacja)
+            return ["success", f"Lot o numerze {numer} w dniu {data} został usunięty"]
+
+
+def zmodyfikuj_realizacje_lotu(data, numer, new_samolot, new_pilot1, new_pilot2):
+    if check_empty([new_samolot, new_pilot1, new_pilot2]):
+        return ["danger", "Wszystkie atrybuty są obowiązkowe"]
+    if not(new_pilot1.isnumeric() and new_pilot2.isnumeric()):
+        return ["danger", "Podano zły identyfikator pilota"]
+    with session_handler() as db_session:
+        realizacja = db_session.query(RealizacjaLotu).filter(RealizacjaLotu.data == data and
+                                                             RealizacjaLotu.harmonogram_nr_lotu == numer).first()
+        if not realizacja:
+            return ["danger", f"Brak realizacji lotu {numer} w dniu {data}"]
+        realizacja.samolot_nr_boczny = new_samolot
+        realizacja.pilot_id_pil1 = new_pilot1
+        realizacja.pilot_id_pil2 = new_pilot2
 
 
 db.create_all()
