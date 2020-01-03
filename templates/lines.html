@@ -60,7 +60,13 @@
                     Kraj
                 </th>
                 <th>
-                    Liczba samolotów
+                    Samoloty
+                </th>
+                <th>
+                    Piloci
+                </th>
+                <th>
+                    Loty
                 </th>
                 <th>
                     Data założenia
@@ -80,6 +86,12 @@
                     </th>
                     <th>
                         {{ linia.liczba_samolotow() }}
+                    </th>
+                    <th>
+                        {{ linia.liczba_pilotow() }}
+                    </th>
+                    <th>
+                        {{ linia.liczba_lotow() }}
                     </th>
                     <th>
                         {{ linia.get_data_zalozenia() }}

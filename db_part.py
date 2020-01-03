@@ -137,10 +137,17 @@ class LiniaLotnicza(db.Model):
     harmonogram = relationship("Harmonogram", cascade='all')
 
     def liczba_samolotow(self):
-        return pokaz_samoloty_linia(self.nazwa)
+        return len(pokaz_samoloty(self.nazwa))
+
+    def liczba_pilotow(self):
+        return len(pokaz_pilotow(self.nazwa))
+
+    def liczba_lotow(self):
+        return len(pokaz_harmonogram(linia_lotnicza=self.nazwa))
 
     def get_data_zalozenia(self):
-        return datetime.datetime.strftime(self.data_zalozenia, "%d.%m.%Y")
+        return self.data_zalozenia.date()
+        # return datetime.datetime.strftime(self.data_zalozenia, "%d.%m.%Y")
 
     def get_nazwa_safe(self):
         return urllib.parse.quote(self.nazwa.replace(" ", "_"))
@@ -291,10 +298,13 @@ def convert_time_front_back(time_str):
 
 # ######### samoloty
 
-def pokaz_samoloty_linia(nazwa):
-    with session_handler() as db_session:
-        liczba = len(db_session.query(Samolot).filter(Samolot.linia_lotnicza_nazwa == nazwa).all())
-        return liczba
+'''
+    @deprecated
+'''
+# def pokaz_samoloty_linia(nazwa):
+#     with session_handler() as db_session:
+#         liczba = len(db_session.query(Samolot).filter(Samolot.linia_lotnicza_nazwa == nazwa).all())
+#         return liczba
 
 
 def check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc):
