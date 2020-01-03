@@ -24,21 +24,34 @@ def index():
     return render_template("index.html")
 
 
+# @app.route('/flights', methods=['GET', 'POST'])
+# def flights():
+#     notification = None
+#     if request.method == "POST":
+#         req = request.values.to_dict()
+#         if 'update-all' in req:
+#             notification = zauktualizuj_realizacje_lotow()
+#     realizacje = pokaz_realizacje_lotow()
+#     return render_template("flights.html", notification=notification, realizacje=realizacje)
+
+
 @app.route('/flights', methods=['GET', 'POST'])
 def flights():
-    return render_template("flights.html")
-
-
-@app.route('/schedule', methods=['GET', 'POST'])
-def schedule():
     notification = None
     if request.method == "POST":
         req = request.values.to_dict()
+        if 'update-all' in req:
+            notification = zauktualizuj_realizacje_lotow()
         if 'new' in req:
             notification = dodaj_harmonogram(nr_lotu=req['nr_flight'], linia_lotnicza=req['line'],
                                              start_lotnisko=req['from'], finish_lotnisko=req['to'],
                                              dzien_tygodnia=req['day'], start_godzina=req['time_start'],
                                              finish_godzina=req['time_finish'], cena_podstawowa=req['price'])
+        elif 'edit' in req:
+            notification = zmodyfikuj_harmonogram(nr_lotu=req['edit'], linia_lotnicza=req['line'],
+                                                  start_lotnisko=req['from'], finish_lotnisko=req['to'],
+                                                  dzien_tygodnia=req['day'], start_godzina=req['time_start'],
+                                                  finish_godzina=req['time_finish'], cena_podstawowa=req['price'])
         elif 'remove' in req:
             notification = usun_harmonogram(nr_lotu=req['remove'])
     linie = pokaz_linie()
@@ -46,6 +59,15 @@ def schedule():
     harmonogram = pokaz_harmonogram()
     return render_template("schedule.html", linie=linie, lotniska=lotniska, harmonogram=harmonogram, days=days_pl,
                            notification=notification)
+
+
+@app.route('/flights/<nr_lotu>', methods=["GET", "POST"])
+def flight(nr_lotu):
+    harm_note = pokaz_harmonogram(nr_lotu=nr_lotu)
+    if not harm_note:
+        abort(404)
+    realizacje = pokaz_realizacje_lotow(nr_lotu=nr_lotu)
+    return render_template("flights.html", realizacje=realizacje, harm_note=harm_note)
 
 
 @app.route('/lines', methods=['GET', 'POST'])
@@ -81,7 +103,7 @@ def line_name(line):
             notification = zmodyfikuj_samolot(nr_boczny=req['nr_boczny'], marka=req['marka'], model=req['model'],
                                               linia_nazwa=linia.nazwa, pojemnosc=req['pojemnosc'], zasieg=req['zasieg'])
         elif 'remove-samolot' in req:
-            notification = usun_samolot(nr_boczny=req['remove'])
+            notification = usun_samolot(nr_boczny=req['remove-samolot'])
         elif 'new-pilot' in req:
             notification = dodaj_pilota(imie=req['imie'], nazwisko=req['nazwisko'], linia_nazwa=linia.nazwa)
         elif 'edit-pilot' in req:
@@ -90,7 +112,9 @@ def line_name(line):
             notification = usun_pilota(id_pil=req['remove-pilot'])
     samoloty = pokaz_samoloty(linia=line)
     piloci = pokaz_pilotow(linia=line)
-    return render_template("line.html", linia=linia, samoloty=samoloty, piloci=piloci, notification=notification)
+    harmonogram = pokaz_harmonogram(linia_lotnicza=line)
+    return render_template("line.html", linia=linia, samoloty=samoloty, piloci=piloci, harmonogram=harmonogram,
+                           notification=notification)
 
 
 @app.route('/airports', methods=['GET', 'POST'])

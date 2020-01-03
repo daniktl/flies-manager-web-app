@@ -25,9 +25,11 @@
     </nav>
 
 
-    <button class="new-data new-btn" type="button" data-toggle="collapse" data-target="#collapseNewDataPlane"
-            aria-expanded="false" aria-controls="collapseNewDataPlane">
-    </button>
+    <div class="btn-div right">
+        <button class="png-btn new-btn" type="button" data-toggle="collapse" data-target="#collapseNewDataPlane"
+                aria-expanded="false" aria-controls="collapseNewDataPlane">
+        </button>
+    </div>
     <form method="post" class="collapse collapse-new" id="collapseNewDataPlane" enctype="multipart/form-data">
         <div class="card card-body">
             <div class="subsection-header">
@@ -156,9 +158,11 @@
 
     <hr style="margin: 50px 0">
 
-    <button class="new-data new-btn" type="button" data-toggle="collapse" data-target="#collapseNewDataPilot"
-            aria-expanded="false" aria-controls="collapseNewDataPilot">
-    </button>
+    <div class="btn-div right">
+        <button class="png-btn new-btn" type="button" data-toggle="collapse" data-target="#collapseNewDataPilot"
+                aria-expanded="false" aria-controls="collapseNewDataPilot">
+        </button>
+    </div>
     <form method="post" class="collapse collapse-new" id="collapseNewDataPilot" enctype="multipart/form-data">
         <div class="card card-body">
             <div class="subsection-header">
@@ -181,7 +185,6 @@
     </form>
 
     <div class="subsection-header">Piloci</div>
-
 
     {% if not piloci %}
         <div class="no-content"></div>
@@ -288,6 +291,71 @@
                 </div>
             </div>
         {% endfor %}
+    {% endif %}
+
+    <hr style="margin: 50px 0">
+
+    <div class="subsection-header">
+        Harmonogram lotów:
+    </div>
+    {% if not harmonogram %}
+        <div class="no-content"></div>
+    {% else %}
+        <table class="table table-sm table-hover">
+            <thead>
+            <tr>
+                <th>
+                    Numer
+                </th>
+                <th>
+                    Wylot
+                </th>
+                <th>
+                    Lądowanie
+                </th>
+                <th>
+                    Dzień tygodnia
+                </th>
+                <th>
+                    Godzina
+                </th>
+                <th>
+                    Czas podróży
+                </th>
+                <th>
+                    Cena
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for wpis in harmonogram %}
+                <tr>
+                    <th>
+                        <a href="{{ url_for("flight", nr_lotu=wpis.nr_lotu) }}">{{ wpis.nr_lotu }}</a>
+                    </th>
+                    <th>
+                        <a href="{{ url_for("airports") }}#{{ wpis.start_lotnisko_nazwa }}">{{ wpis.start_lotnisko_nazwa }}</a>
+                    </th>
+                    <th>
+                        <a href="{{ url_for("airports") }}#{{ wpis.finish_lotnisko_nazwa }}">{{ wpis.finish_lotnisko_nazwa }}</a>
+                    </th>
+                    <th>
+                        {{ wpis.get_dzien_tygodnia() }}
+                    </th>
+                    <th>
+                        {{ wpis.get_start_godzina() }}
+                    </th>
+                    <th>
+                        {{ wpis.get_finish_godzina() }}
+                    </th>
+                    <th>
+                        {{ wpis.cena_podstawowa }} zł
+                    </th>
+                </tr>
+            {% endfor %}
+            </tbody>
+
+        </table>
     {% endif %}
 
 {% endblock %}

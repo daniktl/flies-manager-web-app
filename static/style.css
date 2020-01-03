@@ -39,7 +39,7 @@ html {
 }
 
 .navlink.logout {
-    color: coral!important;
+    color: coral !important;
 }
 
 .nav-item + .nav-item {
@@ -52,15 +52,15 @@ html {
 }
 
 .nav-item:hover {
-    background-color: #cdcdcd;
+    background-color: #dcdcdc;
 }
 
 .navbar {
-    padding: 0!important;
+    padding: 0 !important;
 }
 
 .navbar-collapse {
-    margin: 0!important;
+    margin: 0 !important;
 }
 
 .header {
@@ -261,8 +261,8 @@ html {
 .login-body.hidden {
     height: 0;
     overflow: hidden;
-    margin: 0!important;
-    padding: 0!important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 .login-body.signin {
@@ -287,18 +287,30 @@ html {
     text-decoration: none !important;
 }
 
-
-.new-btn {
+.btn-div.right {
     float: right;
     margin-top: 10px;
+    white-space: nowrap;
+}
+
+.png-btn {
     background-color: transparent;
-    background-image: url("/static/new.png");
-    border: 0!important;
-    outline: none!important;
+    border: 0 !important;
+    outline: none !important;
     width: 35px;
     height: 35px;
     background-size: cover;
     cursor: pointer;
+    display: inline;
+}
+
+.png-btn + .png-btn {
+    margin-left: 15px;
+}
+
+
+.new-btn {
+    background-image: url("/static/new.png");
 }
 
 .new-btn.large {
@@ -306,8 +318,43 @@ html {
     height: 45px;
 }
 
+.update-btn {
+    background-image: url("/static/update.png");
+}
+
 .collapse-new {
     /*border-bottom: 1px grey solid;*/
     margin-bottom: 20px;
     padding-top: 10px;
+}
+
+.underlined {
+    text-decoration: underline;
+}
+
+.img-status {
+    width: 30px;
+    height: 30px;
+    display: inline-block;
+    background-size: cover;
+    padding: 0;
+    filter: opacity(30%);
+}
+
+.img-status.plane {
+    background-image: url("/static/plane.png");
+
+}
+
+.img-status.active {
+    filter: none
+}
+
+.img-status.pilot {
+    background-image: url("/static/pilot.png");
+}
+
+
+.flight-status-div {
+    height: 35px;
 }

@@ -1,130 +1,124 @@
 {% extends 'base.html' %}
 
 {% block title %}
-Realizacje lotów
+    Realizacje lotów
 {% endblock %}
 
 {% block header %}
     <div class="container">
         <div class="header-text">
-            Realizacje lotów
+            Realizacje lotu
         </div>
     </div>
 
 {% endblock %}
 
 {% block content %}
-    <div class="section-header">
-        Loty sortowane wg czegoś tam:
-    </div>
-    <table class="table table-sm table-hover">
-        <thead>
-        <tr>
-            <th>
-                Numer
-            </th>
-            <th>
-                Wylot
-            </th>
-            <th>
-                Lądowanie
-            </th>
-            <th>
-                Data
-            </th>
-            <th>
-                Godzina
-            </th>
-            <th>
-                Trwanie
-            </th>
-            <th>
-                Przewożnik
-            </th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <th>
-                LOT1234
-            </th>
-            <th>
-                Poznań
-            </th>
-            <th>
-                Warszawa
-            </th>
-            <th>
-                1.11.2019
-            </th>
-            <th>
-                10:15
-            </th>
-            <th>
-                0:50
-            </th>
-            <th>
-                LOT
-            </th>
-            <th>
-                <button class="edit-button action-button"></button>
-            </th>
-        </tr>
-        <tr>
-            <th>
-                LOT1234
-            </th>
-            <th>
-                Poznań
-            </th>
-            <th>
-                Warszawa
-            </th>
-            <th>
-                8.11.2019
-            </th>
-            <th>
-                10:15
-            </th>
-            <th>
-                0:50
-            </th>
-            <th>
-                LOT
-            </th>
-            <th>
-                <button class="edit-button action-button"></button>
-            </th>
-        </tr>
-        <tr>
-            <th>
-                LOT1234
-            </th>
-            <th>
-                Poznań
-            </th>
-            <th>
-                Warszawa
-            </th>
-            <th>
-                15.11.2019
-            </th>
-            <th>
-                10:15
-            </th>
-            <th>
-                0:50
-            </th>
-            <th>
-                LOT
-            </th>
-            <th>
-                <button class="edit-button action-button"></button>
-            </th>
-        </tr>
-        </tbody>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Strona główna</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('flights') }}">Harmonogram</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ harm_note.nr_lotu }}</li>
+        </ol>
+    </nav>
 
-    </table>
+    <div class="btn-div right">
+        <button class="png-btn new-btn" type="button" data-toggle="collapse" data-target="#collapseNewData"
+                aria-expanded="false" aria-controls="collapseNewData">
+        </button>
+    </div>
+    <form method="post" class="collapse collapse-new" id="collapseNewData" enctype="multipart/form-data">
+        <div class="card card-body">
+            <div class="subsection-header">Nowa realizacja (ręczne dodawanie)</div>
+
+            Some fields
+            <button type="submit" class="btn btn-primary btn-block" name="new">Dodaj</button>
+        </div>
+    </form>
+
+    <div class="subsection-header">
+        Realizacje lotu <span class="underlined">{{ harm_note.nr_lotu }}</span>:
+    </div>
+    {% if not realizacje %}
+        <div class="no-content"></div>
+    {% else %}
+        <table class="table table-sm table-hover">
+            <thead>
+            <tr>
+                <th>
+                    ID
+                </th>
+                <th>
+                    Nr lotu
+                </th>
+                <th>
+                    Wylot
+                </th>
+                <th>
+                    Lądowanie
+                </th>
+                <th>
+                    Data
+                </th>
+                <th>
+                    Godzina
+                </th>
+                <th>
+                    Trwanie
+                </th>
+                <th>
+                    Przewożnik
+                </th>
+                <th>
+                    Zasoby
+                </th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for note in realizacje %}
+                <tr>
+                    <th>
+                        {{ note.id_rlotu }}
+                    </th>
+                    <th>
+                        {{ note.harmonogram.nr_lotu }}
+                    </th>
+                    <th>
+                        {{ note.harmonogram.start_lotnisko_nazwa }}
+                    </th>
+                    <th>
+                        {{ note.harmonogram.finish_lotnisko_nazwa }}
+                    </th>
+                    <th>
+                        {{ note.data }}
+                    </th>
+                    <th>
+                        {{ note.harmonogram.get_start_godzina() }}
+                    </th>
+                    <th>
+                        {{ note.harmonogram.get_finish_godzina() }}
+                    </th>
+                    <th>
+                        <a href="{{ url_for("line_name", line=harm_note.linia_lotnicza_nazwa) }}">{{ note.harmonogram.linia_lotnicza_nazwa }}</a>
+                    </th>
+                    <th>
+                        <div class="flight-status-div">
+                            <div class="img-status plane {% if note.samolot_nr_boczny %}active{% endif %}"></div>
+                            <div class="img-status pilot {% if note.pilot_id_pil1 %}active{% endif %}"></div>
+                            <div class="img-status pilot {% if note.pilot_id_pil2 %}active{% endif %}"></div>
+                        </div>
+
+                    </th>
+                    <th>
+                        <button class="edit-button action-button" data-toggle="modal"
+                                data-target="#modal-schedule-{{ note.id_rlotu }}"></button>
+                    </th>
+                </tr>
+            {% endfor %}
+            </tbody>
+
+        </table>
+    {% endif %}
 
 {% endblock %}

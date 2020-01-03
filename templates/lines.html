@@ -15,10 +15,11 @@
 
 {% block content %}
 
-
-    <button class="new-data new-btn" type="button" data-toggle="collapse" data-target="#collapseNewData"
-            aria-expanded="false" aria-controls="collapseNewData">
-    </button>
+    <div class="btn-div right">
+        <button class="png-btn new-btn" type="button" data-toggle="collapse" data-target="#collapseNewData"
+                aria-expanded="false" aria-controls="collapseNewData">
+        </button>
+    </div>
     <form method="post" class="collapse collapse-new" id="collapseNewData" enctype="multipart/form-data">
         <div class="card card-body">
             <div class="subsection-header">
@@ -81,7 +82,7 @@
                         {{ linia.liczba_samolotow() }}
                     </th>
                     <th>
-                        {{ linia.data_zalozenia }}
+                        {{ linia.get_data_zalozenia() }}
                     </th>
 
                     <th>
@@ -117,9 +118,9 @@
                                         <select id="kraj" class="form-control" name="kraj">
                                             {% for kraj in kraje %}
                                                 {% if kraj == linia.kraj %}
-                                                <option selected>{{ kraj }}</option>
+                                                    <option selected>{{ kraj }}</option>
                                                 {% else %}
-                                                <option>{{ kraj }}</option>
+                                                    <option>{{ kraj }}</option>
                                                 {% endif %}
                                             {% endfor %}
                                         </select>

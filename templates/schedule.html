@@ -15,9 +15,15 @@
 
 {% block content %}
 
-    <button class="new-data new-btn" type="button" data-toggle="collapse" data-target="#collapseNewData"
-            aria-expanded="false" aria-controls="collapseNewData">
-    </button>
+    <div class="btn-div right">
+        <form method="post" enctype="multipart/form-data" style="display: inline; margin-right: 15px">
+            <button class="update-btn png-btn" type="submit" name="update-all">
+            </button>
+        </form>
+        <button class="png-btn new-btn" type="button" data-toggle="collapse" data-target="#collapseNewData"
+                aria-expanded="false" aria-controls="collapseNewData">
+        </button>
+    </div>
     <form method="post" class="collapse collapse-new" id="collapseNewData" enctype="multipart/form-data">
         <div class="card card-body">
             <div class="subsection-header">Nowy wpis</div>
@@ -133,7 +139,7 @@
             {% for wpis in harmonogram %}
                 <tr>
                     <th>
-                        {{ wpis.nr_lotu }}
+                        <a href="{{ url_for("flight", nr_lotu=wpis.nr_lotu) }}">{{ wpis.nr_lotu }}</a>
                     </th>
                     <th>
                         <a href="{{ url_for("airports") }}#{{ wpis.start_lotnisko_nazwa }}">{{ wpis.start_lotnisko_nazwa }}</a>
@@ -172,14 +178,132 @@
                 <div class="modal-dialog modal-dialog-centered" role="document">
                     <form class="modal-content" method="post" enctype="multipart/form-data">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalCenterTitle">Zmień lot o
+                            <h5 class="modal-title" id="exampleModalCenterTitle">Zmień harmonogram o
                                 numerze {{ wpis.nr_lotu }}</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div class="modal-body">
-                            {# TODO #}
+                            <table class="table">
+                                <tbody>
+                                <tr>
+                                    <th>
+                                        <label for="edit-{{ wpis.nr_lotu }}-line">Linia lotnicza</label>
+                                    </th>
+                                    <th>
+                                        <select class="form-control" id="edit-{{ wpis.nr_lotu }}-line" name="line">
+                                            {% if linie %}
+                                                {% for linia in linie %}
+                                                    {% if linia.nazwa == wpis.linia_lotnicza_nazwa %}
+                                                        <option selected>
+                                                            {{ linia.nazwa }}
+                                                        </option>
+                                                    {% else %}
+                                                        <option>
+                                                            {{ linia.nazwa }}
+                                                        </option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% endif %}
+                                        </select>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <label for="edit-{{ wpis.nr_lotu }}-from">Skąd</label>
+                                    </th>
+                                    <th>
+                                        <select class="form-control" id="edit-{{ wpis.nr_lotu }}-from" name="from">
+                                            {% if lotniska %}
+                                                {% for lotnisko in lotniska %}
+                                                    {% if lotnisko.kod == wpis.start_lotnisko_nazwa %}
+                                                        <option selected
+                                                                value="{{ lotnisko.kod }}">{{ lotnisko.miasto }}
+                                                            ({{ lotnisko.kod }})
+                                                        </option>
+                                                    {% else %}
+                                                        <option value="{{ lotnisko.kod }}">{{ lotnisko.miasto }}
+                                                            ({{ lotnisko.kod }})
+                                                        </option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% endif %}
+                                        </select>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <label for="edit-{{ wpis.nr_lotu }}-to">Dokąd</label>
+                                    </th>
+                                    <th>
+                                        <select class="form-control" id="edit-{{ wpis.nr_lotu }}-to" name="to">
+                                            {% if lotniska %}
+                                                {% for lotnisko in lotniska %}
+                                                    {% if lotnisko.kod == wpis.finish_lotnisko_nazwa %}
+                                                        <option selected
+                                                                value="{{ lotnisko.kod }}">{{ lotnisko.miasto }}
+                                                            ({{ lotnisko.kod }})
+                                                        </option>
+                                                    {% else %}
+                                                        <option value="{{ lotnisko.kod }}">{{ lotnisko.miasto }}
+                                                            ({{ lotnisko.kod }})
+                                                        </option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% endif %}
+                                        </select>
+                                    </th>
+
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <label for="edit-{{ wpis.nr_lotu }}-day">Dzień tygodnia</label>
+                                    </th>
+                                    <th>
+                                        <select id="edit-{{ wpis.nr_lotu }}-day" name="day" class="form-control">
+                                            {% for day in days %}
+                                                {% if day == wpis.dzien_tygodnia %}
+                                                    <option selected value="{{ day }}">{{ days[day] }}</option>
+                                                {% else %}
+                                                    <option value="{{ day }}">{{ days[day] }}</option>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </select>
+                                    </th>
+                                </tr>
+
+                                <tr>
+                                    <th>
+                                        <label for="edit-{{ wpis.nr_lotu }}-time_start">Godzina wylotu</label>
+                                    </th>
+                                    <th>
+                                        <input type="time" class="form-control" id="edit-{{ wpis.nr_lotu }}-time_start"
+                                               name="time_start"
+                                               value={{ wpis.start_godzina }}>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <label for="edit-{{ wpis.nr_lotu }}-time_finish">Godzina lądowania</label>
+                                    </th>
+                                    <th>
+                                        <input type="time" class="form-control" id="edit-{{ wpis.nr_lotu }}-time_finish"
+                                               name="time_finish"
+                                               value={{ wpis.finish_godzina }}>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <label for="edit-{{ wpis.nr_lotu }}-price">Cena podstawowa</label>
+                                    </th>
+                                    <th>
+                                        <input type="number" class="form-control" id="edit-{{ wpis.nazwa }}-price"
+                                               name="price" value={{ wpis.cena_podstawowa }}>
+                                    </th>
+                                </tr>
+                                </tbody>
+                            </table>
                         </div>
                         <div class="modal-footer">
                             <button type="submit" class="btn btn-danger" name="remove" value="{{ wpis.nr_lotu }}">Usuń
