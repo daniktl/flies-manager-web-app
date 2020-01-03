@@ -32,3 +32,35 @@ function switchLogin() {
 for (let i=0; i< ls_login.length; i++){
     ls_login[i].addEventListener("click tap", switchLogin);
 }
+
+window.onload = function () {
+    let search_ls = document.getElementsByClassName("search-field");
+    for (let i = 0; i < search_ls.length; i++) {
+        let field = search_ls[i];
+        field.addEventListener('keyup',
+            function (e){
+                // if (e.keyCode === 13){
+                    filterTable(field);
+                // }
+            }
+        )
+
+    }
+};
+
+function filterTable(field) {
+    let table = document.getElementById(field.getAttribute("data-target"));
+    if (!table){
+        return 0;
+    }
+    let text = field.value.toLowerCase();
+    let children = table.children;
+    for (let i=0; i < children.length; i++){
+
+        if (!children[i].children[0].textContent.toLowerCase().includes(text)){
+            children[i].style.display = 'none';
+        }else {
+            children[i].style.display = '';
+        }
+    }
+}

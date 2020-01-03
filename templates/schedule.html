@@ -106,6 +106,8 @@
 
     <div class="subsection-header">
         Aktualny harmonogram lotów:
+        <input class="form-control search-field" id="search-schedule" data-target="schedule-table"
+               placeholder="Wpisz numer lotu żeby filtrować">
     </div>
     {% if not harmonogram %}
         <div class="no-content"></div>
@@ -143,7 +145,7 @@
                 <th></th>
             </tr>
             </thead>
-            <tbody>
+            <tbody id="schedule-table">
             {% for wpis in harmonogram %}
                 <tr>
                     <th>
@@ -299,9 +301,15 @@
                                         <label for="edit-{{ wpis.nr_lotu }}-duration">Czas trwania</label>
                                     </th>
                                     <th>
-                                        <input type="time" class="form-control" id="edit-{{ wpis.nr_lotu }}-duration"
-                                               name="czas_trwania"
-                                               value={{ wpis.czas_trwania }}>
+                                        <div class="input-group mb-3">
+                                            <input type="number" class="form-control"
+                                                   id="edit-{{ wpis.nr_lotu }}-duration"
+                                                   name="czas_trwania"
+                                                   value={{ wpis.czas_trwania }}>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text">min</span>
+                                            </div>
+                                        </div>
                                     </th>
                                 </tr>
                                 <tr>
@@ -309,8 +317,13 @@
                                         <label for="edit-{{ wpis.nr_lotu }}-price">Cena podstawowa</label>
                                     </th>
                                     <th>
+                                        <div class="input-group mb-3">
                                         <input type="number" class="form-control" id="edit-{{ wpis.nazwa }}-price"
                                                name="price" value={{ wpis.cena_podstawowa }}>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text">zł</span>
+                                            </div>
+                                        </div>
                                     </th>
                                 </tr>
                                 </tbody>
