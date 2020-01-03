@@ -79,7 +79,7 @@
             {% for note in realizacje %}
                 <tr>
                     <th>
-                        {{ note.id_rlotu }}
+                        {{ note.id_rlotu }} {% if not note.samolot_nr_boczny or not note.pilot_id_pil1 or not note.pilot_id_pil2 %}<span class="badge badge-danger badge-pill">!</span>{% endif %}
                     </th>
                     <th>
                         {{ note.harmonogram.nr_lotu }}
