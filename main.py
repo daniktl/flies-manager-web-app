@@ -66,8 +66,17 @@ def flight(nr_lotu):
     harm_note = pokaz_harmonogram(nr_lotu=nr_lotu)
     if not harm_note:
         abort(404)
+    notification = None
+    if request.method == "POST":
+        req = request.values.to_dict()
+        if 'edit' in req:
+            notification = zmodyfikuj_realizacje_lotu(id_rlotu=req['edit'], new_samolot=req['samolot'],
+                                                      new_pilot1=req['pilot-1'], new_pilot2=req['pilot-2'])
     realizacje = pokaz_realizacje_lotow(nr_lotu=nr_lotu)
-    return render_template("flights.html", realizacje=realizacje, harm_note=harm_note)
+    samoloty = pokaz_samoloty(linia=harm_note.linia_lotnicza_nazwa)
+    piloci = pokaz_pilotow(linia=harm_note.linia_lotnicza_nazwa)
+    return render_template("flights.html", notification=notification, realizacje=realizacje, harm_note=harm_note,
+                           samoloty=samoloty, piloci=piloci)
 
 
 @app.route('/lines', methods=['GET', 'POST'])

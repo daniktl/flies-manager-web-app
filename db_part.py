@@ -40,6 +40,8 @@ db = SQLAlchemy(app)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
+WEEKS_TO_SCHEDULE = 20
+
 
 def check_empty(x):
     if isinstance(x, list):
@@ -246,10 +248,10 @@ class RealizacjaLotu(db.Model):
     samolot_nr_boczny = Column('samolot_nr_boczny', String(10), ForeignKey(Samolot.nr_boczny))
     samolot = relationship('Samolot')
 
-    pilot_id_pil1 = Column("pilot_id_pil1", ForeignKey(Pilot.id_pil))
+    pilot_id_pil1 = Column("pilot_id_pil1", Integer, ForeignKey(Pilot.id_pil))
     pilot1 = relationship("Pilot", foreign_keys=[pilot_id_pil1])
 
-    pilot_id_pil2 = Column("pilot_id_pil2", ForeignKey(Pilot.id_pil))
+    pilot_id_pil2 = Column("pilot_id_pil2", Integer, ForeignKey(Pilot.id_pil))
     pilot2 = relationship("Pilot", foreign_keys=[pilot_id_pil2], backref=backref("pilot_id_pil2"))
 
 
@@ -753,24 +755,49 @@ def usun_realizacje_lotu(data, numer):
             return ["success", f"Lot o numerze {numer} w dniu {data} został usunięty"]
 
 
-def zmodyfikuj_realizacje_lotu(data, numer, new_samolot, new_pilot1, new_pilot2):
-    if check_empty([new_samolot, new_pilot1, new_pilot2]):
-        return ["danger", "Wszystkie atrybuty są obowiązkowe"]
-    if not (new_pilot1.isnumeric() and new_pilot2.isnumeric()):
-        return ["danger", "Podano zły identyfikator pilota"]
+def zmodyfikuj_realizacje_lotu(id_rlotu, new_samolot, new_pilot1, new_pilot2):
+    if new_pilot1 == new_pilot2 and new_pilot1 != '':
+        return ['danger', "Piloci 1 i 2 nie mogą być tym samym pilotem"]
     with session_handler() as db_session:
-        realizacja = db_session.query(RealizacjaLotu).filter(RealizacjaLotu.data == data and
-                                                             RealizacjaLotu.harmonogram_nr_lotu == numer).first()
+        realizacja = db_session.query(RealizacjaLotu).filter(RealizacjaLotu.id_rlotu == id_rlotu).first()
         if not realizacja:
-            return ["danger", f"Brak realizacji lotu {numer} w dniu {data}"]
-        realizacja.samolot_nr_boczny = new_samolot
-        realizacja.pilot_id_pil1 = new_pilot1
-        realizacja.pilot_id_pil2 = new_pilot2
+            return ["danger", f"Brak realizacji lotu o id {id_rlotu}"]
+        for pil in [new_pilot1, new_pilot2]:
+            if pil == '':
+                continue
+            pil_tmp = db_session.query(Pilot).filter(Pilot.id_pil == pil).first()
+            if pil_tmp:
+                realizacje_pilot_tmp = db_session.query(RealizacjaLotu).filter(
+                    RealizacjaLotu.data == realizacja.data and
+                    RealizacjaLotu.id_rlotu != realizacja.id_rlotu and
+                    (RealizacjaLotu.pilot_id_pil1 == pil or RealizacjaLotu.pilot_id_pil2 == pil)).first()
+                if not realizacje_pilot_tmp:
+                    return ['danger',
+                            f"Pilot {pil_tmp.imie} {pil_tmp.nazwisko} jest już zajęty w tym dniu i nie może latać więcej niż raz w tym samym dniu"]
+
+        samolot = db_session.query(Samolot).filter(Samolot.nr_boczny == new_samolot).first()
+        if samolot:
+            samolot_zajety = db_session.query(RealizacjaLotu).filter(RealizacjaLotu.samolot_nr_boczny,
+                                                                     RealizacjaLotu.id_rlotu != realizacja.id_rlotu,
+                                                                     RealizacjaLotu.data == realizacja.data).first()
+            if samolot_zajety:
+                return ['danger',
+                        f"Samolot o numerze bocznym {samolot.nr_boczny} jest zejęty w dniu {realizacja.data}. Nie można wykorzystywać ten sam samolot więcej niż raz w tym samym dniu"]
+        if new_samolot != '':
+            realizacja.samolot_nr_boczny = new_samolot
+        else:
+            realizacja.samolot_nr_boczny = None
+        if new_pilot1 != "":
+            realizacja.pilot_id_pil1 = new_pilot1
+        else:
+            realizacja.pilot_id_pil1 = None
+        if new_pilot2 != "":
+            realizacja.pilot_id_pil2 = new_pilot2
+        else:
+            realizacja.pilot_id_pil2 = None
         db_session.commit()
-        return ['success', f"Realizacja lotu o numerze {numer} w dniu {data} została zmodyfikowana"]
-
-
-WEEKS_TO_SCHEDULE = 20
+        return ['success',
+                f"Realizacja lotu o numerze {realizacja.harmonogram_nr_lotu} w dniu {realizacja.data} została zmodyfikowana"]
 
 
 def zauktualizuj_realizacje_lotow():
@@ -785,7 +812,8 @@ def zauktualizuj_realizacje_lotow():
                 if not ex_realizacje.filter(RealizacjaLotu.data == tmp).first():
                     new_note = RealizacjaLotu(data=tmp, ilosc_pasazerow=0, harmonogram_nr_lotu=harm_note.nr_lotu)
                     db_session.add(new_note)
-    return ['success', "Wszystkie brakujące realizacje lotów zostali wygenerowane. Uzupełnij ręcznie pilotów i samoloty"]
+    return ['success',
+            "Wszystkie brakujące realizacje lotów zostali wygenerowane. Uzupełnij ręcznie pilotów i samoloty"]
 
 
 db.create_all()

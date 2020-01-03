@@ -79,7 +79,9 @@
             {% for note in realizacje %}
                 <tr>
                     <th>
-                        {{ note.id_rlotu }} {% if not note.samolot_nr_boczny or not note.pilot_id_pil1 or not note.pilot_id_pil2 %}<span class="badge badge-danger badge-pill">!</span>{% endif %}
+                        {{ note.id_rlotu }}
+                        {% if not note.samolot_nr_boczny or not note.pilot_id_pil1 or not note.pilot_id_pil2 %}
+                            <span class="badge badge-danger badge-pill">!</span>{% endif %}
                     </th>
                     <th>
                         {{ note.harmonogram.nr_lotu }}
@@ -112,13 +114,118 @@
                     </th>
                     <th>
                         <button class="edit-button action-button" data-toggle="modal"
-                                data-target="#modal-schedule-{{ note.id_rlotu }}"></button>
+                                data-target="#modal-flights-{{ note.id_rlotu }}"></button>
                     </th>
                 </tr>
             {% endfor %}
             </tbody>
 
         </table>
+        {% for note in realizacje %}
+
+            <div class="modal fade" id="modal-flights-{{ note.id_rlotu }}" tabindex="-1" role="dialog"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <form class="modal-content" method="post" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalCenterTitle">Zmień lot o
+                                numerze {{ note.harmonodram_nr_lotu }} w dniu {{ note.data }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table">
+                                <tbody>
+                                <tr>
+                                    <th>
+                                        <label for="edit-{{ note.id_rlotu }}-plane">Samolot</label>
+                                    </th>
+                                    <th>
+                                        <select class="form-control" id="edit-{{ note.id_rlotu }}-plane" name="samolot">
+                                            <option></option>
+                                            {% if samoloty %}
+                                                {% for samolot in samoloty %}
+                                                    {% if note.samolot_nr_boczny == samolot.nr_boczny %}
+                                                        <option selected value="{{ samolot.nr_boczny }}">
+                                                            {{ samolot.nr_boczny }}
+                                                            ({{ samolot.marka }}-{{ samolot.model }})
+                                                        </option>
+                                                    {% else %}
+                                                        <option value="{{ samolot.nr_boczny }}">
+                                                            {{ samolot.nr_boczny }}
+                                                            ({{ samolot.marka }}-{{ samolot.model }})
+                                                        </option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% endif %}
+                                        </select>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <label for="edit-{{ note.id_rlotu }}-pilot-1">Pilot 1</label>
+                                    </th>
+                                    <th>
+                                        <select class="form-control" id="edit-{{ note.id_rlotu }}-pilot-1" name="pilot-1">
+                                        <option></option>
+                                            {% if piloci %}
+                                                {% for pilot in piloci %}
+                                                    {% if note.pilot_id_pil1 == pilot.id_pil %}
+                                                        <option selected value="{{ pilot.id_pil }}">
+                                                            {{ pilot.id_pil }} ({{ pilot.imie }}-{{ pilot.nazwisko }})
+                                                        </option>
+                                                    {% else %}
+                                                        <option value="{{ pilot.id_pil }}">
+                                                            {{ pilot.id_pil }} ({{ pilot.imie }}-{{ pilot.nazwisko }})
+                                                        </option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% endif %}
+                                        </select>
+                                    </th>
+                                </tr>
+
+                                <tr>
+                                    <th>
+                                        <label for="edit-{{ note.id_rlotu }}-pilot-2">Pilot 2</label>
+                                    </th>
+                                    <th>
+                                        <select class="form-control" id="edit-{{ note.id_rlotu }}-pilot-2" name="pilot-2">
+                                            <option></option>
+                                            {% if piloci %}
+                                                {% for pilot in piloci %}
+                                                    {% if note.pilot_id_pil2 == pilot.id_pil %}
+                                                        <option selected value="{{ pilot.id_pil }}">
+                                                            {{ pilot.id_pil }} ({{ pilot.imie }}-{{ pilot.nazwisko }})
+                                                        </option>
+                                                    {% else %}
+                                                        <option value="{{ pilot.id_pil }}">
+                                                            {{ pilot.id_pil }} ({{ pilot.imie }}-{{ pilot.nazwisko }})
+                                                        </option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% endif %}
+                                        </select>
+                                    </th>
+                                </tr>
+
+
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            {#                            <button type="submit" class="btn btn-danger" name="remove" value="{{ note.id_rlotu }}">Usuń#}
+                            {#                            </button>#}
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+                            <button type="submit" class="btn btn-primary" name="edit" value="{{ note.id_rlotu }}">
+                                Zapisz
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
     {% endif %}
 
 {% endblock %}
