@@ -81,8 +81,13 @@
                     <input type="time" class="form-control" id="time_start" name="time_start" value="10:00">
                 </div>
                 <div class="form-group col-md-6">
-                    <label for="time_finish">Godzina lądowania</label>
-                    <input type="time" class="form-control" id="time_finish" name="time_finish" value="11:00">
+                    <label for="duration">Gzas trwania</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control" id="duration" name="czas_trwania" placeholder="90">
+                        <div class="input-group-append">
+                            <span class="input-group-text">min</span>
+                        </div>
+                    </div>
                 </div>
             </div>
             <label for="price">Cena podstawowa</label>
@@ -121,10 +126,13 @@
                     Dzień tygodnia
                 </th>
                 <th>
-                    Godzina
+                    Start
                 </th>
                 <th>
                     Czas podróży
+                </th>
+                <th>
+                    Lądowanie
                 </th>
                 <th>
                     Cena
@@ -152,6 +160,9 @@
                     </th>
                     <th>
                         {{ wpis.get_start_godzina() }}
+                    </th>
+                    <th>
+                        {{ wpis.czas_trwania }} min
                     </th>
                     <th>
                         {{ wpis.get_finish_godzina() }}
@@ -285,12 +296,12 @@
                                 </tr>
                                 <tr>
                                     <th>
-                                        <label for="edit-{{ wpis.nr_lotu }}-time_finish">Godzina lądowania</label>
+                                        <label for="edit-{{ wpis.nr_lotu }}-duration">Czas trwania</label>
                                     </th>
                                     <th>
-                                        <input type="time" class="form-control" id="edit-{{ wpis.nr_lotu }}-time_finish"
-                                               name="time_finish"
-                                               value={{ wpis.finish_godzina }}>
+                                        <input type="time" class="form-control" id="edit-{{ wpis.nr_lotu }}-duration"
+                                               name="czas_trwania"
+                                               value={{ wpis.czas_trwania }}>
                                     </th>
                                 </tr>
                                 <tr>

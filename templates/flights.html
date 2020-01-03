@@ -67,6 +67,9 @@
                     Trwanie
                 </th>
                 <th>
+                    Lądowanie
+                </th>
+                <th>
                     Przewożnik
                 </th>
                 <th>
@@ -97,6 +100,9 @@
                     </th>
                     <th>
                         {{ note.harmonogram.get_start_godzina() }}
+                    </th>
+                    <th>
+                        {{ note.harmonogram.czas_trwania }} min
                     </th>
                     <th>
                         {{ note.harmonogram.get_finish_godzina() }}
@@ -167,8 +173,9 @@
                                         <label for="edit-{{ note.id_rlotu }}-pilot-1">Pilot 1</label>
                                     </th>
                                     <th>
-                                        <select class="form-control" id="edit-{{ note.id_rlotu }}-pilot-1" name="pilot-1">
-                                        <option></option>
+                                        <select class="form-control" id="edit-{{ note.id_rlotu }}-pilot-1"
+                                                name="pilot-1">
+                                            <option></option>
                                             {% if piloci %}
                                                 {% for pilot in piloci %}
                                                     {% if note.pilot_id_pil1 == pilot.id_pil %}
@@ -191,7 +198,8 @@
                                         <label for="edit-{{ note.id_rlotu }}-pilot-2">Pilot 2</label>
                                     </th>
                                     <th>
-                                        <select class="form-control" id="edit-{{ note.id_rlotu }}-pilot-2" name="pilot-2">
+                                        <select class="form-control" id="edit-{{ note.id_rlotu }}-pilot-2"
+                                                name="pilot-2">
                                             <option></option>
                                             {% if piloci %}
                                                 {% for pilot in piloci %}

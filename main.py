@@ -46,12 +46,12 @@ def flights():
             notification = dodaj_harmonogram(nr_lotu=req['nr_flight'], linia_lotnicza=req['line'],
                                              start_lotnisko=req['from'], finish_lotnisko=req['to'],
                                              dzien_tygodnia=req['day'], start_godzina=req['time_start'],
-                                             finish_godzina=req['time_finish'], cena_podstawowa=req['price'])
+                                             czas_trwania=req['czas_trwania'], cena_podstawowa=req['price'])
         elif 'edit' in req:
             notification = zmodyfikuj_harmonogram(nr_lotu=req['edit'], linia_lotnicza=req['line'],
                                                   start_lotnisko=req['from'], finish_lotnisko=req['to'],
                                                   dzien_tygodnia=req['day'], start_godzina=req['time_start'],
-                                                  finish_godzina=req['time_finish'], cena_podstawowa=req['price'])
+                                                  czas_trwania=req['czas_trwania'], cena_podstawowa=req['price'])
         elif 'remove' in req:
             notification = usun_harmonogram(nr_lotu=req['remove'])
     linie = pokaz_linie()

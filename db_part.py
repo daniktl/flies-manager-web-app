@@ -197,8 +197,8 @@ class Harmonogram(db.Model):
     nr_lotu = Column("nr_lotu", String(8), primary_key=True)
     dzien_tygodnia = Column("dzien_tygodnia", Integer, nullable=False)
     start_godzina = Column("start_godzina", Time, nullable=False)
-    # czas_trwania = Column("trwanie", Integer, nullable=False)
-    finish_godzina = Column("finish_godzina", Time, nullable=False)
+    czas_trwania = Column("trwanie", Integer, nullable=False)
+    # finish_godzina = Column("finish_godzina", Time, nullable=False)
     cena_podstawowa = Column("cena_podstawowa", Float(precision=2), nullable=False)
 
     start_lotnisko_nazwa = Column("start_lotnisko", ForeignKey(Lotnisko.kod), nullable=False)
@@ -220,7 +220,9 @@ class Harmonogram(db.Model):
         return datetime.time.strftime(self.start_godzina, "%H:%M")
 
     def get_finish_godzina(self):
-        return datetime.time.strftime(self.finish_godzina, "%H:%M")
+        return datetime.datetime.strftime(
+            datetime.datetime(100, 1, 1, self.start_godzina.hour, self.start_godzina.minute,
+                              self.start_godzina.second) + datetime.timedelta(minutes=self.czas_trwania), "%H:%M")
 
 
 class Podroz(db.Model):
@@ -527,20 +529,24 @@ def usun_lotnisko(kod):
 # ############# harmonogram
 
 def check_data_harmonogram(nr_lotu, linia_lotnicza, start_lotnisko, finish_lotnisko, dzien_tygodnia, start_godzina,
-                           finish_godzina, cena_podstawowa):
-    if check_empty([linia_lotnicza, start_lotnisko, finish_lotnisko, dzien_tygodnia, start_godzina, finish_godzina,
+                           czas_trwania, cena_podstawowa):
+    if check_empty([linia_lotnicza, start_lotnisko, finish_lotnisko, dzien_tygodnia, start_godzina, czas_trwania,
                     cena_podstawowa]):
         return ['danger', "Wszystkie pola są obowiązkowe"]
     if len(nr_lotu) != 8:
         return ["danger", "Długośc numeru lotu musi być równa 8"]
     if not isinstance(dzien_tygodnia, str) or not dzien_tygodnia.isnumeric() or int(dzien_tygodnia) not in range(7):
         return ['danger', "Niepoprawny dzień tygodnia"]
-    if not all([convert_time_front_back(x) for x in [start_godzina, finish_godzina]]):
+    if not all([convert_time_front_back(x) for x in [start_godzina]]):
         return ['danger', "Niepoprawny format godziny startu bądż lądowania"]
     try:
         float(cena_podstawowa)
     except ValueError:
         return ["danger", "Niepoprawny format ceny"]
+    try:
+        int(czas_trwania)
+    except ValueError:
+        return ['danger', "Niepoprawny czas trwania lotu (powinien być w minutach)"]
     if start_lotnisko == finish_lotnisko:
         return ['danger', "Lotnisko startu nie może być takie same jak lotnisko lądowania"]
 
@@ -555,16 +561,16 @@ def pokaz_harmonogram(linia_lotnicza=None, nr_lotu=None):
         else:
             # if it doesn't work - log into your root account on mysql and enter:
             #           SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
-            result = db_session.query(Harmonogram).group_by(Harmonogram.linia_lotnicza_nazwa).order_by(
+            result = db_session.query(Harmonogram).order_by(
                 Harmonogram.nr_lotu).all()
         return result
 
 
 def dodaj_harmonogram(nr_lotu, linia_lotnicza, start_lotnisko, finish_lotnisko, dzien_tygodnia, start_godzina,
-                      finish_godzina, cena_podstawowa):
+                      czas_trwania, cena_podstawowa):
     error = check_data_harmonogram(nr_lotu, linia_lotnicza, start_lotnisko, finish_lotnisko, dzien_tygodnia,
                                    start_godzina,
-                                   finish_godzina, cena_podstawowa)
+                                   czas_trwania, cena_podstawowa)
     if error:
         return error
     with session_handler() as db_session:
@@ -576,10 +582,8 @@ def dodaj_harmonogram(nr_lotu, linia_lotnicza, start_lotnisko, finish_lotnisko, 
         if not db_session.query(LiniaLotnicza).filter(LiniaLotnicza.nazwa == linia_lotnicza).first():
             return ["danger", f"Linia lotnicza o nazwie {linia_lotnicza} nie istnieje"]
         time_start = convert_time_front_back(start_godzina)
-        time_finish = convert_time_front_back(finish_godzina)
-
         new_harmonogram = Harmonogram(nr_lotu=nr_lotu, linia_lotnicza_nazwa=linia_lotnicza, start_godzina=time_start,
-                                      finish_godzina=time_finish, start_lotnisko_nazwa=start_lotnisko,
+                                      czas_trwania=int(czas_trwania), start_lotnisko_nazwa=start_lotnisko,
                                       dzien_tygodnia=int(dzien_tygodnia), finish_lotnisko_nazwa=finish_lotnisko,
                                       cena_podstawowa=float(cena_podstawowa))
         db_session.add(new_harmonogram)
@@ -598,10 +602,10 @@ def usun_harmonogram(nr_lotu):
 
 def zmodyfikuj_harmonogram(nr_lotu, linia_lotnicza, start_lotnisko, finish_lotnisko, dzien_tygodnia,
                            start_godzina,
-                           finish_godzina, cena_podstawowa):
+                           czas_trwania, cena_podstawowa):
     error = check_data_harmonogram(nr_lotu, linia_lotnicza, start_lotnisko, finish_lotnisko, dzien_tygodnia,
                                    start_godzina,
-                                   finish_godzina, cena_podstawowa)
+                                   czas_trwania, cena_podstawowa)
     if error:
         return error
     with session_handler() as db_session:
@@ -614,10 +618,10 @@ def zmodyfikuj_harmonogram(nr_lotu, linia_lotnicza, start_lotnisko, finish_lotni
         if not db_session.query(LiniaLotnicza).filter(LiniaLotnicza.nazwa == linia_lotnicza).first():
             return ["danger", f"Linia lotnicza o nazwie {linia_lotnicza} nie istnieje"]
         time_start = convert_time_front_back(start_godzina)
-        time_finish = convert_time_front_back(finish_godzina)
+        czas_trwania = int(czas_trwania)
         harm_note.linia_lotnicza_nazwa = linia_lotnicza
         harm_note.start_godzina = time_start
-        harm_note.finish_godzina = time_finish
+        harm_note.czas_trwania = czas_trwania
         harm_note.start_lotnisko_nazwa = start_lotnisko
         harm_note.finish_lotnisko_nazwa = finish_lotnisko
         harm_note.dzien_tygodnia = int(dzien_tygodnia)
@@ -777,7 +781,7 @@ def zmodyfikuj_realizacje_lotu(id_rlotu, new_samolot, new_pilot1, new_pilot2):
 
         samolot = db_session.query(Samolot).filter(Samolot.nr_boczny == new_samolot).first()
         if samolot:
-            samolot_zajety = db_session.query(RealizacjaLotu).filter(RealizacjaLotu.samolot_nr_boczny,
+            samolot_zajety = db_session.query(RealizacjaLotu).filter(RealizacjaLotu.samolot_nr_boczny == new_samolot,
                                                                      RealizacjaLotu.id_rlotu != realizacja.id_rlotu,
                                                                      RealizacjaLotu.data == realizacja.data).first()
             if samolot_zajety:
@@ -809,7 +813,7 @@ def zauktualizuj_realizacje_lotow():
             for week in range(WEEKS_TO_SCHEDULE):
                 tmp = datetime.datetime.now().date() + datetime.timedelta(
                     days=week * 7 - today_weekday + harm_note.dzien_tygodnia)
-                if not ex_realizacje.filter(RealizacjaLotu.data == tmp).first():
+                if not ex_realizacje.filter(RealizacjaLotu.data == tmp, RealizacjaLotu.harmonogram_nr_lotu == harm_note.nr_lotu).first():
                     new_note = RealizacjaLotu(data=tmp, ilosc_pasazerow=0, harmonogram_nr_lotu=harm_note.nr_lotu)
                     db_session.add(new_note)
     return ['success',
