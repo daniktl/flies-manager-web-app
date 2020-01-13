@@ -358,3 +358,105 @@ html {
 .flight-status-div {
     height: 35px;
 }
+
+
+.btn-collapse-result {
+    background-color: white;
+    height: 80px;
+    padding: 7px;
+    text-align: center;
+    font-size: 1.3rem;
+    outline: none!important;
+}
+
+.btn-collapse-result-content {
+    display: flex!important;
+    overflow-wrap: break-word;
+}
+
+.btn-collapse-result:focus {
+    outline: none!important;
+    box-shadow: none!important;
+}
+
+.btn-collapse-result-content .airline {
+    font-size: 1.7rem;
+    font-weight: 400;
+    flex: 0 1 25%;
+    line-height: 60px;
+}
+
+.btn-collapse-result-content .description {
+    flex: 0 1 75%;
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.btn-collapse-result-content .description .from, .btn-collapse-result-content .description .to {
+    flex: 0 1 30%;
+    flex-direction: column;
+}
+
+.btn-collapse-result-content .description .time {
+    font-size: 1.6rem;
+}
+
+.btn-collapse-result-content .description .arrow {
+    flex: 0 1 40%;
+}
+
+
+
+.btn-collapse-result-content .description .arrow .line {
+    position: relative;
+    height: 2px;
+    width: 80%;
+    margin: 0 10%;
+    background-color: #2f2f2f;
+    margin-top: 30px;
+}
+
+.btn-collapse-result:hover,.btn-collapse-result[aria-expanded="true"]  {
+    background-color: #e1e1e1;
+}
+
+.card + .card {
+    margin-top: 20px;
+}
+
+.collapse-result button {
+    float: right;
+    margin-bottom: 15px;
+}
+
+.collapse-result .card-body .level-splitted {
+    padding: 15px;
+    display: flex;
+    font-size: 1.4rem;
+}
+
+.collapse-result .card-body .left-part {
+    flex: 0 1 70px;
+    padding-right: 20px;
+}
+
+.collapse-result .card-body .left-part div {
+    text-align: right;
+    font-weight: 700;
+}
+
+
+.collapse-result .card-body .middle-part {
+    flex: 0 1 auto;
+}
+
+.collapse-result .card-body .shift {
+    width: 100%;
+    text-align: center;
+    font-weight: 300;
+}
+
+.collapse-result .card-body .smaller-decription {
+    font-size: 1rem;
+    font-weight: 500;
+}

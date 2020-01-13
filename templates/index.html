@@ -21,7 +21,6 @@
                     <input type="text" class="form-control" name="to">
                 </div>
 
-
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
                         <span class="input-group-text">Wylot</span>
@@ -29,14 +28,18 @@
                     <input type="date" class="form-control" name="go-date">
                 </div>
 
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">Powrót</span>
-                    </div>
-                    <input type="date" class="form-control" name="return-date">
-                </div>
+{#                <div class="input-group mb-3">#}
+{#                    <div class="input-group-prepend">#}
+{#                        <span class="input-group-text">Powrót</span>#}
+{#                    </div>#}
+{#                    <input type="date" class="form-control" name="return-date">#}
+{#                </div>#}
 
                 <button type="submit" class="btn btn-primary" name="find">Szukaj</button>
+{#                <div style="display: inline-block; margin-left: 15px">#}
+{#                    <input type="checkbox" id="one-way" name="one-way">#}
+{#                    <label for="one-way">W jedną stronę</label>#}
+{#                </div>#}
             </form>
         </div>
     </div>
@@ -44,40 +47,140 @@
 {% endblock %}
 
 {% block content %}
-    <div class="index-info-group">
-        <div class="index-info">
-            <img src="{{ url_for("static", filename="travel.png") }}" class="logo">
-            <div class="index-info-header">
-                Wszędzie
+
+    <div class="section-header">Wyniki wyszukiwań</div>
+
+    <div class="accordion" id="accordionExample">
+        <div class="card shadow">
+
+            <button class="btn btn-block btn-collapse-result" type="button" data-toggle="collapse"
+                    data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                <div class="btn-collapse-result-content">
+                    <div class="airline">
+                        LOT
+                    </div>
+                    <div class="description">
+                        <div class="from">
+                            <div class="time">9:45</div>
+                            PZN
+                        </div>
+                        <div class="arrow">
+                            <div class="line"></div>
+                            1 przesiadka
+                        </div>
+                        <div class="to">
+                            <div class="time">11:45</div>
+                            WAW
+                        </div>
+                    </div>
+                </div>
+            </button>
+
+
+            <div id="collapseOne" class="collapse show collapse-result" aria-labelledby="headingOne"
+                 data-parent="#accordionExample">
+                <div class="card-body">
+                    <div class="level-splitted">
+                        <div class="left-part">
+                            <div>Z</div>
+                            <div>Do</div>
+                        </div>
+                        <div class="middle-part">
+                            <div>09:30 Poznan (PZN)</div>
+                            <div>11:45 Warszawa Chopin (WAW)</div>
+                        </div>
+                    </div>
+                    <div class="shift">przesiadka</div>
+                    <div class="level-splitted">
+                        <div class="left-part">
+                            <div>Z</div>
+                            <div>Do</div>
+                        </div>
+                        <div class="middle-part">
+                            <div>09:30 Poznan (PZN)</div>
+                            <div>11:45 Warszawa Chopin (WAW)</div>
+                        </div>
+                    </div>
+                    <div class="smaller-decription">
+                        LOT12345
+                        <button class="btn btn-primary">Wybierz</button>
+                    </div>
+
+                </div>
             </div>
         </div>
-
-
-        To Twój świat, a z nami go odkryjesz. Znajdź najlepsze ceny wśród milionów lotów, hoteli i wypożyczalni
-        samochodów, aby zaplanować idealną podróż.
-
-    </div>
-
-    <div class="index-info-group">
-        <div class="index-info">
-            <img src="{{ url_for("static", filename="travel2.jpg") }}" class="logo">
-            <div class="index-info-header">
-                Prosto
+        <div class="card shadow">
+            <button class="btn btn-block btn-collapse-result" type="button" data-toggle="collapse"
+                    data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                The second flight
+            </button>
+            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+                <div class="card-body">
+                    Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3
+                    wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum
+                    eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla
+                    assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt
+                    sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer
+                    farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus
+                    labore sustainable VHS.
+                </div>
             </div>
         </div>
-        Żadnych ukrytych opłat. Żadnych nieczystych zagrań. Z nami zawsze wiesz, dokąd trafiają Twoje pieniądze.
-        Zrelaksuj się, zanim zaczniesz urlop.
-    </div>
-    <div class="index-info-group">
-        <div class="index-info">
-            <img src="{{ url_for("static", filename="travel3.jpg") }}" class="logo">
-            <div class="index-info-header">
-                Podróżuj po swojemu
+        <div class="card shadow">
+            <button class="btn btn-block btn-collapse-result" type="button" data-toggle="collapse"
+                    data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                The third flight
+            </button>
+            <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+                <div class="card-body">
+                    Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3
+                    wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum
+                    eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla
+                    assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt
+                    sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer
+                    farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus
+                    labore sustainable VHS.
+                </div>
             </div>
         </div>
-        Wiesz, dokąd chcesz się udać? Sprawdź, kiedy najlepiej dokonać rezerwacji. Masz więcej czasu? Znajdź okazje
-        na
-        krótkie wypady i niesamowite przygody
     </div>
+    {% if result %}
+
+    {% endif %}
+    {#    <div class="index-info-group">#}
+    {#        <div class="index-info">#}
+    {#            <img src="{{ url_for("static", filename="travel.png") }}" class="logo">#}
+    {#            <div class="index-info-header">#}
+    {#                Wszędzie#}
+    {#            </div>#}
+    {#        </div>#}
+    {##}
+    {##}
+    {#        To Twój świat, a z nami go odkryjesz. Znajdź najlepsze ceny wśród milionów lotów, hoteli i wypożyczalni#}
+    {#        samochodów, aby zaplanować idealną podróż.#}
+    {##}
+    {#    </div>#}
+    {##}
+    {#    <div class="index-info-group">#}
+    {#        <div class="index-info">#}
+    {#            <img src="{{ url_for("static", filename="travel2.jpg") }}" class="logo">#}
+    {#            <div class="index-info-header">#}
+    {#                Prosto#}
+    {#            </div>#}
+    {#        </div>#}
+    {#        Żadnych ukrytych opłat. Żadnych nieczystych zagrań. Z nami zawsze wiesz, dokąd trafiają Twoje pieniądze.#}
+    {#        Zrelaksuj się, zanim zaczniesz urlop.#}
+    {#    </div>#}
+    {#    <div class="index-info-group">#}
+    {#        <div class="index-info">#}
+    {#            <img src="{{ url_for("static", filename="travel3.jpg") }}" class="logo">#}
+    {#            <div class="index-info-header">#}
+    {#                Podróżuj po swojemu#}
+    {#            </div>#}
+    {#        </div>#}
+    {#        Wiesz, dokąd chcesz się udać? Sprawdź, kiedy najlepiej dokonać rezerwacji. Masz więcej czasu? Znajdź okazje#}
+    {#        na#}
+    {#        krótkie wypady i niesamowite przygody#}
+    {#    </div>#}
 
 {% endblock %}
