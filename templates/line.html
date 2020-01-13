@@ -37,30 +37,40 @@
             </div>
             <div class="form-row">
                 <div class="form-group col-md-6">
-                    <label for="from">Number boczny</label>
+                    <label for="nr_boczny">Number boczny</label>
                     <input type="text" class="form-control" id="nr_boczny" name="nr_boczny" placeholder="XXX1234">
                 </div>
                 <div class="form-group col-md-6">
-                    <label for="from">Maksymalny zasięg (km)</label>
-                    <input type="number" class="form-control" id="zasieg" name="zasieg" placeholder="1200">
+                    <label for="zasieg">Maksymalny zasięg</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control" id="zasieg" name="zasieg" placeholder="1200">
+                        <div class="input-group-append">
+                            <span class="input-group-text">km</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group col-md-6">
-                    <label for="from">Marka</label>
+                    <label for="marka">Marka</label>
                     <input type="text" class="form-control" id="marka" name="marka" placeholder="TU">
                 </div>
                 <div class="form-group col-md-6">
-                    <label for="from">Model</label>
+                    <label for="model">Model</label>
                     <input type="text" class="form-control" id="model" name="model" placeholder="104">
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group col-md-12">
-                    <label for="from">Pojemność (osób)</label>
-                    <input type="number" class="form-control" id="pojemnosc" name="pojemnosc" placeholder="100">
+                    <label for="pojemnosc">Pojemność</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control" id="pojemnosc" name="pojemnosc" placeholder="100">
+                        <div class="input-group-append">
+                            <span class="input-group-text">osób</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -139,7 +149,60 @@
                             </button>
                         </div>
                         <div class="modal-body">
-                            ...
+                            <table class="table">
+                                <tbody>
+                                <tr>
+                                    <th>
+                                        <label for="edit-{{ samolot.nr_boczny }}-marka">Marka</label>
+                                    </th>
+                                    <th>
+                                        <input class="form-control" type="text" name="marka"
+                                               id="edit-{{ samolot.nr_boczny }}-marka"
+                                               value="{{ samolot.marka }}">
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <label for="edit-{{ samolot.nr_boczny }}-model">Model</label>
+                                    </th>
+                                    <th>
+                                        <input class="form-control" type="text" name="model"
+                                               id="edit-{{ samolot.nr_boczny }}-model"
+                                               value="{{ samolot.model }}">
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <label for="edit-{{ samolot.nr_boczny }}-pojemnosc">Pojemność</label>
+                                    </th>
+                                    <th>
+                                        <div class="input-group mb-3">
+                                            <input class="form-control" type="number" name="pojemnosc"
+                                                   id="edit-{{ samolot.nr_boczny }}-pojemnosc"
+                                                   value="{{ samolot.pojemnosc }}">
+                                            <div class="input-group-append">
+                                                <span class="input-group-text">osób</span>
+                                            </div>
+                                        </div>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <label for="edit-{{ samolot.nr_boczny }}-zasieg">Zasięg</label>
+                                    </th>
+                                    <th>
+                                        <div class="input-group mb-3">
+                                            <input class="form-control" type="number" name="zasieg"
+                                                   id="edit-{{ samolot.nr_boczny }}-zasieg"
+                                                   value="{{ samolot.max_zasieg }}">
+                                            <div class="input-group-append">
+                                                <span class="input-group-text">km</span>
+                                            </div>
+                                        </div>
+                                    </th>
+                                </tr>
+                                </tbody>
+                            </table>
                         </div>
                         <div class="modal-footer">
                             <button type="submit" class="btn btn-danger" name="remove-samolot"
@@ -222,7 +285,7 @@
                         {{ pilot.nazwisko }}
                     </th>
                     <th>
-                        {{ pilot.data_dolaczenia }}
+                        {{ pilot.get_data_dolaczenia() }}
                     </th>
 
 

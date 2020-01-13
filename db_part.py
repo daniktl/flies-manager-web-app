@@ -182,6 +182,9 @@ class Pilot(db.Model):
     realizacja1 = relationship("RealizacjaLotu", foreign_keys="[RealizacjaLotu.pilot_id_pil1]", cascade="all")
     realizacja2 = relationship("RealizacjaLotu", foreign_keys="[RealizacjaLotu.pilot_id_pil2]", cascade="all")
 
+    def get_data_dolaczenia(self):
+        return self.data_dolaczenia.date()
+
 
 class Lotnisko(db.Model):
     __tablename__ = 'lotnisko'
@@ -307,12 +310,13 @@ def convert_time_front_back(time_str):
 #         return liczba
 
 
-def check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc):
+def check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, for_edit=False):
     with session_handler() as db_session:
-        samolot = db_session.query(Samolot).filter(Samolot.nr_boczny == nr_boczny).first()
-        if samolot:
-            return ['danger',
-                    f"Samolot z numerem bocznym {nr_boczny} już istnieje ({samolot.linia_lotnicza_nazwa})"]
+        if not for_edit:
+            samolot = db_session.query(Samolot).filter(Samolot.nr_boczny == nr_boczny).first()
+            if samolot:
+                return ['danger',
+                        f"Samolot z numerem bocznym {nr_boczny} już istnieje ({samolot.linia_lotnicza_nazwa})"]
         if len(marka) > 15 or len(model) > 15:
             return ['danger', "Długość atrybutów marka i model powinna być nie większa niż 15"]
         if not pokaz_linie(linia_nazwa):
@@ -340,7 +344,7 @@ def dodaj_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, zasieg=None):
 
 
 def zmodyfikuj_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, zasieg=None):
-    error = check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc)
+    error = check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, for_edit=True)
     if error:
         return error
     with session_handler() as db_session:
@@ -685,6 +689,24 @@ def usun_user(user_id):
             surname = user.nazwisko
             db_session.delete(user)
             return ["success", f"Użytkownik {name} {surname} został usunięty"]
+
+
+def zmodyfikuj_user(user_id, imie, nazwisko, email, new_password, new_r_password, typ):
+    if check_empty([user_id, imie, nazwisko, email, typ]):
+        return ['danger', "Wypełnij wszystkie obowiązkowe pole"]
+    with session_handler() as db_session:
+        ex_user = db_session.query(User).filter(User.user_id == user_id).first()
+        if not ex_user:
+            return ['danger', f"Użytkownik o id {user_id} nie istnieje"]
+        if new_password != "" and new_password == new_r_password:
+            if not re.search(r'\d', new_password) or not re.search(r'[A-Z]', new_password) or not re.search(r'[a-z]', new_password):
+                return ["danger", "Hasło jest bardzo słabe. Musi zawierać conajmniej 1 liczbę, co najmniej 1 dużą literę i co najmniej jedbą małą"]
+            ex_user.haslo = bcrypt.encrypt(new_password)
+        ex_user.imie = imie
+        ex_user.nazwisko = nazwisko
+        ex_user.email = email
+        ex_user.typ = typ
+        return ['success', f"Dane użytkownika {imie} {nazwisko} zostały zmodyfikowane"]
 
 
 def check_user_credentials(email, password):

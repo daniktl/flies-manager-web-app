@@ -24,17 +24,6 @@ def index():
     return render_template("index.html")
 
 
-# @app.route('/flights', methods=['GET', 'POST'])
-# def flights():
-#     notification = None
-#     if request.method == "POST":
-#         req = request.values.to_dict()
-#         if 'update-all' in req:
-#             notification = zauktualizuj_realizacje_lotow()
-#     realizacje = pokaz_realizacje_lotow()
-#     return render_template("flights.html", notification=notification, realizacje=realizacje)
-
-
 @app.route('/flights', methods=['GET', 'POST'])
 def flights():
     notification = None
@@ -109,7 +98,7 @@ def line_name(line):
                                          linia_nazwa=linia.nazwa, pojemnosc=req['pojemnosc'],
                                          zasieg=req['zasieg'])
         elif 'edit-samolot' in req:
-            notification = zmodyfikuj_samolot(nr_boczny=req['nr_boczny'], marka=req['marka'], model=req['model'],
+            notification = zmodyfikuj_samolot(nr_boczny=req['edit-samolot'], marka=req['marka'], model=req['model'],
                                               linia_nazwa=linia.nazwa, pojemnosc=req['pojemnosc'], zasieg=req['zasieg'])
         elif 'remove-samolot' in req:
             notification = usun_samolot(nr_boczny=req['remove-samolot'])
@@ -135,7 +124,7 @@ def airports():
             notification = dodaj_lotnisko(kod=req['code'], kraj=req['country'],
                                           miasto=req['city'], m_na_mapie=req['map'], strefa_czasowa=req['timezone'])
         elif 'edit' in req:
-            notification = zmodyfikuj_lotnisko(kod=req['edit'], nowy_kod=req['code'], kraj=req['country'],
+            notification = zmodyfikuj_lotnisko(kod=req['edit'], nowy_kod=req['edit'], kraj=req['country'],
                                                miasto=req['city'], m_na_mapie=req['map'],
                                                strefa_czasowa=req['timezone'])
         elif 'remove' in req:
@@ -159,6 +148,10 @@ def admin():
             notification = dodaj_user(email=req['email'], password=req['password'],
                                       password_repeat=req['password-repeat'], imie=req['name'], nazwisko=req['surname'],
                                       u_type=req['type'])
+        elif 'edit' in req:
+            notification = zmodyfikuj_user(user_id=req['edit'], imie=req['name'], nazwisko=req['surname'],
+                                           email=req['email'], new_password=req['password'],
+                                           new_r_password=req['password-repeat'], typ=req['u_type'])
         elif 'remove' in req:
             notification = usun_user(user_id=req['remove'])
     users = pokaz_user()

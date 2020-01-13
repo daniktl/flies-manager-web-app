@@ -295,7 +295,7 @@
                                                name="time_start"
                                                value={{ wpis.start_godzina }}>
                                     </th>
-                                    </tr>
+                                </tr>
                                 <tr>
                                     <th>
                                         <label for="edit-{{ wpis.nr_lotu }}-duration">Czas trwania</label>
@@ -317,9 +317,10 @@
                                         <label for="edit-{{ wpis.nr_lotu }}-price">Cena podstawowa</label>
                                     </th>
                                     <th>
+                                        <label for="edit-{{ wpis.nazwa }}-price">Cena podstawowa</label>
                                         <div class="input-group mb-3">
-                                        <input type="number" class="form-control" id="edit-{{ wpis.nazwa }}-price"
-                                               name="price" value={{ wpis.cena_podstawowa }}>
+                                            <input type="number" class="form-control" id="edit-{{ wpis.nazwa }}-price"
+                                                   name="price" value={{ wpis.cena_podstawowa }}>
                                             <div class="input-group-append">
                                                 <span class="input-group-text">zł</span>
                                             </div>
