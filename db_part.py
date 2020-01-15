@@ -18,7 +18,9 @@ from string import ascii_letters, digits
 
 app = Flask(__name__)
 
-with open("data/db_credentials") as file:
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
+with open(os.path.join(dir_path, "data/db_credentials")) as file:
     db_credentials = json.load(file)
 
 #   Go to the data/db_credentials file
@@ -37,8 +39,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://{username}:{password}@{host}/{d
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-
-dir_path = os.path.dirname(os.path.realpath(__file__))
 
 WEEKS_TO_SCHEDULE = 20
 
@@ -123,6 +123,9 @@ class Rabat(db.Model):
 
     user_id = Column("user_id_u", Integer, ForeignKey(User.user_id), nullable=False)
     user = relationship("User")
+
+    def get_data_waznosci(self):
+        return self.data_waznosci.date()
 
 
 class LiniaLotnicza(db.Model):
@@ -719,6 +722,48 @@ def check_user_credentials(email, password):
         return user, None
 
 
+# ############ rabaty
+
+def dodaj_rabat(user_id, znizka, data_waznosci):
+    with session_handler() as db_session:
+        kod_rabatowy = ''.join(random.choice(ascii_letters) for i in range(10)).upper()
+        while db_session.query(Rabat).filter(Rabat.kod == kod_rabatowy).first():
+            kod_rabatowy = ''.join(random.choice(ascii_letters) for i in range(10)).upper()
+        data_formated = datetime.datetime.strptime(data_waznosci, "%Y-%m-%d").date()
+        if data_formated < datetime.datetime.now().date():
+            return ["danger", "Data ważności upłyneła przed chwilą... Spróbuj ponownie"]
+        success = db_session.execute(func.dodaj_rabat(user_id, kod_rabatowy, znizka, data_formated)).scalar()
+        if success:
+            return ["success", f"Kod rabatowy został dodany"]
+        else:
+            return ["danger", f"Niepoprawny procent zniżki"]
+
+
+def pokaz_rabaty(user_id):
+    with session_handler() as db_session:
+        rabaty = db_session.query(Rabat).filter(Rabat.user_id == user_id).all()
+        to_remove = []
+        # remove old discounts
+        for rabat in rabaty:
+            if rabat.data_waznosci < datetime.datetime.now():
+                to_remove.append(rabat)
+        for rabat in to_remove:
+            rabaty.remove(rabat)
+            db_session.delete(rabat)
+        db_session.commit()
+        return rabaty
+
+
+def usun_rabat(kod):
+    with session_handler() as db_session:
+        db_session.execute("""CALL USUN_RABAT(:kod, @result);""", {"kod":kod})
+        success = db_session.execute("""SELECT @result""").scalar()
+        if success:
+            return ["success", f"Rabat o kodzie {kod} został usunięty"]
+        else:
+            return ["danger", f"Rabat o kodzie {kod} nie istnieje"]
+
+
 # ############ realizacja lotu
 
 def check_data_realizacje_lotu(data, numer_lotu, samolot, pilot1, pilot2):
@@ -856,4 +901,5 @@ db.create_all()
 
 if __name__ == '__main__':
     # db.drop_all()
+    dodaj_rabat(3, 30, datetime.datetime.now().date())
     pass

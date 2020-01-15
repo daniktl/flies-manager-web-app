@@ -146,17 +146,18 @@ html {
 }
 
 .copy-button.active {
-    background-color: #cbffe1;
+    background-color: #c5f7bc!important;
 }
 
 .copy-area {
     transition: .4s;
-    padding-left: 10px;
+    width: fit-content;
+    padding: 3px 7px;
+    border-radius: 10px;
 }
 
 .copy-area.active{
-    padding-left: 5px;
-    border-left: 5px green solid;
+    background-color: #c5f7bc;
 }
 
 .action-button {
@@ -240,12 +241,12 @@ html {
 }
 
 .no-content {
-    font-size: 30px;
+    font-size: 25px;
     font-weight: 300;
 }
 
 .no-content:after {
-    content: "No content";
+    content: "W tej chwili puste...";
 }
 
 

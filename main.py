@@ -5,6 +5,10 @@ def get_current_user_type():
     return request.cookies.get("user_type")
 
 
+def get_current_user_id():
+    return request.cookies.get("user_id")
+
+
 @app.context_processor
 def global_vars():
     return dict(user_type=get_current_user_type())
@@ -140,10 +144,20 @@ def account(user_id=None):
     if user_id and get_current_user_type() != "admin" or \
             isinstance(user_id, type(None)) and get_current_user_type() == "admin":
         return redirect(url_for('index'))
+    notification = None
+    if request.method == "POST":
+        req = request.values.to_dict()
+        if "new" in req:
+            notification = dodaj_rabat(user_id if user_id else get_current_user_id(), req['procent'],
+                                       req['data_waznosci'])
+        elif "remove-rabat" in req:
+            notification = usun_rabat(req['remove-rabat'])
     user = None
     if not isinstance(user_id, type(None)):
         user = pokaz_user(user_id=user_id)
-    return render_template('account.html', user=user)
+    u_id = get_current_user_id()
+    rabaty = pokaz_rabaty(user_id if user_id else u_id)
+    return render_template('account.html', user=user, rabaty=rabaty, u_id=u_id, notification=notification)
 
 
 @app.route('/admin', methods=['GET', 'POST'])

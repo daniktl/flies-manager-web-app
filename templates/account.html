@@ -51,7 +51,7 @@
                 Data zamówienia
             </th>
             <th>
-                Więcej
+
             </th>
 
         </tr>
@@ -153,11 +153,10 @@
 
                 <div class="form-group">
                     <label for="data_waznosci">Data ważności</label>
-                    <input id="data_waznosci" name="data_waznosci" type="date"class="form-control">
+                    <input id="data_waznosci" name="data_waznosci" type="date" class="form-control">
                 </div>
 
-
-                <button type="submit" class="btn btn-primary btn-block" name="new">Dodaj</button>
+                <button type="submit" class="btn btn-primary btn-block" name="new" value="{{ u_id }}">Dodaj</button>
             </div>
         </form>
         <div class="subsection-header">
@@ -168,6 +167,9 @@
         Twoje rabaty
     {% endif %}
 </div>
+    {% if not rabaty %}
+    <div class="no-content"></div>
+    {% else %}
 <table class="table table-sm table-hover">
     <thead>
     <tr>
@@ -184,60 +186,95 @@
             Skopiuj
         </th>
         <th>
-            Więcej
+
         </th>
 
     </tr>
     </thead>
     <tbody>
+    {% for rabat in rabaty %}
     <tr>
         <th>
-            <div id="code_1" class="copy-area">
-                LATAJZLOTEM
+            <div id="code_{{ rabat.kod }}" class="copy-area">
+                {{ rabat.kod }}
             </div>
 
         </th>
         <th>
-            15%
+            {{ rabat.procent }}%
         </th>
         <th>
-            19.02.2020
-        </th>
-
-        <th>
-            <input type="button" class="copy-button action-button" data-placeholder="code_1">
-        </th>
-        <th>
-            <button class="more-button action-button"></button>
-        </th>
-
-    </tr>
-    <tr>
-        <th>
-            <div id="code_2" class="copy-area">
-                LATAJBOLTEM
-            </div>
-
-        </th>
-        <th>
-            20%
-        </th>
-        <th>
-            13.01.2020
+            {{ rabat.get_data_waznosci() }}
         </th>
 
         <th>
-            <input type="button" class="copy-button action-button" data-placeholder="code_2">
+            <input type="button" class="copy-button action-button" data-placeholder="code_{{ rabat.kod }}">
         </th>
         <th>
-            <button class="more-button action-button"></button>
+            <button class="more-button action-button" data-toggle="modal"
+                                data-target="#modal-rabat-{{ rabat.kod }}"></button>
         </th>
 
     </tr>
-
+    {% endfor %}
 
     </tbody>
 
 </table>
+    {% endif %}
+
+    {% for rabat in rabaty %}
+
+        <div class="modal fade" id="modal-rabat-{{ rabat.kod }}" tabindex="-1" role="dialog"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <form class="modal-content" method="post" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalCenterTitle">Rabat {{ rabat.kod }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table">
+                                <tbody>
+                                <tr>
+                                    <th>
+                                        Kod rabatowy
+                                    </th>
+                                    <th>
+                                        {{ rabat.kod }}
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        Procent zniżki
+                                    </th>
+                                    <th>
+                                        {{ rabat.procent }}%
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        Data ważności
+                                    </th>
+                                    <th>
+                                        {{ rabat.get_data_waznosci() }}
+                                    </th>
+
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-danger" name="remove-rabat" value="{{ rabat.kod }}">Usuń
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+    {% endfor %}
 
 {% endblock %}
