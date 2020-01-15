@@ -136,6 +136,29 @@ html {
     background-image: url("/static/more.png");
 }
 
+.orders-button {
+    background-image: url("/static/orders.png");
+}
+
+.copy-button {
+    padding: 5px!important;
+    background-image: url("/static/copy.png");
+}
+
+.copy-button.active {
+    background-color: #cbffe1;
+}
+
+.copy-area {
+    transition: .4s;
+    padding-left: 10px;
+}
+
+.copy-area.active{
+    padding-left: 5px;
+    border-left: 5px green solid;
+}
+
 .action-button {
     width: 40px;
     height: 40px;
@@ -145,6 +168,7 @@ html {
     border-radius: 20px;
     background-size: cover;
     background-origin: content-box;
+    background-repeat: no-repeat;
     border: none;
     margin: 0 !important;
     outline: none !important;
@@ -387,9 +411,20 @@ html {
 }
 
 .btn-collapse-result-content .description {
-    flex: 0 1 75%;
+    flex: 0 1 60%;
     display: flex;
     flex-flow: row wrap;
+}
+
+.btn-collapse-result-content .price {
+    flex: 0 1 15%;
+    border-left: 1px solid #2f2f2f;
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: #0069d9;
+    line-height: 60px;
+
 }
 
 .btn-collapse-result-content .description .from, .btn-collapse-result-content .description .to {
@@ -429,14 +464,18 @@ html {
     margin-bottom: 15px;
 }
 
+.collapse-result .card-body {
+    padding: .375rem .75rem;
+}
+
 .collapse-result .card-body .level-splitted {
-    padding: 15px;
+    padding: 15px 0;
     display: flex;
     font-size: 1.4rem;
 }
 
 .collapse-result .card-body .left-part {
-    flex: 0 1 70px;
+    flex: 0 1 10%;
     padding-right: 20px;
 }
 
@@ -445,9 +484,17 @@ html {
     font-weight: 700;
 }
 
+.collapse-result .card-body .right-part {
+    flex: 0 1 15%;
+    font-size: 25px;
+    font-weight: 500;
+    color: #508fd9;
+    text-align: center;
+}
+
 
 .collapse-result .card-body .middle-part {
-    flex: 0 1 auto;
+    flex: 0 1 75%;
 }
 
 .collapse-result .card-body .shift {

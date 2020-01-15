@@ -1,21 +1,33 @@
 {% extends 'base.html' %}
 
 {% block title %}
-Moje konto
+    {% if user %}
+        {{ user.imie }} {{ user.nazwisko }}
+    {% else %}
+        Moje konto
+    {% endif %}
 {% endblock %}
 
 {% block header %}
     <div class="container">
         <div class="header-text">
-            Moje konto
+            {% if user %}
+                Użytkownik {{ user.imie }} {{ user.nazwisko }}
+            {% else %}
+                Moje konto
+            {% endif %}
         </div>
     </div>
 
 {% endblock %}
 
 {% block content %}
-    <div class="section-header">
-        Twoje podróży:
+    <div class="subsection-header">
+        {% if user %}
+            Podróży użytkownika
+        {% else %}
+            Twoje podrózy
+        {% endif %}
     </div>
     <table class="table table-sm table-hover">
         <thead>
@@ -42,7 +54,6 @@ Moje konto
                 Więcej
             </th>
 
-            <th></th>
         </tr>
         </thead>
         <tbody>
@@ -119,5 +130,114 @@ Moje konto
         </tbody>
 
     </table>
+
+
+    {% if user %}
+        <div class="btn-div right">
+            <button class="png-btn new-btn" type="button" data-toggle="collapse" data-target="#collapseNewData"
+                    aria-expanded="false" aria-controls="collapseNewData">
+            </button>
+        </div>
+        <form class="collapse collapse-new" id="collapseNewData" method="post" enctype="multipart/form-data">
+            <div class="card card-body">
+                <div class="subsection-header">Nowy rabat</div>
+                <div class="form-row">
+                    <label for="procent">Zniżka</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control" id="procent" name="procent" value="30">
+                        <div class="input-group-append">
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="data_waznosci">Data ważności</label>
+                    <input id="data_waznosci" name="data_waznosci" type="date"class="form-control">
+                </div>
+
+
+                <button type="submit" class="btn btn-primary btn-block" name="new">Dodaj</button>
+            </div>
+        </form>
+        <div class="subsection-header">
+        Rabaty użytkownika
+
+    {% else %}
+        <div class="subsection-header">
+        Twoje rabaty
+    {% endif %}
+</div>
+<table class="table table-sm table-hover">
+    <thead>
+    <tr>
+        <th>
+            Kod rabatowy
+        </th>
+        <th>
+            Procent zniżki
+        </th>
+        <th>
+            Data ważności
+        </th>
+        <th>
+            Skopiuj
+        </th>
+        <th>
+            Więcej
+        </th>
+
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <th>
+            <div id="code_1" class="copy-area">
+                LATAJZLOTEM
+            </div>
+
+        </th>
+        <th>
+            15%
+        </th>
+        <th>
+            19.02.2020
+        </th>
+
+        <th>
+            <input type="button" class="copy-button action-button" data-placeholder="code_1">
+        </th>
+        <th>
+            <button class="more-button action-button"></button>
+        </th>
+
+    </tr>
+    <tr>
+        <th>
+            <div id="code_2" class="copy-area">
+                LATAJBOLTEM
+            </div>
+
+        </th>
+        <th>
+            20%
+        </th>
+        <th>
+            13.01.2020
+        </th>
+
+        <th>
+            <input type="button" class="copy-button action-button" data-placeholder="code_2">
+        </th>
+        <th>
+            <button class="more-button action-button"></button>
+        </th>
+
+    </tr>
+
+
+    </tbody>
+
+</table>
 
 {% endblock %}

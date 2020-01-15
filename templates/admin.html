@@ -83,7 +83,7 @@
                 <th>
                     Typ konta
                 </th>
-
+                <th></th>
                 <th></th>
             </tr>
             </thead>
@@ -102,7 +102,13 @@
                     <th>
                         {{ user.get_type() }}
                     </th>
-
+                    <th>
+                        {% if not user.is_admin() %}
+                        <form action="{{ url_for('account', user_id=user.user_id) }}">
+                            <input type="submit" class="orders-button action-button" value="">
+                        </form>
+                        {% endif %}
+                    </th>
                     <th>
                         <button class="edit-button action-button" data-toggle="modal"
                                 data-target="#modal-user-{{ user.user_id }}"></button>
@@ -128,15 +134,6 @@
                         <div class="modal-body">
                             <table class="table">
                                 <tbody>
-                                {#                                <tr>#}
-                                {#                                    <th>#}
-                                {#                                        <label for="edit-code">Kod</label>#}
-                                {#                                    </th>#}
-                                {#                                    <th>#}
-                                {#                                        <input class="form-control" type="text" name="code" id="edit-code"#}
-                                {#                                               value="{{ lotnisko.kod }}">#}
-                                {#                                    </th>#}
-                                {#                                </tr>#}
 
                                 <tr>
                                     <th>

@@ -135,8 +135,15 @@ def airports():
 
 
 @app.route('/account', methods=['GET', 'POST'])
-def account():
-    return render_template('account.html')
+@app.route('/account/<user_id>', methods=['GET', 'POST'])
+def account(user_id=None):
+    if user_id and get_current_user_type() != "admin" or \
+            isinstance(user_id, type(None)) and get_current_user_type() == "admin":
+        return redirect(url_for('index'))
+    user = None
+    if not isinstance(user_id, type(None)):
+        user = pokaz_user(user_id=user_id)
+    return render_template('account.html', user=user)
 
 
 @app.route('/admin', methods=['GET', 'POST'])
