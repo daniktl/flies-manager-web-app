@@ -900,12 +900,13 @@ def zauktualizuj_realizacje_lotow():
 
 
 # ############# szukanie polaczen
+
 def create_cities_dic():
     with session_handler() as db_session:
         result_dic = {}
         all_cities = db_session.query(Lotnisko.kod).all()
         for city in all_cities:
-            result_dic[city] = False
+            result_dic[city[0]] = False
         return result_dic
 
 
@@ -917,10 +918,8 @@ def find_all_connections(city_code):
 
 def recursive_find(source, destination, visited_dic, path, all_paths):
     max_change = 3
-    if len(path) > max_change:
-        return
     max_routes = 15
-    if len(all_paths) >= max_routes:
+    if len(all_paths) >= max_routes or len(path) > max_change:
         return
 
     visited_dic[source] = True
@@ -932,8 +931,8 @@ def recursive_find(source, destination, visited_dic, path, all_paths):
     else:
         all_connections = find_all_connections(source)
         for city in all_connections:
-            if not visited_dic[city]:
-                recursive_find(city, destination, visited_dic, path, all_paths)
+            if not visited_dic[city[0]]:
+                recursive_find(city[0], destination, visited_dic, path, all_paths)
     path.pop()
     visited_dic[source] = False
 
@@ -949,5 +948,5 @@ db.create_all()
 
 if __name__ == '__main__':
     # db.drop_all()
-    dodaj_rabat(3, 30, datetime.datetime.now().date())
+    print(find_all_routes("PZN", "WAW"))
     pass
