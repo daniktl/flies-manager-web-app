@@ -15,6 +15,8 @@ from flask_sqlalchemy import SQLAlchemy
 import urllib, re
 from passlib.hash import bcrypt
 from string import ascii_letters, digits
+import copy
+
 
 app = Flask(__name__)
 
@@ -895,6 +897,52 @@ def zauktualizuj_realizacje_lotow():
                     db_session.add(new_note)
     return ['success',
             "Wszystkie brakujące realizacje lotów zostali wygenerowane. Uzupełnij ręcznie pilotów i samoloty"]
+
+
+# ############# szukanie polaczen
+def create_cities_dic():
+    with session_handler() as db_session:
+        result_dic = {}
+        all_cities = db_session.query(Lotnisko.kod).all()
+        for city in all_cities:
+            result_dic[city] = False
+        return result_dic
+
+
+def find_all_connections(city_code):
+    with session_handler() as db_session:
+        return db_session.query(Harmonogram.finish_lotnisko_nazwa). \
+            filter(Harmonogram.start_lotnisko_nazwa == city_code).all()
+
+
+def recursive_find(source, destination, visited_dic, path, all_paths):
+    max_change = 3
+    if len(path) > max_change:
+        return
+    max_routes = 15
+    if len(all_paths) >= max_routes:
+        return
+
+    visited_dic[source] = True
+    path.append(source)
+
+    if source == destination:
+        path_copy = copy.deepcopy(path)
+        all_paths.append(path_copy)
+    else:
+        all_connections = find_all_connections(source)
+        for city in all_connections:
+            if not visited_dic[city]:
+                recursive_find(city, destination, visited_dic, path, all_paths)
+    path.pop()
+    visited_dic[source] = False
+
+
+def find_all_routes(source_code, destination_code):
+    all_cities_dic = create_cities_dic()
+    all_routes_list = []
+    recursive_find(source_code, destination_code, all_cities_dic, [], all_routes_list)
+    return all_routes_list
 
 
 db.create_all()
