@@ -254,7 +254,7 @@ class Podroz(db.Model):
     user_id_u = Column('user_id_u', Integer, ForeignKey(User.user_id), nullable=False)
     user = relationship('User')
 
-    polaczenie = relationship('Polaczenie')
+    polaczenie = relationship('Polaczenie', cascade="all")
 
 
 class RealizacjaLotu(db.Model):
@@ -995,6 +995,11 @@ def szukaj_podrozy(miasto_start, miasto_finish, data_str):
         start_code = db_session.query(Lotnisko.kod).filter(Lotnisko.miasto == miasto_start).scalar()
         finish_code = db_session.query(Lotnisko.kod).filter(Lotnisko.miasto == miasto_finish).scalar()
         data = convert_date_front_back(data_str)
+        teraz = datetime.datetime.today()
+        if data < teraz:
+            data = str(teraz)
+            data = data[:10]
+            data = datetime.datetime.strptime(data, "%Y-%m-%d")
         wszytskie_trasy = find_all_routes(start_code, finish_code)
         bezposredni = db_session.query(Harmonogram).filter(Harmonogram.start_lotnisko_nazwa == start_code). \
             filter(Harmonogram.finish_lotnisko_nazwa == finish_code).first()
@@ -1077,9 +1082,20 @@ def suma_biletow(lista_lotow):
     return suma
 
 
+def dodaj_podroz(cena, user):
+    with session_handler() as db_session:
+        obecny_user = db_session.query(User).filter(User.user_id == user).first()
+        if obecny_user:
+            nowa_podroz = Podroz(cena=cena, user_id_u=user)
+            db_session.add(nowa_podroz)
+            return ['success', 'Podróż zoostała dodana! Pakuj walizki!']
+        else:
+            return ['danger', 'Brak użytkownika do przypisania podróży']
+
+
 db.create_all()
 
 if __name__ == '__main__':
     # db.drop_all()
-    print(szukaj_podrozy("Poznan", "Londyn", "25.01.2020"))
+    print(szukaj_podrozy("Poznan", "Londyn", "30.01.2020"))
     pass
