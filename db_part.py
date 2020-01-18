@@ -304,6 +304,14 @@ def convert_time_front_back(time_str):
             return None
 
 
+def convert_date_front_back(date_str):
+    try:
+        date_f = datetime.datetime.strptime(date_str, "%d.%m.%Y")
+        return date_f
+    except:
+        return None
+
+
 # ######### samoloty
 
 '''
@@ -899,7 +907,7 @@ def zauktualizuj_realizacje_lotow():
             "Wszystkie brakujące realizacje lotów zostali wygenerowane. Uzupełnij ręcznie pilotów i samoloty"]
 
 
-# ############# szukanie polaczen
+# ############ szukanie polaczen
 
 def create_cities_dic():
     with session_handler() as db_session:
@@ -944,9 +952,97 @@ def find_all_routes(source_code, destination_code):
     return all_routes_list
 
 
+# ############ podroz
+
+def szukaj_podrozy(miasto_start, miasto_finish, data_str):
+    with session_handler() as db_session:
+        start_code = db_session.query(Lotnisko.kod).filter(Lotnisko.miasto == miasto_start).scalar()
+        finish_code = db_session.query(Lotnisko.kod).filter(Lotnisko.miasto == miasto_finish).scalar()
+        data = convert_date_front_back(data_str)
+        wszytskie_trasy = find_all_routes(start_code, finish_code)
+        min_przesiadka = datetime.timedelta(minutes=30)
+        max_przesiadka = datetime.timedelta(hours=20)
+        index = -1
+        for trasa in wszytskie_trasy:
+            index += 1
+            for i in range(len(trasa) - 2):
+                ladowanie = db_session.query(Harmonogram, RealizacjaLotu). \
+                    filter(Harmonogram.start_lotnisko_nazwa == trasa[i]). \
+                    filter(Harmonogram.finish_lotnisko_nazwa == trasa[i+1]). \
+                    filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
+                    filter(RealizacjaLotu.data >= data).first()
+
+                czas_trwania = datetime.timedelta(minutes=ladowanie[0].czas_trwania)
+                start_godzina = datetime.timedelta(hours=ladowanie[0].start_godzina.hour,
+                                                   minutes=ladowanie[0].start_godzina.minute,
+                                                   days=ladowanie[0].dzien_tygodnia+1)
+
+                # roznica_timezone = db_session.query(Lotnisko.strefa_czasowa).filter(Lotnisko.kod == trasa[i+1]).scalar() - \
+                #     db_session.query(Lotnisko.strefa_czasowa).filter(Lotnisko.kod == trasa[i]).scalar()
+                # roznica_timezone = datetime.timedelta(hours=roznica_timezone)
+
+                obecny_czas = start_godzina + czas_trwania  # + roznica_timezone
+
+                nastepne_startowanie = db_session.query(Harmonogram, RealizacjaLotu). \
+                    filter(Harmonogram.start_lotnisko_nazwa == trasa[i+1]). \
+                    filter(Harmonogram.finish_lotnisko_nazwa == trasa[i+2]). \
+                    filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
+                    filter(RealizacjaLotu.data >= data).first()
+                nastepne_startowanie = datetime.timedelta(hours=nastepne_startowanie[0].start_godzina.hour,
+                                                          minutes=nastepne_startowanie[0].start_godzina.minute,
+                                                          days=nastepne_startowanie[0].dzien_tygodnia+1)
+
+                if not min_przesiadka <= nastepne_startowanie - obecny_czas <= max_przesiadka:
+                    wszytskie_trasy[index] = None
+                    break
+
+        wszytskie_wyniki = []
+        for trasa in wszytskie_trasy:
+            if trasa is not None:
+                wynik = []
+                for i in range(len(trasa) - 1):
+                    realizacja, harmonogram = db_session.query(RealizacjaLotu, Harmonogram). \
+                        filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
+                        filter(Harmonogram.start_lotnisko_nazwa == trasa[i]). \
+                        filter(Harmonogram.finish_lotnisko_nazwa == trasa[i+1]). \
+                        filter(RealizacjaLotu.data >= data).first()
+
+                    cena = licz_bilet(harmonogram.cena_podstawowa, realizacja.data)
+                    # result = (realizacja.data, harmonogram.nr_lotu, cena)
+                    result = (realizacja, harmonogram, cena)
+                    wynik.append(result)
+                wszytskie_wyniki.append(wynik)
+
+        wszytskie_wyniki.sort(key=sortuj_suma_biletow)
+        return wszytskie_wyniki
+
+
+def licz_bilet(cena_podstawowa, data_lotu):
+    now = datetime.datetime.now()
+    fmt = "%d.%m.%Y"
+    data_lotu = datetime.datetime.strftime(data_lotu, fmt)
+    data_lotu = datetime.datetime.strptime(data_lotu, fmt)
+    delta = data_lotu - now
+    int_days = delta.days
+
+    if int_days > 150:
+        return cena_podstawowa
+    elif int_days < 0:
+        return 20*cena_podstawowa
+    else:
+        return round(cena_podstawowa + (150 - int_days) * 0.03 * cena_podstawowa, 2)
+
+
+def sortuj_suma_biletow(lista_lotow):
+    suma = 0
+    for lot in lista_lotow:
+        suma += lot[2]
+    return suma
+
+
 db.create_all()
 
 if __name__ == '__main__':
     # db.drop_all()
-    print(find_all_routes("PZN", "WAW"))
+    print(szukaj_podrozy("Poznan", "Londyn", "25.01.2020"))
     pass
