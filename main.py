@@ -9,9 +9,22 @@ def get_current_user_id():
     return request.cookies.get("user_id")
 
 
+def check_city_code(code):
+    def check_code(airport):
+        return code == airport.kod
+
+    return check_code
+
+
+def convert_data_format(data_wrong):
+    return ".".join(list(reversed(data_wrong.split("-"))))
+
+
 @app.context_processor
 def global_vars():
-    return dict(user_type=get_current_user_type())
+    return dict(user_type=get_current_user_type(), suma_biletow=suma_biletow, enumerate=enumerate,
+                check_city_code=check_city_code, filter=filter, list=list, czas_podrozy=policz_czas_podrozy,
+                czas_przesiadki=policz_czas_przesiadki, isinstance=isinstance)
 
 
 # @app.before_request
@@ -25,7 +38,15 @@ def global_vars():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template("index.html")
+    result = None
+    request_data = None
+    if request.method == "POST":
+        req = request.values.to_dict()
+        if 'from' in req:
+            result = szukaj_podrozy(req['from'], req['to'], req['go-date'])
+            request_data = {"from": req["from"], "to": req["to"], "go-date": convert_data_format(req["go-date"])}
+    lotniska = pokaz_lotniska()
+    return render_template("index.html", result=result, request_data=request_data, lotniska=lotniska)
 
 
 @app.route('/flights', methods=['GET', 'POST'])

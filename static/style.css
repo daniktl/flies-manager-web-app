@@ -447,9 +447,8 @@ html {
     position: relative;
     height: 2px;
     width: 80%;
-    margin: 0 10%;
+    margin: 5px 10%;
     background-color: #2f2f2f;
-    margin-top: 30px;
 }
 
 .btn-collapse-result:hover,.btn-collapse-result[aria-expanded="true"]  {
@@ -502,6 +501,10 @@ html {
     width: 100%;
     text-align: center;
     font-weight: 300;
+}
+
+.collapse-result .card-body .shift.danger {
+    color: #d10007;
 }
 
 .collapse-result .card-body .smaller-decription {

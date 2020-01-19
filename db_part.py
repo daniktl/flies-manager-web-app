@@ -17,7 +17,6 @@ from passlib.hash import bcrypt
 from string import ascii_letters, digits
 import copy
 
-
 app = Flask(__name__)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -40,6 +39,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://{username}:{password}@{host}/{d
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+
 db = SQLAlchemy(app)
 
 WEEKS_TO_SCHEDULE = 20
@@ -50,6 +50,9 @@ def check_empty(x):
         if all([y != "" for y in x]):
             return False
     return True
+
+
+import traceback
 
 
 @contextmanager
@@ -63,7 +66,7 @@ def session_handler():
         print("Already exists", exp)
         session.rollback()
     except Exception as exp:
-        print(exp)
+        print(traceback.format_exc())
         session.rollback()
 
 
@@ -231,7 +234,7 @@ class Harmonogram(db.Model):
     def get_dzien_tygodnia(self):
         return days_pl[self.dzien_tygodnia]
 
-    def get_start_godzina(self):
+    def get_start_godzina_show(self):
         return datetime.time.strftime(self.start_godzina, "%H:%M")
 
     def get_finish_godzina(self):
@@ -239,10 +242,12 @@ class Harmonogram(db.Model):
             strt = db_session.query(Lotnisko.strefa_czasowa).filter(Lotnisko.kod == self.start_lotnisko_nazwa).scalar()
             fnsh = db_session.query(Lotnisko.strefa_czasowa).filter(Lotnisko.kod == self.finish_lotnisko_nazwa).scalar()
             timezone_roznica = fnsh - strt
-        return datetime.datetime.strftime(
-            datetime.datetime(100, 1, 1, self.start_godzina.hour, self.start_godzina.minute,
-                              self.start_godzina.second) + datetime.timedelta(minutes=self.czas_trwania,
-                                                                              hours=timezone_roznica), "%H:%M")
+        return (datetime.datetime(100, 1, 1, self.start_godzina.hour, self.start_godzina.minute,
+                                  self.start_godzina.second) + datetime.timedelta(minutes=self.czas_trwania,
+                                                                                  hours=timezone_roznica)).time()
+
+    def get_finish_godzina_show(self):
+        return datetime.time.strftime(self.get_finish_godzina(), "%H:%M")
 
 
 class Podroz(db.Model):
@@ -311,7 +316,7 @@ def convert_time_front_back(time_str):
 
 def convert_date_front_back(date_str):
     try:
-        date_f = datetime.datetime.strptime(date_str, "%d.%m.%Y")
+        date_f = datetime.datetime.strptime(date_str, "%Y-%m-%d")
         return date_f
     except:
         return None
@@ -325,7 +330,7 @@ def licz_odleglosc(start, finish):
         x2_f = float(x2)
         y1_f = float(y1)
         y2_f = float(y2)
-        return ((x2_f-x1_f)**2 + (y2_f-y1_f)**2)**(1/2) * 100
+        return ((x2_f - x1_f) ** 2 + (y2_f - y1_f) ** 2) ** (1 / 2) * 100
     except (TypeError, ValueError) as e:
         return 0
 
@@ -335,6 +340,8 @@ def licz_odleglosc(start, finish):
 '''
     @deprecated
 '''
+
+
 # def pokaz_samoloty_linia(nazwa):
 #     with session_handler() as db_session:
 #         liczba = len(db_session.query(Samolot).filter(Samolot.linia_lotnicza_nazwa == nazwa).all())
@@ -735,8 +742,10 @@ def zmodyfikuj_user(user_id, imie, nazwisko, email, new_password, new_r_password
         if not ex_user:
             return ['danger', f"Użytkownik o id {user_id} nie istnieje"]
         if new_password != "" and new_password == new_r_password:
-            if not re.search(r'\d', new_password) or not re.search(r'[A-Z]', new_password) or not re.search(r'[a-z]', new_password):
-                return ["danger", "Hasło jest bardzo słabe. Musi zawierać conajmniej 1 liczbę, co najmniej 1 dużą literę i co najmniej jedbą małą"]
+            if not re.search(r'\d', new_password) or not re.search(r'[A-Z]', new_password) or not re.search(r'[a-z]',
+                                                                                                            new_password):
+                return ["danger",
+                        "Hasło jest bardzo słabe. Musi zawierać conajmniej 1 liczbę, co najmniej 1 dużą literę i co najmniej jedbą małą"]
             ex_user.haslo = bcrypt.encrypt(new_password)
         ex_user.imie = imie
         ex_user.nazwisko = nazwisko
@@ -789,7 +798,7 @@ def pokaz_rabaty(user_id):
 
 def usun_rabat(kod):
     with session_handler() as db_session:
-        db_session.execute("""CALL USUN_RABAT(:kod, @result);""", {"kod":kod})
+        db_session.execute("""CALL USUN_RABAT(:kod, @result);""", {"kod": kod})
         success = db_session.execute("""SELECT @result""").scalar()
         if success:
             return ["success", f"Rabat o kodzie {kod} został usunięty"]
@@ -803,7 +812,6 @@ def check_data_realizacje_lotu(data, numer_lotu, samolot, pilot1, pilot2):
     if check_empty([data, numer_lotu, samolot, pilot1, pilot2]):
         return ["danger", "Wszystkie atrybuty są obowiązkowe"]
     try:
-        print(data)
         data_f = datetime.datetime.strptime(data, "%d")
 
     except:
@@ -936,7 +944,8 @@ def zauktualizuj_realizacje_lotow():
             for week in range(WEEKS_TO_SCHEDULE):
                 tmp = datetime.datetime.now().date() + datetime.timedelta(
                     days=week * 7 - today_weekday + harm_note.dzien_tygodnia)
-                if not ex_realizacje.filter(RealizacjaLotu.data == tmp, RealizacjaLotu.harmonogram_nr_lotu == harm_note.nr_lotu).first():
+                if not ex_realizacje.filter(RealizacjaLotu.data == tmp,
+                                            RealizacjaLotu.harmonogram_nr_lotu == harm_note.nr_lotu).first():
                     new_note = RealizacjaLotu(data=tmp, ilosc_pasazerow=0, harmonogram_nr_lotu=harm_note.nr_lotu)
                     db_session.add(new_note)
     return ['success',
@@ -990,10 +999,10 @@ def find_all_routes(source_code, destination_code):
 
 # ############ podroz
 
-def szukaj_podrozy(miasto_start, miasto_finish, data_str):
+def szukaj_podrozy(start_code, finish_code, data_str):
     with session_handler() as db_session:
-        start_code = db_session.query(Lotnisko.kod).filter(Lotnisko.miasto == miasto_start).scalar()
-        finish_code = db_session.query(Lotnisko.kod).filter(Lotnisko.miasto == miasto_finish).scalar()
+        # start_code = db_session.query(Lotnisko.kod).filter(Lotnisko.miasto == miasto_start).scalar()
+        # finish_code = db_session.query(Lotnisko.kod).filter(Lotnisko.miasto == miasto_finish).scalar()
         data = convert_date_front_back(data_str)
         wszytskie_trasy = find_all_routes(start_code, finish_code)
         bezposredni = db_session.query(Harmonogram).filter(Harmonogram.start_lotnisko_nazwa == start_code). \
@@ -1009,25 +1018,27 @@ def szukaj_podrozy(miasto_start, miasto_finish, data_str):
             for i in range(len(trasa) - 2):
                 ladowanie = db_session.query(Harmonogram, RealizacjaLotu). \
                     filter(Harmonogram.start_lotnisko_nazwa == trasa[i]). \
-                    filter(Harmonogram.finish_lotnisko_nazwa == trasa[i+1]). \
+                    filter(Harmonogram.finish_lotnisko_nazwa == trasa[i + 1]). \
                     filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
                     filter(RealizacjaLotu.data >= data).first()
 
-                godzina_ladowania = ladowanie[0].get_finish_godzina()
-                dzien_ladowania = str(ladowanie[1].data)
-                ful_str = dzien_ladowania + " " + godzina_ladowania
-                czas_ladowania = datetime.datetime.strptime(ful_str, "%Y-%m-%d %H:%M")
+                czas_ladowania = datetime.datetime(100, 1, 1).replace(year=ladowanie[1].data.year,
+                                                                      month=ladowanie[1].data.month,
+                                                                      day=ladowanie[1].data.day,
+                                                                      hour=ladowanie[0].get_finish_godzina().hour,
+                                                                      minute=ladowanie[0].get_finish_godzina().minute)
 
                 nastepne_startowanie = db_session.query(Harmonogram, RealizacjaLotu). \
-                    filter(Harmonogram.start_lotnisko_nazwa == trasa[i+1]). \
-                    filter(Harmonogram.finish_lotnisko_nazwa == trasa[i+2]). \
+                    filter(Harmonogram.start_lotnisko_nazwa == trasa[i + 1]). \
+                    filter(Harmonogram.finish_lotnisko_nazwa == trasa[i + 2]). \
                     filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
                     filter(RealizacjaLotu.data >= data).first()
 
-                godzina_startu = nastepne_startowanie[0].get_start_godzina()
-                dzien_startu = str(nastepne_startowanie[1].data)
-                ful_str = dzien_startu + " " + godzina_startu
-                czas_startu = datetime.datetime.strptime(ful_str, "%Y-%m-%d %H:%M")
+                czas_startu = datetime.datetime(100, 1, 1).replace(year=nastepne_startowanie[1].data.year,
+                                                                   month=nastepne_startowanie[1].data.month,
+                                                                   day=nastepne_startowanie[1].data.day,
+                                                                   hour=nastepne_startowanie[0].start_godzina.hour,
+                                                                   minute=nastepne_startowanie[0].start_godzina.minute)
 
                 przesiadka = czas_startu - czas_ladowania
                 if not min_przesiadka <= przesiadka <= max_przesiadka:
@@ -1042,14 +1053,13 @@ def szukaj_podrozy(miasto_start, miasto_finish, data_str):
                     realizacja, harmonogram = db_session.query(RealizacjaLotu, Harmonogram). \
                         filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
                         filter(Harmonogram.start_lotnisko_nazwa == trasa[i]). \
-                        filter(Harmonogram.finish_lotnisko_nazwa == trasa[i+1]). \
+                        filter(Harmonogram.finish_lotnisko_nazwa == trasa[i + 1]). \
                         filter(RealizacjaLotu.data >= data).first()
 
                     cena = licz_bilet(harmonogram.cena_podstawowa, realizacja.data)
-                    result = (realizacja, harmonogram, cena)
+                    result = (realizacja, cena)
                     wynik.append(result)
                 wszytskie_wyniki.append(wynik)
-
         wszytskie_wyniki.sort(key=suma_biletow)
         return wszytskie_wyniki[:3]
 
@@ -1065,7 +1075,7 @@ def licz_bilet(cena_podstawowa, data_lotu):
     if int_days > 150:
         return cena_podstawowa
     elif int_days < 0:
-        return 20*cena_podstawowa
+        return 20 * cena_podstawowa
     else:
         return round(cena_podstawowa + (150 - int_days) * 0.03 * cena_podstawowa, 2)
 
@@ -1073,13 +1083,44 @@ def licz_bilet(cena_podstawowa, data_lotu):
 def suma_biletow(lista_lotow):
     suma = 0
     for lot in lista_lotow:
-        suma += lot[2]
-    return suma
+        suma += lot[1]
+    return int(suma)
+
+
+def time_timedelta(start, end, start_timezone=0, end_timezone=0):
+    reverse = False
+    if start > end:
+        start, end = end, start
+        reverse = True
+
+    delta = ((end.hour - end_timezone) - (start.hour - start_timezone)) * 60 + end.minute - start.minute + (
+                end.second - start.second) / 60.0
+    if reverse:
+        delta = 24 * 60 - delta
+    return delta
+
+
+def policz_czas_podrozy(lista_lotow):
+    start = lista_lotow[0][0].harmonogram.start_godzina
+    end = lista_lotow[-1][0].harmonogram.get_finish_godzina()
+    start_timezone = lista_lotow[0][0].harmonogram.start_lotnisko.strefa_czasowa
+    end_timezone = lista_lotow[-1][0].harmonogram.finish_lotnisko.strefa_czasowa
+    delta = time_timedelta(start, end, start_timezone, end_timezone)
+    return int(delta//60), int(delta % 60)
+
+
+def policz_czas_przesiadki(lot1, lot2):
+    if not all([lot1, lot2]):
+        return None
+    end = lot2.harmonogram.start_godzina
+    start = lot1.harmonogram.get_finish_godzina()
+    delta = time_timedelta(start, end)
+    return int(delta//60), int(delta % 60)
 
 
 db.create_all()
 
 if __name__ == '__main__':
     # db.drop_all()
-    print(szukaj_podrozy("Poznan", "Londyn", "25.01.2020"))
+    print(szukaj_podrozy("PZN", "WAW", "2020-01-27"))
     pass

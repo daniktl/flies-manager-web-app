@@ -98,13 +98,13 @@
                         {{ note.data }}
                     </th>
                     <th>
-                        {{ note.harmonogram.get_start_godzina() }}
+                        {{ note.harmonogram.get_start_godzina_show() }}
                     </th>
                     <th>
                         {{ note.harmonogram.czas_trwania }} min
                     </th>
                     <th>
-                        {{ note.harmonogram.get_finish_godzina() }}
+                        {{ note.harmonogram.get_finish_godzina_show() }}
                     </th>
                     <th>
                         <a href="{{ url_for("line_name", line=harm_note.linia_lotnicza_nazwa) }}">{{ note.harmonogram.linia_lotnicza_nazwa }}</a>

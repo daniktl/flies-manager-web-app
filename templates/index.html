@@ -9,37 +9,45 @@
             <form method="post" enctype="multipart/form-data">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
-                        <span class="input-group-text">Z</span>
+                        <label for="from" class="input-group-text">Z</label>
                     </div>
-                    <input type="text" class="form-control" name="from">
+                    <select id="from" class="form-control" name="from">
+                        {% for lotnisko in lotniska %}
+                            <option value="{{ lotnisko.kod }}">{{ lotnisko.miasto }} ({{ lotnisko.kod }})</option>
+                        {% endfor %}
+                    </select>
                 </div>
 
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
-                        <span class="input-group-text">Do</span>
+                        <label for="to" class="input-group-text">Do</label>
                     </div>
-                    <input type="text" class="form-control" name="to">
+                    <select id="to" class="form-control" name="to">
+                        {% for lotnisko in lotniska %}
+                            <option value="{{ lotnisko.kod }}">{{ lotnisko.miasto }} ({{ lotnisko.kod }})</option>
+                        {% endfor %}
+                    </select>
                 </div>
 
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
-                        <span class="input-group-text">Wylot</span>
+                        <label for="go-date" class="input-group-text">Wylot</label>
                     </div>
-                    <input type="date" class="form-control" name="go-date">
+                    <input id="go-date" type="date" class="form-control" name="go-date">
                 </div>
 
-{#                <div class="input-group mb-3">#}
-{#                    <div class="input-group-prepend">#}
-{#                        <span class="input-group-text">Powrót</span>#}
-{#                    </div>#}
-{#                    <input type="date" class="form-control" name="return-date">#}
-{#                </div>#}
+                {#                <div class="input-group mb-3">#}
+                {#                    <div class="input-group-prepend">#}
+                {#                        <span class="input-group-text">Powrót</span>#}
+                {#                    </div>#}
+                {#                    <input type="date" class="form-control" name="return-date">#}
+                {#                </div>#}
 
                 <button type="submit" class="btn btn-primary" name="find">Szukaj</button>
-{#                <div style="display: inline-block; margin-left: 15px">#}
-{#                    <input type="checkbox" id="one-way" name="one-way">#}
-{#                    <label for="one-way">W jedną stronę</label>#}
-{#                </div>#}
+                {#                <div style="display: inline-block; margin-left: 15px">#}
+                {#                    <input type="checkbox" id="one-way" name="one-way">#}
+                {#                    <label for="one-way">W jedną stronę</label>#}
+                {#                </div>#}
             </form>
         </div>
     </div>
@@ -47,114 +55,90 @@
 {% endblock %}
 
 {% block content %}
-
-    <div class="subsection-header">Wyniki wyszukiwań <span style="font-size: 1.3rem; font-weight: 400">(Poznań - Warszawa 19.02.2020)</span></div>
-
-    <div class="accordion" id="accordionExample">
-        <div class="card shadow">
-
-            <button class="btn btn-block btn-collapse-result" type="button" data-toggle="collapse"
-                    data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                <div class="btn-collapse-result-content">
-                    <div class="airline">
-                        LOT
-                    </div>
-                    <div class="description">
-                        <div class="from">
-                            <div class="time">9:45</div>
-                            PZN
-                        </div>
-                        <div class="arrow">
-                            <div class="line"></div>
-                            1 przesiadka
-                        </div>
-                        <div class="to">
-                            <div class="time">11:45</div>
-                            WAW
-                        </div>
-                    </div>
-                    <div class="price">
-                            150zl
-                    </div>
-                </div>
-            </button>
-
-
-            <div id="collapseOne" class="collapse show collapse-result" aria-labelledby="headingOne"
-                 data-parent="#accordionExample">
-                <div class="card-body">
-                    <div class="level-splitted">
-                        <div class="left-part">
-                            <div>Z</div>
-                            <div>Do</div>
-                        </div>
-                        <div class="middle-part">
-                            <div>09:30 Poznan (PZN)</div>
-                            <div>11:45 Warszawa Chopin (WAW)</div>
-                        </div>
-                        <div class="right-part">
-                            100zł
-                        </div>
-                    </div>
-                    <div class="shift">przesiadka</div>
-                    <div class="level-splitted">
-                        <div class="left-part">
-                            <div>Z</div>
-                            <div>Do</div>
-                        </div>
-                        <div class="middle-part">
-                            <div>09:30 Poznan (PZN)</div>
-                            <div>11:45 Warszawa Chopin (WAW)</div>
-                        </div>
-                        <div class="right-part">
-                            50zł
-                        </div>
-                    </div>
-                    <div class="smaller-decription">
-                        LOT12345
-                        <button class="btn btn-primary">Wybierz</button>
-                    </div>
-
-                </div>
-            </div>
+    {% if isinstance(result, list) %}
+        <div class="subsection-header">Wyniki wyszukiwań
+            <a style="font-size: 1.3rem; font-weight: 400">({{ list(filter(check_city_code(request_data["from"]), lotniska))[0].miasto }} - {{ list(filter(check_city_code(request_data["to"]), lotniska))[0].miasto }} {{ request_data["go-date"] }})</a>
         </div>
-        <div class="card shadow">
-            <button class="btn btn-block btn-collapse-result" type="button" data-toggle="collapse"
-                    data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                The second option
-            </button>
-            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
-                <div class="card-body">
-                    Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3
-                    wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum
-                    eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla
-                    assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt
-                    sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer
-                    farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus
-                    labore sustainable VHS.
-                </div>
-            </div>
-        </div>
-        <div class="card shadow">
-            <button class="btn btn-block btn-collapse-result" type="button" data-toggle="collapse"
-                    data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                The third option
-            </button>
-            <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
-                <div class="card-body">
-                    Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3
-                    wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum
-                    eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla
-                    assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt
-                    sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer
-                    farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus
-                    labore sustainable VHS.
-                </div>
-            </div>
-        </div>
-    </div>
-    {% if result %}
+        {% if result|length == 0 %}
+            <div class="no-content"></div>
+        {% else %}
+            <div class="accordion" id="accordionExample">
+                {% for idx, option in enumerate(result) %}
+                    <div class="card shadow">
 
+                        <button class="btn btn-block btn-collapse-result" type="button" data-toggle="collapse"
+                                data-target="#collapse-{{ idx }}"
+                                aria-expanded="{% if option == result[0] %}true{% else %}false{% endif %}"
+                                aria-controls="collapse-{{ idx }}">
+                            <div class="btn-collapse-result-content">
+                                <div class="airline">
+                                    {{ option[0][0].harmonogram.linia_lotnicza_nazwa }}
+                                </div>
+                                <div class="description">
+                                    <div class="from">
+                                        <div class="time">{{ option[0][0].harmonogram.get_start_godzina_show() }}</div>
+                                        {{ option[0][0].harmonogram.start_lotnisko_nazwa }}
+                                    </div>
+                                    <div class="arrow">
+                                        <div class="duration">{{ czas_podrozy(option)[0] }}h {{ czas_podrozy(option)[1] }}min</div>
+                                        <div class="line"></div>
+                                        <div class="shifts-count">{% if option|length == 1 %}bez przesiadek{% else %}przesiadek:
+                                            {{ option|length-1 }}{% endif %} </div>
+
+                                    </div>
+                                    <div class="to">
+                                        <div class="time">{{ option[-1][0].harmonogram.get_finish_godzina_show() }}</div>
+                                        {{ option[-1][0].harmonogram.finish_lotnisko_nazwa }}
+                                    </div>
+                                </div>
+                                <div class="price">
+                                    {{ suma_biletow(option) }}zł
+                                </div>
+                            </div>
+                        </button>
+
+
+                        <div id="collapse-{{ idx }}"
+                             class="collapse {% if option == result[0] %}show{% endif %} collapse-result"
+                             aria-labelledby="headingOne"
+                             data-parent="#accordionExample">
+                            <div class="card-body">
+                                {% for idx, polaczenie in enumerate(option) %}
+                                    <div class="level-splitted">
+                                        <div class="left-part">
+                                            <div>Z</div>
+                                            <div>Do</div>
+                                        </div>
+                                        <div class="middle-part">
+                                            <div>{{ polaczenie[0].harmonogram.get_start_godzina_show() }} {{ polaczenie[0].harmonogram.start_lotnisko.miasto }}
+                                                {{ polaczenie[0].harmonogram.start_lotnisko_nazwa }}
+                                            </div>
+                                            <div>{{ polaczenie[0].harmonogram.get_finish_godzina_show() }} {{ polaczenie[0].harmonogram.finish_lotnisko.miasto }}
+                                                {{ polaczenie[0].harmonogram.finish_lotnisko_nazwa }}</div>
+                                        </div>
+                                        <div class="right-part">
+                                            {{ polaczenie[1] }}zł
+                                        </div>
+                                    </div>
+                                    {% if polaczenie != option[-1] %}
+                                        <div class="shift {% if czas_przesiadki(option[idx][0], option[idx + 1][0])[0] < 1 %}danger{% endif %}">przesiadka {{ czas_przesiadki(option[idx][0], option[idx + 1][0])[0] }}h {{ czas_przesiadki(option[idx][0], option[idx + 1][0])[1] }}min</div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% if user_type == "user" %}
+                                <div class="smaller-decription">
+
+                                    <button class="btn btn-primary">Wybierz</button>
+                                </div>
+                            {% endif %}
+
+                            </div>
+                        </div>
+
+
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
     {% endif %}
     {#    <div class="index-info-group">#}
     {#        <div class="index-info">#}
