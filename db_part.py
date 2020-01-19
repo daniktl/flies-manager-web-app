@@ -259,7 +259,7 @@ class Podroz(db.Model):
     user_id_u = Column('user_id_u', Integer, ForeignKey(User.user_id), nullable=False)
     user = relationship('User')
 
-    polaczenie = relationship('Polaczenie')
+    polaczenie = relationship('Polaczenie', cascade="all")
 
 
 class RealizacjaLotu(db.Model):
@@ -340,8 +340,6 @@ def licz_odleglosc(start, finish):
 '''
     @deprecated
 '''
-
-
 # def pokaz_samoloty_linia(nazwa):
 #     with session_handler() as db_session:
 #         liczba = len(db_session.query(Samolot).filter(Samolot.linia_lotnicza_nazwa == nazwa).all())
@@ -742,10 +740,8 @@ def zmodyfikuj_user(user_id, imie, nazwisko, email, new_password, new_r_password
         if not ex_user:
             return ['danger', f"Użytkownik o id {user_id} nie istnieje"]
         if new_password != "" and new_password == new_r_password:
-            if not re.search(r'\d', new_password) or not re.search(r'[A-Z]', new_password) or not re.search(r'[a-z]',
-                                                                                                            new_password):
-                return ["danger",
-                        "Hasło jest bardzo słabe. Musi zawierać conajmniej 1 liczbę, co najmniej 1 dużą literę i co najmniej jedbą małą"]
+            if not re.search(r'\d', new_password) or not re.search(r'[A-Z]', new_password) or not re.search(r'[a-z]', new_password):
+                return ["danger", "Hasło jest bardzo słabe. Musi zawierać conajmniej 1 liczbę, co najmniej 1 dużą literę i co najmniej jedbą małą"]
             ex_user.haslo = bcrypt.encrypt(new_password)
         ex_user.imie = imie
         ex_user.nazwisko = nazwisko
@@ -1004,6 +1000,11 @@ def szukaj_podrozy(start_code, finish_code, data_str):
         # start_code = db_session.query(Lotnisko.kod).filter(Lotnisko.miasto == miasto_start).scalar()
         # finish_code = db_session.query(Lotnisko.kod).filter(Lotnisko.miasto == miasto_finish).scalar()
         data = convert_date_front_back(data_str)
+        teraz = datetime.datetime.today()
+        if data < teraz:
+            data = str(teraz)
+            data = data[:10]
+            data = datetime.datetime.strptime(data, "%Y-%m-%d")
         wszytskie_trasy = find_all_routes(start_code, finish_code)
         bezposredni = db_session.query(Harmonogram).filter(Harmonogram.start_lotnisko_nazwa == start_code). \
             filter(Harmonogram.finish_lotnisko_nazwa == finish_code).first()
