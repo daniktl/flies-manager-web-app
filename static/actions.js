@@ -71,6 +71,11 @@ function recountPrice(){
     document.getElementById("new-price-int").innerHTML = (price - price * (current_discount / 100)).toString();
 }
 
+function  buttonCorrect() {
+    let state = document.getElementById("agree").checked;
+    document.getElementById("confirm_btn").disabled = !state;
+}
+
 function CopyToClipboard(btn) {
     let containerid = btn.getAttribute("data-placeholder");
     if (document.selection) {

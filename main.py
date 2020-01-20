@@ -56,13 +56,14 @@ def order():
     page_mode = None
     user = None
     rabaty = None
+    to_reconfirm = False
+    r_nums = request.args.get("r_nums")
     if request.method == "POST":
         req = request.values.to_dict()
-        # if "r_nums" in req:
-        #     print(req)
-        # pass
-    elif request.method == "GET":
-        r_nums = request.args.get("r_nums")
+        if r_nums:
+            pass
+    elif request.method == "GET" or to_reconfirm:
+
 
         if r_nums:
             page_mode = "confirm_order"
