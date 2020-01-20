@@ -125,9 +125,8 @@
                                     {% endif %}
                                 {% endfor %}
                             {% if user_type == "user" %}
-                                <div class="smaller-decription">
-
-                                    <button class="btn btn-primary">Wybierz</button>
+                                <div class="smaller-description">
+                                    <a href="{{ url_for("order") }}?r_nums={% for polaczenie in option %}{{ polaczenie[0].id_rlotu }};{% endfor %}" class="btn btn-primary">Wybierz</a>
                                 </div>
                             {% endif %}
 

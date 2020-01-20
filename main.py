@@ -24,7 +24,7 @@ def convert_data_format(data_wrong):
 def global_vars():
     return dict(user_type=get_current_user_type(), suma_biletow=suma_biletow, enumerate=enumerate,
                 check_city_code=check_city_code, filter=filter, list=list, czas_podrozy=policz_czas_podrozy,
-                czas_przesiadki=policz_czas_przesiadki, isinstance=isinstance)
+                czas_przesiadki=policz_czas_przesiadki, isinstance=isinstance, licz_bilet=licz_bilet)
 
 
 # @app.before_request
@@ -47,6 +47,33 @@ def index():
             request_data = {"from": req["from"], "to": req["to"], "go-date": convert_data_format(req["go-date"])}
     lotniska = pokaz_lotniska()
     return render_template("index.html", result=result, request_data=request_data, lotniska=lotniska)
+
+
+@app.route("/order", methods=["GET", "POST"])
+def order():
+    notification = None
+    ls_realizacji = []
+    page_mode = None
+    user = None
+    rabaty = None
+    if request.method == "POST":
+        req = request.values.to_dict()
+        # if "r_nums" in req:
+        #     print(req)
+        # pass
+    elif request.method == "GET":
+        r_nums = request.args.get("r_nums")
+
+        if r_nums:
+            page_mode = "confirm_order"
+            for r_num in r_nums.split(";"):
+                if isinstance(r_num, str) and r_num.isnumeric():
+                    ls_realizacji.append(pokaz_realizacje_lotow(id_rlotu=int(r_num)))
+        if not page_mode:
+            notification = ["danger", "Niepoprawny dostęp do strony. Spróbuj jeszcze raz"]
+        user = pokaz_user(user_id=get_current_user_id())
+        rabaty = pokaz_rabaty(user_id=get_current_user_id())
+    return render_template("order.html", ls_realizacji=ls_realizacji, user=user, rabaty=rabaty, notification=notification)
 
 
 @app.route('/flights', methods=['GET', 'POST'])

@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Twoja podróż
+{% endblock %}
+
+{% block header %}
+    <div class="container">
+        <div class="header-text">
+            Twoja podróż
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block content %}
+    {% if ls_realizacji|length > 0 %}
+        <div class="subsection-header">
+            Z {{ ls_realizacji[0].harmonogram.start_lotnisko.miasto }}
+            do {{ ls_realizacji[-1].harmonogram.finish_lotnisko.miasto }} w dniu {{ ls_realizacji[0].get_data_show() }}
+        </div>
+
+        <div class="info-title">Dane podróżującego</div>
+
+        <div class="order-info">
+            <div class="info-block">
+                <div class="info-key">Imię</div>
+                <div class="info-value">{{ user.imie }}</div>
+            </div>
+            <div class="info-block">
+                <div class="info-key">Nazwisko</div>
+                <div class="info-value">{{ user.nazwisko }}</div>
+            </div>
+            <div class="info-block">
+                <div class="info-key">Email</div>
+                <div class="info-value">{{ user.email }}</div>
+            </div>
+        </div>
+
+        <div class="info-title">Lista połaczeń</div>
+
+        {% for idx, realizacja in enumerate(ls_realizacji) %}
+            <div class="order-block">
+                <div class="flight-number">{{ realizacja.harmonogram.nr_lotu }}</div>
+                <div class="flight-description">
+                    <div class="left-part">
+                        <div>Z</div>
+                        <div>Do</div>
+                    </div>
+                    <div class="middle-part">
+                        <div>{{ realizacja.harmonogram.get_start_godzina_show() }} {{ realizacja.harmonogram.start_lotnisko.miasto }}
+                            {{ realizacja.harmonogram.start_lotnisko_nazwa }}
+                        </div>
+                        <div>{{ realizacja.harmonogram.get_finish_godzina_show() }} {{ realizacja.harmonogram.finish_lotnisko.miasto }}
+                            {{ realizacja.harmonogram.finish_lotnisko_nazwa }}</div>
+                    </div>
+                    <div class="right-part">
+                        {{ licz_bilet(realizacja.harmonogram.cena_podstawowa, realizacja.data) }}zł
+                    </div>
+                </div>
+            </div>
+            {% if realizacja != ls_realizacji[-1] %}
+                <div class="shift {% if czas_przesiadki(realizacja, ls_realizacji[idx + 1])[0] < 1 %}danger{% endif %}">
+                    przesiadka {{ czas_przesiadki(realizacja, ls_realizacji[idx + 1])[0] }}h {{ czas_przesiadki(realizacja, ls_realizacji[idx + 1])[1] }}min
+                </div>
+            {% endif %}
+        {% endfor %}
+
+        <div class="discounts-block">
+            <div class="form-group">
+                <label for="discounts">Wybierz rabat do wykorzystania:</label>
+                <select class="form-control" {% if rabaty|length == 0 %}disabled{% endif %} id="discounts" onchange="recountPrice()">
+                    <option data-placeholder="0"></option>
+                    {% for rabat in rabaty %}
+                        <option data-placeholder="{{ rabat.procent }}">
+                            {{ rabat.kod }} (-{{ rabat.procent }}%)
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {% if rabaty|length == 0 %}
+                <a class="no-discounts">Nie masz żadnych rabatów. Podróżuj z nami i dostawaj rabaty</a>
+            {% endif %}
+        </div>
+
+        <div class="final-price">
+            <a>Razem: <span class="price" id="basic-price"><span id="price-int" data-placeholder="{{ suma_biletow(ls_realizacji, pol_only=True) }}">{{ suma_biletow(ls_realizacji, pol_only=True) }}</span>zł</span></a>
+            <span class="price new-price" id="new-price"><span id="new-price-int" data-placeholder="{{ suma_biletow(ls_realizacji, pol_only=True) }}">{{ suma_biletow(ls_realizacji, pol_only=True) }}</span>zł</span>
+        </div>
+
+        <div>
+            <input id="agree" name="agree" type="checkbox" style="height: 20px; width: 20px">
+            <label for="agree">Akceptuję wszystkie warunki i podpisuję RODO</label>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+            <button class="btn btn-primary btn-block">
+                Potwierdż
+            </button>
+        </form>
+
+    {% endif %}
+
+
+{% endblock %}

@@ -141,12 +141,12 @@ html {
 }
 
 .copy-button {
-    padding: 5px!important;
+    padding: 5px !important;
     background-image: url("/static/copy.png");
 }
 
 .copy-button.active {
-    background-color: #c5f7bc!important;
+    background-color: #c5f7bc !important;
 }
 
 .copy-area {
@@ -156,7 +156,7 @@ html {
     border-radius: 10px;
 }
 
-.copy-area.active{
+.copy-area.active {
     background-color: #c5f7bc;
 }
 
@@ -391,17 +391,17 @@ html {
     padding: 7px;
     text-align: center;
     font-size: 1.3rem;
-    outline: none!important;
+    outline: none !important;
 }
 
 .btn-collapse-result-content {
-    display: flex!important;
+    display: flex !important;
     overflow-wrap: break-word;
 }
 
 .btn-collapse-result:focus {
-    outline: none!important;
-    box-shadow: none!important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 .btn-collapse-result-content .airline {
@@ -442,7 +442,6 @@ html {
 }
 
 
-
 .btn-collapse-result-content .description .arrow .line {
     position: relative;
     height: 2px;
@@ -451,7 +450,7 @@ html {
     background-color: #2f2f2f;
 }
 
-.btn-collapse-result:hover,.btn-collapse-result[aria-expanded="true"]  {
+.btn-collapse-result:hover, .btn-collapse-result[aria-expanded="true"] {
     background-color: #e1e1e1;
 }
 
@@ -479,7 +478,7 @@ html {
     padding-right: 20px;
 }
 
-.collapse-result .card-body .left-part div {
+.left-part div {
     text-align: right;
     font-weight: 700;
 }
@@ -497,17 +496,117 @@ html {
     flex: 0 1 75%;
 }
 
-.collapse-result .card-body .shift {
+.shift {
     width: 100%;
     text-align: center;
     font-weight: 300;
 }
 
-.collapse-result .card-body .shift.danger {
+.shift.danger {
     color: #d10007;
 }
 
-.collapse-result .card-body .smaller-decription {
+.collapse-result .card-body .smaller-description {
     font-size: 1rem;
     font-weight: 600;
+    text-align: right;
+}
+
+.order-block {
+    margin: 20px 0;
+    box-shadow: 0 0 7px 2px rgb(215, 215, 215);
+    border-left: #0069d9 3px solid;
+    display: flex;
+    border-radius: 10px;
+}
+
+.order-block + .order-block {
+    margin-top: 40px;
+}
+
+.order-block .flight-number {
+    flex: 0 1 15%;
+    font-size: 30px;
+    font-weight: 300;
+    padding: 10px;
+    margin-top: auto;
+    margin-bottom: auto;
+    border-right: #9b9b9b solid 1px;
+    text-align: center;
+}
+
+.order-block .flight-description {
+    flex: 0 1 85%;
+    padding: 10px;
+    display: flex;
+}
+
+.order-block .flight-description .left-part {
+    flex: 0 1 7%;
+    padding-right: 20px;
+}
+
+
+.order-block .flight-description .middle-part {
+    flex: 0 1 78%;
+}
+
+.order-block .flight-description .right-part {
+    flex: 0 1 15%;
+    color: #57abff;
+    font-weight: 600;
+}
+
+.discounts-block {
+    margin: 20px 0;
+}
+
+.no-discounts{
+    font-size: 18px;
+    font-weight: 300;
+    font-style: italic;
+}
+
+.info-block {
+    display: flex;
+}
+
+.info-title {
+    font-size: 26px;
+    font-weight: 300;
+    margin: 15px 0;
+}
+
+.info-block + .info-block {
+    margin-top: 10px;
+}
+
+.info-block .info-key {
+    flex: 0 1 200px;
+    padding-right: 10px;
+    font-weight: 700;
+}
+
+.final-price {
+    font-size: 25px;
+    text-align: right;
+    font-weight: 600;
+}
+
+.final-price .price {
+    color: #57abff;
+    transition: .4s;
+}
+
+.new-price {
+    display: none;
+}
+
+.new-price.show {
+    display: block;
+}
+
+.price.bitted {
+    color: #e84444;
+    text-decoration: line-through;
 }

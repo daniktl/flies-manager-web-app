@@ -281,6 +281,9 @@ class RealizacjaLotu(db.Model):
     pilot_id_pil2 = Column("pilot_id_pil2", Integer, ForeignKey(Pilot.id_pil))
     pilot2 = relationship("Pilot", foreign_keys=[pilot_id_pil2], backref=backref("pilot_id_pil2"))
 
+    def get_data_show(self):
+        return datetime.date.strftime(self.data, "%d.%m.%Y")
+
 
 class Polaczenie(db.Model):
     __tabelname__ = 'polaczenie'
@@ -814,9 +817,11 @@ def check_data_realizacje_lotu(data, numer_lotu, samolot, pilot1, pilot2):
         return ['danger', "Niepoprawny format daty"]
 
 
-def pokaz_realizacje_lotow(data=None, start=None, finish=None, nr_lotu=None, old_too=False):
+def pokaz_realizacje_lotow(data=None, start=None, finish=None, nr_lotu=None, old_too=False, id_rlotu=None):
     with session_handler() as db_session:
-        if data and start and finish:
+        if id_rlotu:
+            realizacja_lotow = db_session.query(RealizacjaLotu).filter(RealizacjaLotu.id_rlotu == id_rlotu).first()
+        elif data and start and finish:
             realizacja_lotow = db_session.query(RealizacjaLotu, Harmonogram). \
                 filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
                 filter(RealizacjaLotu.data == data and Harmonogram.start_lotnisko_nazwa == start and
@@ -1003,10 +1008,8 @@ def szukaj_podrozy(start_code, finish_code, data_str):
             return []
         data = convert_date_front_back(data_str)
         teraz = datetime.datetime.today()
-        if data < teraz:
-            data = str(teraz)
-            data = data[:10]
-            data = datetime.datetime.strptime(data, "%Y-%m-%d")
+        if data.date() < teraz.date():
+            data = teraz
         wszytskie_trasy = find_all_routes(start_code, finish_code)
         bezposredni = db_session.query(Harmonogram).filter(Harmonogram.start_lotnisko_nazwa == start_code). \
             filter(Harmonogram.finish_lotnisko_nazwa == finish_code).first()
@@ -1100,13 +1103,16 @@ def licz_bilet(cena_podstawowa, data_lotu):
     elif int_days < 0:
         return 20 * cena_podstawowa
     else:
-        return round(cena_podstawowa + (150 - int_days) * 0.03 * cena_podstawowa, 2)
+        return int(cena_podstawowa + (150 - int_days) * 0.03 * cena_podstawowa)
 
 
-def suma_biletow(lista_lotow):
+def suma_biletow(lista_lotow, pol_only=False):
     suma = 0
     for lot in lista_lotow:
-        suma += lot[1]
+        if pol_only:
+            suma += licz_bilet(lot.harmonogram.cena_podstawowa, lot.data)
+        else:
+            suma += lot[1]
     return int(suma)
 
 

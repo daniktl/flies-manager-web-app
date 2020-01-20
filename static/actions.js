@@ -55,6 +55,22 @@ window.onload = function () {
     }
 };
 
+function recountPrice(){
+    let price_div = document.getElementById("price-int");
+    let discount_select = document.getElementById('discounts');
+    let current_discount_str = discount_select.options[discount_select.selectedIndex].getAttribute("data-placeholder");
+    let price = parseInt(price_div.getAttribute("data-placeholder"));
+    let current_discount = parseInt(current_discount_str);
+    if (!current_discount){
+        document.getElementById("basic-price").classList.remove("bitted");
+        document.getElementById("new-price").classList.remove("show");
+    }else {
+        document.getElementById("basic-price").classList.add("bitted");
+        document.getElementById("new-price").classList.add("show");
+    }
+    document.getElementById("new-price-int").innerHTML = (price - price * (current_discount / 100)).toString();
+}
+
 function CopyToClipboard(btn) {
     let containerid = btn.getAttribute("data-placeholder");
     if (document.selection) {
