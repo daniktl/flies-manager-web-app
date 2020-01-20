@@ -66,14 +66,16 @@
             {% endif %}
         {% endfor %}
 
+        <form method="post" enctype="multipart/form-data">
+
         <div class="discounts-block">
             <div class="form-group">
                 <label for="discounts">Wybierz rabat do wykorzystania:</label>
-                <select class="form-control" {% if rabaty|length == 0 %}disabled{% endif %} id="discounts"
+                <select class="form-control" {% if rabaty|length == 0 %}disabled{% endif %} id="discounts" name="discount"
                         onchange="recountPrice()">
                     <option data-placeholder="0"></option>
                     {% for rabat in rabaty %}
-                        <option data-placeholder="{{ rabat.procent }}">
+                        <option data-placeholder="{{ rabat.procent }}" value="{{ rabat.kod }}">
                             {{ rabat.kod }} (-{{ rabat.procent }}%)
                         </option>
                     {% endfor %}
@@ -90,8 +92,9 @@
                                                                  data-placeholder="{{ suma_biletow(ls_realizacji, pol_only=True) }}">{{ suma_biletow(ls_realizacji, pol_only=True) }}</span>zł</span></a>
             <span class="price new-price" id="new-price"><span id="new-price-int"
                                                                data-placeholder="{{ suma_biletow(ls_realizacji, pol_only=True) }}">{{ suma_biletow(ls_realizacji, pol_only=True) }}</span>zł</span>
+            <input id="hidden-price" name="cena" value="{{ suma_biletow(ls_realizacji, pol_only=True) }}" hidden>
         </div>
-        <form method="post" enctype="multipart/form-data">
+
             <div>
                 <input id="agree" name="agree" type="checkbox" style="height: 20px; width: 20px" onchange="buttonCorrect()">
                 <label for="agree">Akceptuję wszystkie warunki i podpisuję RODO</label>

@@ -82,7 +82,7 @@
                 <div class="form-group">
                     <label for="new-password-repeat">Powtórz hasło</label>
                     <input name="password-repeat" id="new-password-repeat" type="password" class="form-control"
-                           placeholder="********">
+                           placeholder="********" onkeyup="checkPasswordMatch('new-password', this)">
                 </div>
                 <button class="btn btn-info btn-block" name="signup" type="submit">Zarejestruj się</button>
             </form>

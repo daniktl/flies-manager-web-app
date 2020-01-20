@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    {% if user %}
+    {% if admin %}
         {{ user.imie }} {{ user.nazwisko }}
     {% else %}
         Moje konto
@@ -11,7 +11,7 @@
 {% block header %}
     <div class="container">
         <div class="header-text">
-            {% if user %}
+            {% if admin %}
                 Użytkownik {{ user.imie }} {{ user.nazwisko }}
             {% else %}
                 Moje konto
@@ -23,275 +23,336 @@
 
 {% block content %}
 
-    <div class="subsection-header">
-        {% if user %}
-            Dane użytkownika
-        {% else %}
-            Twoje dane
-        {% endif %}
-    </div>
-    <div class="user-data">
-        <div class="user-data-block">
-            <div class="key"><label for="user-name">Imie</label></div>
-            <div class="value">
-                <input id="user-name" class="form-control">
+    <div class="row">
+        <div class="col-2">
+            <div class="list-group" id="list-tab" role="tablist">
+                <a class="list-group-item list-group-item-action active" id="list-home-list" data-toggle="list"
+                   href="#list-data" role="tab" aria-controls="data">Dane</a>
+                <a class="list-group-item list-group-item-action" id="list-profile-list" data-toggle="list"
+                   href="#list-trips" role="tab" aria-controls="trips">Podrózy</a>
+                <a class="list-group-item list-group-item-action" id="list-messages-list" data-toggle="list"
+                   href="#list-messages" role="tab" aria-controls="discounts">Rabaty</a>
             </div>
         </div>
-    </div>
-
-    <div class="subsection-header">
-        {% if user %}
-            Podróży użytkownika
-        {% else %}
-            Twoje podrózy
-        {% endif %}
-    </div>
-    <table class="table table-sm table-hover">
-        <thead>
-        <tr>
-            <th>
-                Data
-            </th>
-            <th>
-                Godzina
-            </th>
-            <th>
-                Skąd
-            </th>
-            <th>
-                Dokąd
-            </th>
-            <th>
-                Cena
-            </th>
-            <th>
-                Data zamówienia
-            </th>
-            <th>
-
-            </th>
-
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <th>
-                1.11.2019
-            </th>
-            <th>
-                10:15
-            </th>
-            <th>
-                Poznań
-            </th>
-            <th>
-                Warszawa
-            </th>
-            <th>
-                150 PLN
-            </th>
-            <th>
-                1.1.2019
-            </th>
-            <th>
-                <button class="more-button action-button"></button>
-            </th>
-
-        </tr>
-        <tr>
-            <th>
-                10.11.2019
-            </th>
-            <th>
-                10:15
-            </th>
-            <th>
-                Poznań
-            </th>
-            <th>
-                Warszawa
-            </th>
-            <th>
-                100 PLN
-            </th>
-            <th>
-                2.4.2019
-            </th>
-            <th>
-                <button class="more-button action-button"></button>
-            </th>
-        </tr>
-        <tr>
-            <th>
-                1.12.2019
-            </th>
-            <th>
-                14:00
-            </th>
-            <th>
-                Warszawa
-            </th>
-            <th>
-                Poznań
-            </th>
-            <th>
-                15 PLN
-            </th>
-            <th>
-                3.8.2019
-            </th>
-            <th>
-                <button class="more-button action-button"></button>
-            </th>
-        </tr>
-        </tbody>
-
-    </table>
-
-
-    {% if user %}
-        <div class="btn-div right">
-            <button class="png-btn new-btn" type="button" data-toggle="collapse" data-target="#collapseNewData"
-                    aria-expanded="false" aria-controls="collapseNewData">
-            </button>
-        </div>
-        <form class="collapse collapse-new" id="collapseNewData" method="post" enctype="multipart/form-data">
-            <div class="card card-body">
-                <div class="subsection-header">Nowy rabat</div>
-                <div class="form-row">
-                    <label for="procent">Zniżka</label>
-                    <div class="input-group mb-3">
-                        <input type="number" class="form-control" id="procent" name="procent" value="30">
-                        <div class="input-group-append">
-                            <span class="input-group-text">%</span>
+        <div class="col-10">
+            <div class="tab-content" id="nav-tabContent">
+                <div class="tab-pane fade show active" id="list-data" role="tabpanel">
+                    <div class="subsection-header">
+                        {% if admin %}
+                            Dane użytkownika
+                        {% else %}
+                            Twoje dane
+                        {% endif %}
+                    </div>
+                    <form class="user-data" method="post" enctype="multipart/form-data">
+                        <div class="user-data-block">
+                            <div class="key"><label for="user-name">Imie</label></div>
+                            <div class="value">
+                                <input id="user-name" name="imie" class="form-control" value="{{ user.imie }}">
+                            </div>
                         </div>
-                    </div>
+                        <div class="user-data-block">
+                            <div class="key"><label for="user-surname">Nazwisko</label></div>
+                            <div class="value">
+                                <input id="user-surname" name="nazwisko" class="form-control"
+                                       value="{{ user.nazwisko }}">
+                            </div>
+                        </div>
+                        <div class="user-data-block">
+                            <div class="key"><label for="user-email">Email</label></div>
+                            <div class="value">
+                                <input id="user-email" name="email" class="form-control" value="{{ user.email }}">
+                            </div>
+                        </div>
+                        <div class="user-data-block">
+                            <div class="key"><label for="user-password">Nowe hasło</label></div>
+                            <div class="value">
+                                <input id="user-password" type="password" name="new-password" class="form-control" placeholder="Password1234">
+                            </div>
+                        </div>
+                        <div class="user-data-block">
+                            <div class="key"><label for="user-rpassword">Powtórz hasło</label></div>
+                            <div class="value">
+                                <input id="user-rpassword" type="password" name="new-password-repeat" class="form-control" placeholder="Password1234" onkeyup="checkPasswordMatch('user-password', this)">
+                            </div>
+                        </div>
+                        <div class="user-data-block">
+                        <button type="submit" class="btn btn-primary btn-block" name="edit-user">
+                            Wyślij
+                        </button>
+                        </div>
+                    </form>
                 </div>
-
-                <div class="form-group">
-                    <label for="data_waznosci">Data ważności</label>
-                    <input id="data_waznosci" name="data_waznosci" type="date" class="form-control">
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-block" name="new" value="{{ u_id }}">Dodaj</button>
-            </div>
-        </form>
-        <div class="subsection-header">
-        Rabaty użytkownika
-
-    {% else %}
-        <div class="subsection-header">
-        Twoje rabaty
-    {% endif %}
-</div>
-{% if not rabaty %}
-    <div class="no-content"></div>
-{% else %}
-    <table class="table table-sm table-hover">
-        <thead>
-        <tr>
-            <th>
-                Kod rabatowy
-            </th>
-            <th>
-                Procent zniżki
-            </th>
-            <th>
-                Data ważności
-            </th>
-            <th>
-                Skopiuj
-            </th>
-            <th>
-
-            </th>
-
-        </tr>
-        </thead>
-        <tbody>
-        {% for rabat in rabaty %}
-            <tr>
-                <th>
-                    <div id="code_{{ rabat.kod }}" class="copy-area">
-                        {{ rabat.kod }}
+                <div class="tab-pane fade" id="list-trips" role="tabpanel">
+                    <div class="subsection-header">
+                        {% if admin %}
+                            Podróży użytkownika
+                        {% else %}
+                            Twoje podrózy
+                        {% endif %}
                     </div>
 
-                </th>
-                <th>
-                    {{ rabat.procent }}%
-                </th>
-                <th>
-                    {{ rabat.get_data_waznosci() }}
-                </th>
+                    <table class="table table-sm table-hover">
+                        <thead>
+                        <tr>
+                            <th>
+                                Data
+                            </th>
+                            <th>
+                                Godzina
+                            </th>
+                            <th>
+                                Skąd
+                            </th>
+                            <th>
+                                Dokąd
+                            </th>
+                            <th>
+                                Cena
+                            </th>
+                            <th>
+                                Data zamówienia
+                            </th>
+                            <th>
 
-                <th>
-                    <input type="button" class="copy-button action-button" data-placeholder="code_{{ rabat.kod }}">
-                </th>
-                <th>
-                    <button class="more-button action-button" data-toggle="modal"
-                            data-target="#modal-rabat-{{ rabat.kod }}"></button>
-                </th>
+                            </th>
 
-            </tr>
-        {% endfor %}
-
-        </tbody>
-
-    </table>
-{% endif %}
-
-{% for rabat in rabaty %}
-
-    <div class="modal fade" id="modal-rabat-{{ rabat.kod }}" tabindex="-1" role="dialog"
-         aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <form class="modal-content" method="post" enctype="multipart/form-data">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalCenterTitle">Rabat {{ rabat.kod }}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <table class="table">
+                        </tr>
+                        </thead>
                         <tbody>
                         <tr>
                             <th>
-                                Kod rabatowy
+                                1.11.2019
                             </th>
                             <th>
-                                {{ rabat.kod }}
-                            </th>
-                        </tr>
-                        <tr>
-                            <th>
-                                Procent zniżki
+                                10:15
                             </th>
                             <th>
-                                {{ rabat.procent }}%
-                            </th>
-                        </tr>
-                        <tr>
-                            <th>
-                                Data ważności
+                                Poznań
                             </th>
                             <th>
-                                {{ rabat.get_data_waznosci() }}
+                                Warszawa
+                            </th>
+                            <th>
+                                150 PLN
+                            </th>
+                            <th>
+                                1.1.2019
+                            </th>
+                            <th>
+                                <button class="more-button action-button"></button>
                             </th>
 
+                        </tr>
+                        <tr>
+                            <th>
+                                10.11.2019
+                            </th>
+                            <th>
+                                10:15
+                            </th>
+                            <th>
+                                Poznań
+                            </th>
+                            <th>
+                                Warszawa
+                            </th>
+                            <th>
+                                100 PLN
+                            </th>
+                            <th>
+                                2.4.2019
+                            </th>
+                            <th>
+                                <button class="more-button action-button"></button>
+                            </th>
+                        </tr>
+                        <tr>
+                            <th>
+                                1.12.2019
+                            </th>
+                            <th>
+                                14:00
+                            </th>
+                            <th>
+                                Warszawa
+                            </th>
+                            <th>
+                                Poznań
+                            </th>
+                            <th>
+                                15 PLN
+                            </th>
+                            <th>
+                                3.8.2019
+                            </th>
+                            <th>
+                                <button class="more-button action-button"></button>
+                            </th>
                         </tr>
                         </tbody>
-                    </table>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-danger" name="remove-rabat" value="{{ rabat.kod }}">Usuń
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
-{% endfor %}
+                    </table>
+
+                </div>
+                <div class="tab-pane fade" id="list-messages" role="tabpanel">
+                    {% if admin %}
+                        <div class="btn-div right">
+                            <button class="png-btn new-btn" type="button" data-toggle="collapse"
+                                    data-target="#collapseNewData"
+                                    aria-expanded="false" aria-controls="collapseNewData">
+                            </button>
+                        </div>
+                        <form class="collapse collapse-new" id="collapseNewData" method="post"
+                              enctype="multipart/form-data">
+                            <div class="card card-body">
+                                <div class="subsection-header">Nowy rabat</div>
+                                <div class="form-row">
+                                    <label for="procent">Zniżka</label>
+                                    <div class="input-group mb-3">
+                                        <input type="number" class="form-control" id="procent" name="procent"
+                                               value="30">
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="data_waznosci">Data ważności</label>
+                                    <input id="data_waznosci" name="data_waznosci" type="date" class="form-control">
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-block" name="new" value="{{ u_id }}">
+                                    Dodaj
+                                </button>
+                            </div>
+                        </form>
+                        <div class="subsection-header">
+                        Rabaty użytkownika
+
+                    {% else %}
+                        <div class="subsection-header">
+                        Twoje rabaty
+                    {% endif %}
+                    </div>
+                    {% if not rabaty %}
+                        <div class="no-content"></div>
+                    {% else %}
+                        <table class="table table-sm table-hover">
+                            <thead>
+                            <tr>
+                                <th>
+                                    Kod rabatowy
+                                </th>
+                                <th>
+                                    Procent zniżki
+                                </th>
+                                <th>
+                                    Data ważności
+                                </th>
+                                <th>
+                                    Skopiuj
+                                </th>
+                                <th>
+
+                                </th>
+
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for rabat in rabaty %}
+                                <tr>
+                                    <th>
+                                        <div id="code_{{ rabat.kod }}" class="copy-area">
+                                            {{ rabat.kod }}
+                                        </div>
+
+                                    </th>
+                                    <th>
+                                        {{ rabat.procent }}%
+                                    </th>
+                                    <th>
+                                        {{ rabat.get_data_waznosci() }}
+                                    </th>
+
+                                    <th>
+                                        <input type="button" class="copy-button action-button"
+                                               data-placeholder="code_{{ rabat.kod }}">
+                                    </th>
+                                    <th>
+                                        <button class="more-button action-button" data-toggle="modal"
+                                                data-target="#modal-rabat-{{ rabat.kod }}"></button>
+                                    </th>
+
+                                </tr>
+                            {% endfor %}
+
+                            </tbody>
+
+                        </table>
+                    {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        {% for rabat in rabaty %}
+
+            <div class="modal fade" id="modal-rabat-{{ rabat.kod }}" tabindex="-1" role="dialog"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <form class="modal-content" method="post" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalCenterTitle">Rabat {{ rabat.kod }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table">
+                                <tbody>
+                                <tr>
+                                    <th>
+                                        Kod rabatowy
+                                    </th>
+                                    <th>
+                                        {{ rabat.kod }}
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        Procent zniżki
+                                    </th>
+                                    <th>
+                                        {{ rabat.procent }}%
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        Data ważności
+                                    </th>
+                                    <th>
+                                        {{ rabat.get_data_waznosci() }}
+                                    </th>
+
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-danger" name="remove-rabat" value="{{ rabat.kod }}">
+                                Usuń
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        {% endfor %}
 
 {% endblock %}

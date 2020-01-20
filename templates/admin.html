@@ -167,7 +167,7 @@
                                         <label for="edit-password">Nowe hasło</label>
                                     </th>
                                     <th>
-                                        <input class="form-control" type="text" name="password" id="edit-password"
+                                        <input class="form-control" type="password" name="password" id="edit-password"
                                                placeholder="Password123">
                                     </th>
                                 </tr>
@@ -176,8 +176,8 @@
                                         <label for="edit-password-repeat">Powtórz hasło</label>
                                     </th>
                                     <th>
-                                        <input class="form-control" type="text" name="password-repeat" id="edit-password-repeat"
-                                               placeholder="Password123">
+                                        <input class="form-control" type="password" name="password-repeat" id="edit-password-repeat"
+                                               placeholder="Password123" onkeyup="checkPasswordMatch('edit-password', this)">
                                     </th>
                                 </tr>
                                 <tr>

@@ -735,21 +735,25 @@ def usun_user(user_id):
             return ["success", f"Użytkownik {name} {surname} został usunięty"]
 
 
-def zmodyfikuj_user(user_id, imie, nazwisko, email, new_password, new_r_password, typ):
+def zmodyfikuj_user(user_id, imie, nazwisko, email, new_password, new_r_password, typ=None):
     if check_empty([user_id, imie, nazwisko, email, typ]):
         return ['danger', "Wypełnij wszystkie obowiązkowe pole"]
     with session_handler() as db_session:
         ex_user = db_session.query(User).filter(User.user_id == user_id).first()
         if not ex_user:
             return ['danger', f"Użytkownik o id {user_id} nie istnieje"]
-        if new_password != "" and new_password == new_r_password:
-            if not re.search(r'\d', new_password) or not re.search(r'[A-Z]', new_password) or not re.search(r'[a-z]', new_password):
-                return ["danger", "Hasło jest bardzo słabe. Musi zawierać conajmniej 1 liczbę, co najmniej 1 dużą literę i co najmniej jedbą małą"]
-            ex_user.haslo = bcrypt.encrypt(new_password)
+        if new_password != "":
+            if new_password == new_r_password:
+                if not re.search(r'\d', new_password) or not re.search(r'[A-Z]', new_password) or not re.search(r'[a-z]', new_password):
+                    return ["danger", "Hasło jest bardzo słabe. Musi zawierać conajmniej 1 liczbę, co najmniej 1 dużą literę i co najmniej jedbą małą"]
+                ex_user.haslo = bcrypt.encrypt(new_password)
+            else:
+                return ["danger", "Hasło wprowadzone pierwsy raz musi się zgadzać z wprowadzonym drugi raz"]
         ex_user.imie = imie
         ex_user.nazwisko = nazwisko
         ex_user.email = email
-        ex_user.typ = typ
+        if typ:
+            ex_user.typ = typ
         return ['success', f"Dane użytkownika {imie} {nazwisko} zostały zmodyfikowane"]
 
 

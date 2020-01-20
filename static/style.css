@@ -615,10 +615,19 @@ html {
     display: flex;
 }
 
+.user-data-block + .user-data-block {
+    margin-top: 10px;
+}
+
 .user-data-block .key {
     flex: 0 1 15%;
 }
 
 .user-data-block .value {
     flex: 0 1 85%;
+}
+
+.form-control.bad {
+    border-color: #d10007!important;
+    box-shadow: none!important;
 }

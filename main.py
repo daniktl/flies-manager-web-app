@@ -61,10 +61,10 @@ def order():
     if get_current_user_type() == "user":
         if request.method == "POST":
             req = request.values.to_dict()
+            # returns for example: {'discount': 'WSXVIWSCSD', 'cena': '1872.5', 'agree': 'on', 'r_nums': '69;89;'}
             if r_nums:
                 pass
         elif request.method == "GET" or to_reconfirm:
-
 
             if r_nums:
                 page_mode = "confirm_order"
@@ -75,7 +75,8 @@ def order():
                 notification = ["danger", "Niepoprawny dostęp do strony. Spróbuj jeszcze raz"]
             user = pokaz_user(user_id=get_current_user_id())
             rabaty = pokaz_rabaty(user_id=get_current_user_id())
-    return render_template("order.html", ls_realizacji=ls_realizacji, user=user, rabaty=rabaty, notification=notification)
+    return render_template("order.html", ls_realizacji=ls_realizacji, user=user, rabaty=rabaty,
+                           notification=notification)
 
 
 @app.route('/flights', methods=['GET', 'POST'])
@@ -202,10 +203,17 @@ def account(user_id=None):
                                        req['data_waznosci'])
         elif "remove-rabat" in req:
             notification = usun_rabat(req['remove-rabat'])
-    user = None
+        elif "edit-user" in req:
+            notification = zmodyfikuj_user(user_id=user_id, imie=req['imie'], nazwisko=req['nazwisko'],
+                                           email=req['email'], new_password=req['new-password'],
+                                           new_r_password=req['new-password-repeat'])
+    admin = True
+    u_id = get_current_user_id()
     if not isinstance(user_id, type(None)):
         user = pokaz_user(user_id=user_id)
-    u_id = get_current_user_id()
+    else:
+        user = pokaz_user(user_id=u_id)
+        admin = False
     rabaty = pokaz_rabaty(user_id if user_id else u_id)
     return render_template('account.html', user=user, rabaty=rabaty, u_id=u_id, notification=notification)
 

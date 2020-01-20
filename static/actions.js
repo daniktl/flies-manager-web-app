@@ -55,6 +55,15 @@ window.onload = function () {
     }
 };
 
+function checkPasswordMatch(password_field_id, confirm_password_field){
+    let password_field = document.getElementById(password_field_id);
+    if (confirm_password_field.value !== password_field.value){
+        confirm_password_field.classList.add("bad");
+    } else {
+        confirm_password_field.classList.remove("bad")
+    }
+}
+
 function recountPrice(){
     let price_div = document.getElementById("price-int");
     let discount_select = document.getElementById('discounts');
@@ -68,7 +77,9 @@ function recountPrice(){
         document.getElementById("basic-price").classList.add("bitted");
         document.getElementById("new-price").classList.add("show");
     }
-    document.getElementById("new-price-int").innerHTML = (price - price * (current_discount / 100)).toString();
+    let price_after = (price - price * (current_discount / 100)).toString();
+    document.getElementById("new-price-int").innerHTML = price_after;
+    document.getElementById("hidden-price").setAttribute("value", price_after);
 }
 
 function  buttonCorrect() {
