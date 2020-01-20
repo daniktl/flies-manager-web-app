@@ -1162,6 +1162,9 @@ def policz_czas_przesiadki(lot1, lot2):
     return int(delta//60), int(delta % 60)
 
 
+# ############ podrózy
+
+
 def dodaj_podroz(cena, user_id):
     with session_handler() as db_session:
         if cena <= 0:

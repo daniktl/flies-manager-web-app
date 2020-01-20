@@ -610,3 +610,15 @@ html {
     color: #e84444;
     text-decoration: line-through;
 }
+
+.user-data-block {
+    display: flex;
+}
+
+.user-data-block .key {
+    flex: 0 1 15%;
+}
+
+.user-data-block .value {
+    flex: 0 1 85%;
+}

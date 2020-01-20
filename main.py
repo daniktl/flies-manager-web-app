@@ -58,22 +58,23 @@ def order():
     rabaty = None
     to_reconfirm = False
     r_nums = request.args.get("r_nums")
-    if request.method == "POST":
-        req = request.values.to_dict()
-        if r_nums:
-            pass
-    elif request.method == "GET" or to_reconfirm:
+    if get_current_user_type() == "user":
+        if request.method == "POST":
+            req = request.values.to_dict()
+            if r_nums:
+                pass
+        elif request.method == "GET" or to_reconfirm:
 
 
-        if r_nums:
-            page_mode = "confirm_order"
-            for r_num in r_nums.split(";"):
-                if isinstance(r_num, str) and r_num.isnumeric():
-                    ls_realizacji.append(pokaz_realizacje_lotow(id_rlotu=int(r_num)))
-        if not page_mode:
-            notification = ["danger", "Niepoprawny dostęp do strony. Spróbuj jeszcze raz"]
-        user = pokaz_user(user_id=get_current_user_id())
-        rabaty = pokaz_rabaty(user_id=get_current_user_id())
+            if r_nums:
+                page_mode = "confirm_order"
+                for r_num in r_nums.split(";"):
+                    if isinstance(r_num, str) and r_num.isnumeric():
+                        ls_realizacji.append(pokaz_realizacje_lotow(id_rlotu=int(r_num)))
+            if not page_mode:
+                notification = ["danger", "Niepoprawny dostęp do strony. Spróbuj jeszcze raz"]
+            user = pokaz_user(user_id=get_current_user_id())
+            rabaty = pokaz_rabaty(user_id=get_current_user_id())
     return render_template("order.html", ls_realizacji=ls_realizacji, user=user, rabaty=rabaty, notification=notification)
 
 
