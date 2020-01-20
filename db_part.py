@@ -999,6 +999,8 @@ def szukaj_podrozy(start_code, finish_code, data_str):
     with session_handler() as db_session:
         # start_code = db_session.query(Lotnisko.kod).filter(Lotnisko.miasto == miasto_start).scalar()
         # finish_code = db_session.query(Lotnisko.kod).filter(Lotnisko.miasto == miasto_finish).scalar()
+        if start_code == finish_code:
+            return []
         data = convert_date_front_back(data_str)
         teraz = datetime.datetime.today()
         if data < teraz:
@@ -1021,25 +1023,35 @@ def szukaj_podrozy(start_code, finish_code, data_str):
                     filter(Harmonogram.start_lotnisko_nazwa == trasa[i]). \
                     filter(Harmonogram.finish_lotnisko_nazwa == trasa[i + 1]). \
                     filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
-                    filter(RealizacjaLotu.data >= data).first()
+                    filter(RealizacjaLotu.data == data).first()
 
-                czas_ladowania = datetime.datetime(100, 1, 1).replace(year=ladowanie[1].data.year,
-                                                                      month=ladowanie[1].data.month,
-                                                                      day=ladowanie[1].data.day,
-                                                                      hour=ladowanie[0].get_finish_godzina().hour,
-                                                                      minute=ladowanie[0].get_finish_godzina().minute)
+                if ladowanie is not None:
+                    czas_ladowania = datetime.datetime(100, 1, 1).replace(year=ladowanie[1].data.year,
+                                                                          month=ladowanie[1].data.month,
+                                                                          day=ladowanie[1].data.day,
+                                                                          hour=ladowanie[0].get_finish_godzina().hour,
+                                                                          minute=ladowanie[0].get_finish_godzina().minute)
+                else:
+                    czas_ladowania = 0
 
                 nastepne_startowanie = db_session.query(Harmonogram, RealizacjaLotu). \
                     filter(Harmonogram.start_lotnisko_nazwa == trasa[i + 1]). \
                     filter(Harmonogram.finish_lotnisko_nazwa == trasa[i + 2]). \
                     filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
-                    filter(RealizacjaLotu.data >= data).first()
+                    filter(RealizacjaLotu.data == data).first()
 
-                czas_startu = datetime.datetime(100, 1, 1).replace(year=nastepne_startowanie[1].data.year,
-                                                                   month=nastepne_startowanie[1].data.month,
-                                                                   day=nastepne_startowanie[1].data.day,
-                                                                   hour=nastepne_startowanie[0].start_godzina.hour,
-                                                                   minute=nastepne_startowanie[0].start_godzina.minute)
+                if nastepne_startowanie is not None:
+                    czas_startu = datetime.datetime(100, 1, 1).replace(year=nastepne_startowanie[1].data.year,
+                                                                       month=nastepne_startowanie[1].data.month,
+                                                                       day=nastepne_startowanie[1].data.day,
+                                                                       hour=nastepne_startowanie[0].start_godzina.hour,
+                                                                       minute=nastepne_startowanie[0].start_godzina.minute)
+                else:
+                    czas_startu = 0
+
+                if czas_startu == 0 or czas_ladowania == 0:
+                    wszytskie_trasy[index] = None
+                    break
 
                 przesiadka = czas_startu - czas_ladowania
                 if not min_przesiadka <= przesiadka <= max_przesiadka:
@@ -1050,19 +1062,29 @@ def szukaj_podrozy(start_code, finish_code, data_str):
         for trasa in wszytskie_trasy:
             if trasa is not None:
                 wynik = []
+                byl_break = False
                 for i in range(len(trasa) - 1):
-                    realizacja, harmonogram = db_session.query(RealizacjaLotu, Harmonogram). \
+                    res = db_session.query(RealizacjaLotu, Harmonogram). \
                         filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
                         filter(Harmonogram.start_lotnisko_nazwa == trasa[i]). \
                         filter(Harmonogram.finish_lotnisko_nazwa == trasa[i + 1]). \
-                        filter(RealizacjaLotu.data >= data).first()
+                        filter(RealizacjaLotu.data == data).all()
+                    # print(res)
+
+                    if not res:
+                        byl_break = True
+                        break
+                    else:
+                        realizacja = res[0][0]
+                        harmonogram = res[0][1]
 
                     cena = licz_bilet(harmonogram.cena_podstawowa, realizacja.data)
                     result = (realizacja, cena)
                     wynik.append(result)
-                wszytskie_wyniki.append(wynik)
+                if not byl_break:
+                    wszytskie_wyniki.append(wynik)
         wszytskie_wyniki.sort(key=suma_biletow)
-        return wszytskie_wyniki[:3]
+        return wszytskie_wyniki
 
 
 def licz_bilet(cena_podstawowa, data_lotu):
@@ -1123,5 +1145,5 @@ db.create_all()
 
 if __name__ == '__main__':
     # db.drop_all()
-    print(szukaj_podrozy("PZN", "WAW", "2020-01-27"))
+    print(szukaj_podrozy("PZN", "LUT", "2020-01-27"))
     pass
