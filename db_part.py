@@ -1019,13 +1019,20 @@ def szukaj_podrozy(start_code, finish_code, data_str):
         for trasa in wszytskie_trasy:
             index += 1
             for i in range(len(trasa) - 2):
-                ladowanie = db_session.query(Harmonogram, RealizacjaLotu). \
-                    filter(Harmonogram.start_lotnisko_nazwa == trasa[i]). \
-                    filter(Harmonogram.finish_lotnisko_nazwa == trasa[i + 1]). \
-                    filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
-                    filter(RealizacjaLotu.data == data).first()
+                if index == 0:
+                    ladowanie = db_session.query(Harmonogram, RealizacjaLotu). \
+                        filter(Harmonogram.start_lotnisko_nazwa == trasa[i]). \
+                        filter(Harmonogram.finish_lotnisko_nazwa == trasa[i + 1]). \
+                        filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
+                        filter(RealizacjaLotu.data == data).first()
+                else:
+                    ladowanie = db_session.query(Harmonogram, RealizacjaLotu). \
+                        filter(Harmonogram.start_lotnisko_nazwa == trasa[i]). \
+                        filter(Harmonogram.finish_lotnisko_nazwa == trasa[i + 1]). \
+                        filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
+                        filter(RealizacjaLotu.data >= data).first()
 
-                if ladowanie is not None:
+                if ladowanie:
                     czas_ladowania = datetime.datetime(100, 1, 1).replace(year=ladowanie[1].data.year,
                                                                           month=ladowanie[1].data.month,
                                                                           day=ladowanie[1].data.day,
@@ -1038,9 +1045,9 @@ def szukaj_podrozy(start_code, finish_code, data_str):
                     filter(Harmonogram.start_lotnisko_nazwa == trasa[i + 1]). \
                     filter(Harmonogram.finish_lotnisko_nazwa == trasa[i + 2]). \
                     filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
-                    filter(RealizacjaLotu.data == data).first()
+                    filter(RealizacjaLotu.data >= data).first()
 
-                if nastepne_startowanie is not None:
+                if nastepne_startowanie:
                     czas_startu = datetime.datetime(100, 1, 1).replace(year=nastepne_startowanie[1].data.year,
                                                                        month=nastepne_startowanie[1].data.month,
                                                                        day=nastepne_startowanie[1].data.day,
@@ -1063,13 +1070,21 @@ def szukaj_podrozy(start_code, finish_code, data_str):
             if trasa is not None:
                 wynik = []
                 byl_break = False
+                index = -1
                 for i in range(len(trasa) - 1):
-                    res = db_session.query(RealizacjaLotu, Harmonogram). \
-                        filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
-                        filter(Harmonogram.start_lotnisko_nazwa == trasa[i]). \
-                        filter(Harmonogram.finish_lotnisko_nazwa == trasa[i + 1]). \
-                        filter(RealizacjaLotu.data == data).all()
-                    # print(res)
+                    index += 1
+                    if index == 0:
+                        res = db_session.query(RealizacjaLotu, Harmonogram). \
+                            filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
+                            filter(Harmonogram.start_lotnisko_nazwa == trasa[i]). \
+                            filter(Harmonogram.finish_lotnisko_nazwa == trasa[i + 1]). \
+                            filter(RealizacjaLotu.data == data).all()
+                    else:
+                        res = db_session.query(RealizacjaLotu, Harmonogram). \
+                            filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
+                            filter(Harmonogram.start_lotnisko_nazwa == trasa[i]). \
+                            filter(Harmonogram.finish_lotnisko_nazwa == trasa[i + 1]). \
+                            filter(RealizacjaLotu.data >= data).all()
 
                     if not res:
                         byl_break = True
@@ -1141,9 +1156,44 @@ def policz_czas_przesiadki(lot1, lot2):
     return int(delta//60), int(delta % 60)
 
 
+def dodaj_podroz(cena, user_id):
+    with session_handler() as db_session:
+        if cena <= 0:
+            return ['danger', "Problem z wyznaczeniem ceny podroży"]
+        user = db_session.query(User).filter(User.user_id == user_id).first()
+        if not user:
+            return ['danger', "Brak użytkownika dla którego wybrano podróż"]
+
+        nowa_podroz = Podroz(cena=cena, user_id_u=user_id)
+        db_session.add(nowa_podroz)
+        return ["success", "Podróż została dodana"]
+
+
+def usun_podroz(nr_rezerwacji):
+    with session_handler() as db_session:
+        podroz = db_session.query(Podroz).filter(Podroz.nr_rezerwacji == nr_rezerwacji).first()
+        if not podroz:
+            return ['danger', 'Podróż już została usunięta lub nie istenieje']
+        else:
+            db_session.delete(podroz)
+            return ['success', "Podróż została usunięta"]
+
+
+def pokaz_podroz(user_id=None):
+    with session_handler() as db_session:
+        if user_id:
+            podroze = db_session.query(Podroz).filter(Podroz.user_id_u == user_id).all()
+        else:
+            podroze = []
+        return podroze
+
+# def dodaj_polaczenie(nr_miejsca, bagaz, kolejnosc, )
+
+
 db.create_all()
 
 if __name__ == '__main__':
     # db.drop_all()
-    print(szukaj_podrozy("PZN", "LUT", "2020-01-27"))
+    # print(szukaj_podrozy("PZN", "LUT", "2020-01-27"))
+    print(pokaz_podroz())
     pass
