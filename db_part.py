@@ -125,6 +125,7 @@ class Rabat(db.Model):
     kod = Column('kod', String(10), primary_key=True, nullable=False)
     procent = Column('procent', Integer, nullable=False)
     data_waznosci = Column('data_waznosci', DateTime, nullable=False)
+    data_rezerwacji = Column('data_rezerwacji', DateTime, nullable=False)
 
     user_id = Column("user_id_u", Integer, ForeignKey(User.user_id), nullable=False)
     user = relationship("User")
@@ -1223,7 +1224,7 @@ def dodaj_podroz(lista_lotow, cena, user_id, rabat=None):
             # if dwa_bilety:
             #     return dwa_bilety
 
-        nowa_podroz = Podroz(cena=cena, user_id_u=user_id)
+        nowa_podroz = Podroz(cena=cena, user_id_u=user_id, data_rezerwacji=datetime.datetime.now())
         db_session.add(nowa_podroz)
         db_session.commit()
         # rezerwacje = db_session.query(Podroz). \
@@ -1277,13 +1278,13 @@ def pokaz_podroz(user_id=None, nr_podrozy=None):
             podroze = []
         return podroze
 
-
+Rabat.__table__.drop(db.engine)
 db.create_all()
 
 if __name__ == '__main__':
     # db.drop_all()
-    print(dodaj_podroz([5], 1500, 1))
+    # print(dodaj_podroz([5], 1500, 1))
     # usun_podroz(10)
-    print(dodaj_podroz([122], 1500, 5))
+    # print(dodaj_podroz([122], 1500, 5))
     # print(user_ma_lot(4, 121))
     pass
