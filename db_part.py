@@ -1195,6 +1195,16 @@ def sprawdz_dostepnosc_biletu(id_rlotu):
             return ['danger', f'Brak wolnych miejsc dla lotu o numerze {nr_lotu}. Przepraszamy i zapraszamy ponownie!']
 
 
+def user_ma_lot(user_id, id_rlotu):
+    with session_handler() as db_session:
+        polaczenie = db_session.query(Podroz, Polaczenie). \
+            filter(Podroz.nr_rezerwacji == Polaczenie.podroz_nr_rezerwacji). \
+            filter(Podroz.user_id_u == user_id). \
+            filter(Polaczenie.realizacja_lotu_id_rlotu == id_rlotu).first()
+        if polaczenie:
+            return ['danger', 'Nie możesz kupić dwóch biletów na jeden lot!']
+
+
 def dodaj_podroz(lista_lotow, cena, user_id):
     with session_handler() as db_session:
         error = check_data_podroz(lista_lotow, cena, user_id)
@@ -1205,6 +1215,9 @@ def dodaj_podroz(lista_lotow, cena, user_id):
             brak_biletu = sprawdz_dostepnosc_biletu(lot)
             if brak_biletu:
                 return brak_biletu
+            # dwa_bilety = user_ma_lot(user_id, lot)
+            # if dwa_bilety:
+            #     return dwa_bilety
 
         nowa_podroz = Podroz(cena=cena, user_id_u=user_id)
         db_session.add(nowa_podroz)
@@ -1244,9 +1257,13 @@ def usun_podroz(nr_rezerwacji):
 def pokaz_podroz(user_id=None, nr_podrozy=None):
     with session_handler() as db_session:
         if user_id:
-            podroze = db_session.query(Podroz).filter(Podroz.user_id_u == user_id).all()
+            podroze = db_session.query(Podroz, Polaczenie). \
+                filter(Podroz.nr_rezerwacji == Polaczenie.podroz_nr_rezerwacji). \
+                filter(Podroz.user_id_u == user_id).all()
         elif nr_podrozy:
-            podroze = db_session.query(Podroz).filter(Podroz.nr_rezerwacji == nr_podrozy).all()
+            podroze = db_session.query(Podroz, Polaczenie). \
+                filter(Podroz.nr_rezerwacji == Polaczenie.podroz_nr_rezerwacji). \
+                filter(Podroz.nr_rezerwacji == nr_podrozy).all()
         else:
             podroze = []
         return podroze
@@ -1256,6 +1273,6 @@ db.create_all()
 
 if __name__ == '__main__':
     # db.drop_all()
-    print(dodaj_podroz([121], 1500, 4))
-    # usun_podroz(10)
+    print(dodaj_podroz([122], 1500, 5))
+    # print(user_ma_lot(4, 121))
     pass
