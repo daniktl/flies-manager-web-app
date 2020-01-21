@@ -1187,18 +1187,26 @@ def sprawdz_dostepnosc_biletu(id_rlotu):
     with session_handler() as db_session:
         przypisany_samolot = db_session.query(RealizacjaLotu.samolot_nr_boczny). \
             filter(RealizacjaLotu.id_rlotu == id_rlotu).scalar()
-        print(przypisany_samolot)
         if not przypisany_samolot:
             return ['danger', 'Przewoźnik nie dodał jeszcze maszyny do lotu. Brak możliwosci kupna biletu. Zapraszamy później.']
         samolot_pojemnosc = db_session.query(Samolot.pojemnosc). \
             filter(Samolot.nr_boczny == przypisany_samolot).scalar()
-        print(samolot_pojemnosc)
         obecna_ilosc = db_session.query(RealizacjaLotu.ilosc_pasazerow). \
             filter(RealizacjaLotu.id_rlotu == id_rlotu).scalar()
         if obecna_ilosc == samolot_pojemnosc:
             nr_lotu = db_session.query(RealizacjaLotu.harmonogram_nr_lotu). \
                 filter(RealizacjaLotu.id_rlotu == id_rlotu).scalar()
             return ['danger', f'Brak wolnych miejsc dla lotu o numerze {nr_lotu}. Przepraszamy i zapraszamy ponownie!']
+
+
+def user_ma_lot(user_id, id_rlotu):
+    with session_handler() as db_session:
+        polaczenie = db_session.query(Podroz, Polaczenie). \
+            filter(Podroz.nr_rezerwacji == Polaczenie.podroz_nr_rezerwacji). \
+            filter(Podroz.user_id_u == user_id). \
+            filter(Polaczenie.realizacja_lotu_id_rlotu == id_rlotu).first()
+        if polaczenie:
+            return ['danger', 'Nie możesz kupić dwóch biletów na jeden lot!']
 
 
 def dodaj_podroz(lista_lotow, cena, user_id, rabat=None):
@@ -1211,6 +1219,9 @@ def dodaj_podroz(lista_lotow, cena, user_id, rabat=None):
             brak_biletu = sprawdz_dostepnosc_biletu(lot)
             if brak_biletu:
                 return brak_biletu
+            # dwa_bilety = user_ma_lot(user_id, lot)
+            # if dwa_bilety:
+            #     return dwa_bilety
 
         nowa_podroz = Podroz(cena=cena, user_id_u=user_id)
         db_session.add(nowa_podroz)
@@ -1255,9 +1266,13 @@ def usun_podroz(nr_rezerwacji):
 def pokaz_podroz(user_id=None, nr_podrozy=None):
     with session_handler() as db_session:
         if user_id:
-            podroze = db_session.query(Podroz).filter(Podroz.user_id_u == user_id).all()
+            podroze = db_session.query(Podroz, Polaczenie). \
+                filter(Podroz.nr_rezerwacji == Polaczenie.podroz_nr_rezerwacji). \
+                filter(Podroz.user_id_u == user_id).all()
         elif nr_podrozy:
-            podroze = db_session.query(Podroz).filter(Podroz.nr_rezerwacji == nr_podrozy).all()
+            podroze = db_session.query(Podroz, Polaczenie). \
+                filter(Podroz.nr_rezerwacji == Polaczenie.podroz_nr_rezerwacji). \
+                filter(Podroz.nr_rezerwacji == nr_podrozy).all()
         else:
             podroze = []
         return podroze
@@ -1269,4 +1284,6 @@ if __name__ == '__main__':
     # db.drop_all()
     print(dodaj_podroz([5], 1500, 1))
     # usun_podroz(10)
+    print(dodaj_podroz([122], 1500, 5))
+    # print(user_ma_lot(4, 121))
     pass
