@@ -103,7 +103,7 @@
             {% if notification %}
                 {% if notification[0]=='success' %}
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <h4 class="alert-heading">Done!</h4>
+                        <h4 class="alert-heading">Gotowe!</h4>
                         <p>{{ notification[1] }}</p>
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
@@ -111,7 +111,7 @@
                     </div>
                 {% elif notification[0]=='danger' %}
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <h4 class="alert-heading">Oops...</h4>
+                        <h4 class="alert-heading">Niestety...</h4>
                         <p>{{ notification[1] }}</p>
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
@@ -119,7 +119,7 @@
                     </div>
                 {% elif notification[0]=='warning' %}
                     <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                        <h4 class="alert-heading">Warning</h4>
+                        <h4 class="alert-heading">Uwaga!</h4>
                         <p>{{ notification[1] }}</p>
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>

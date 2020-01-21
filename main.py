@@ -63,9 +63,14 @@ def order():
             req = request.values.to_dict()
             # returns for example: {'discount': 'WSXVIWSCSD', 'cena': '1872.5', 'agree': 'on', 'r_nums': '69;89;'}
             if r_nums:
-                pass
+                if 'agree' not in req or req['agree'] != 'on':
+                    notification = ["danger", "Musisz potwierdzić warunki korzystania z serwisu"]
+                else:
+                    notification = dodaj_podroz(r_nums.split(";")[:-1], req['cena'], get_current_user_id(),
+                                                rabat=req['discount'] if 'dicount' in req else None)
+            else:
+                notification = ["danger", "Loty nie zostali wybrane. Spróbuj ponownie"]
         elif request.method == "GET" or to_reconfirm:
-
             if r_nums:
                 page_mode = "confirm_order"
                 for r_num in r_nums.split(";"):
@@ -207,15 +212,17 @@ def account(user_id=None):
             notification = zmodyfikuj_user(user_id=user_id, imie=req['imie'], nazwisko=req['nazwisko'],
                                            email=req['email'], new_password=req['new-password'],
                                            new_r_password=req['new-password-repeat'])
-    admin = True
+    admin = False
     u_id = get_current_user_id()
     if not isinstance(user_id, type(None)):
         user = pokaz_user(user_id=user_id)
     else:
         user = pokaz_user(user_id=u_id)
-        admin = False
-    rabaty = pokaz_rabaty(user_id if user_id else u_id)
-    return render_template('account.html', user=user, rabaty=rabaty, u_id=u_id, notification=notification)
+        admin = True
+    rabaty = pokaz_rabaty(user.user_id)
+    podroze = pokaz_podroz(user_id=user.user_id)
+    return render_template('account.html', user=user, rabaty=rabaty, u_id=u_id, notification=notification, admin=admin,
+                           podroze=podroze)
 
 
 @app.route('/admin', methods=['GET', 'POST'])

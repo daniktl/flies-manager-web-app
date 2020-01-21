@@ -631,3 +631,19 @@ html {
     border-color: #d10007!important;
     box-shadow: none!important;
 }
+
+.order-success {
+    padding: 5px;
+}
+
+.order-success-title {
+    font-weight: 600;
+    font-size: 30px;
+    padding: 15px 0;
+}
+
+.order-success-footer {
+    font-style: italic;
+    text-align: right;
+}
+

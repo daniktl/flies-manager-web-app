@@ -96,6 +96,9 @@
                         <thead>
                         <tr>
                             <th>
+                                Nr
+                            </th>
+                            <th>
                                 Data
                             </th>
                             <th>
@@ -120,9 +123,13 @@
                         </tr>
                         </thead>
                         <tbody>
+                        {% for podroz in podroze %}
                         <tr>
                             <th>
-                                1.11.2019
+                                {{ podroz.nr_rezerwacji }}
+                            </th>
+                            <th>
+                                27.01.2020
                             </th>
                             <th>
                                 10:15
@@ -134,7 +141,7 @@
                                 Warszawa
                             </th>
                             <th>
-                                150 PLN
+                                {{ podroz.cena }}zł
                             </th>
                             <th>
                                 1.1.2019
@@ -144,52 +151,7 @@
                             </th>
 
                         </tr>
-                        <tr>
-                            <th>
-                                10.11.2019
-                            </th>
-                            <th>
-                                10:15
-                            </th>
-                            <th>
-                                Poznań
-                            </th>
-                            <th>
-                                Warszawa
-                            </th>
-                            <th>
-                                100 PLN
-                            </th>
-                            <th>
-                                2.4.2019
-                            </th>
-                            <th>
-                                <button class="more-button action-button"></button>
-                            </th>
-                        </tr>
-                        <tr>
-                            <th>
-                                1.12.2019
-                            </th>
-                            <th>
-                                14:00
-                            </th>
-                            <th>
-                                Warszawa
-                            </th>
-                            <th>
-                                Poznań
-                            </th>
-                            <th>
-                                15 PLN
-                            </th>
-                            <th>
-                                3.8.2019
-                            </th>
-                            <th>
-                                <button class="more-button action-button"></button>
-                            </th>
-                        </tr>
+                        {% endfor %}
                         </tbody>
 
                     </table>

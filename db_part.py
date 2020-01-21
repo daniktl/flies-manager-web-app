@@ -1172,8 +1172,12 @@ def check_data_podroz(lista_lotow, cena, user_id):
     with session_handler() as db_session:
         if not isinstance(lista_lotow, list):
             return ['danger', 'Niepoprawny format podroży']
-        if cena <= 0:
-            return ['danger', "Problem z wyznaczeniem ceny podroży"]
+        if isinstance(cena, str):
+            if cena.isnumeric():
+                cena = int(cena)
+        if isinstance(cena, int):
+            if cena <= 0:
+                return ['danger', "Problem z wyznaczeniem ceny podroży"]
         user = db_session.query(User).filter(User.user_id == user_id).first()
         if not user:
             return ['danger', "Brak użytkownika dla którego wybrano podróż"]
@@ -1183,10 +1187,12 @@ def sprawdz_dostepnosc_biletu(id_rlotu):
     with session_handler() as db_session:
         przypisany_samolot = db_session.query(RealizacjaLotu.samolot_nr_boczny). \
             filter(RealizacjaLotu.id_rlotu == id_rlotu).scalar()
+        print(przypisany_samolot)
         if not przypisany_samolot:
             return ['danger', 'Przewoźnik nie dodał jeszcze maszyny do lotu. Brak możliwosci kupna biletu. Zapraszamy później.']
         samolot_pojemnosc = db_session.query(Samolot.pojemnosc). \
             filter(Samolot.nr_boczny == przypisany_samolot).scalar()
+        print(samolot_pojemnosc)
         obecna_ilosc = db_session.query(RealizacjaLotu.ilosc_pasazerow). \
             filter(RealizacjaLotu.id_rlotu == id_rlotu).scalar()
         if obecna_ilosc == samolot_pojemnosc:
@@ -1195,7 +1201,7 @@ def sprawdz_dostepnosc_biletu(id_rlotu):
             return ['danger', f'Brak wolnych miejsc dla lotu o numerze {nr_lotu}. Przepraszamy i zapraszamy ponownie!']
 
 
-def dodaj_podroz(lista_lotow, cena, user_id):
+def dodaj_podroz(lista_lotow, cena, user_id, rabat=None):
     with session_handler() as db_session:
         error = check_data_podroz(lista_lotow, cena, user_id)
         if error:
@@ -1208,9 +1214,10 @@ def dodaj_podroz(lista_lotow, cena, user_id):
 
         nowa_podroz = Podroz(cena=cena, user_id_u=user_id)
         db_session.add(nowa_podroz)
-        rezerwacje = db_session.query(Podroz). \
-            filter(Podroz.user_id_u == user_id).order_by(Podroz.nr_rezerwacji).all()
-        nr_rezerwacji = rezerwacje[-1].nr_rezerwacji
+        db_session.commit()
+        # rezerwacje = db_session.query(Podroz). \
+        #     filter(Podroz.user_id_u == user_id).order_by(Podroz.nr_rezerwacji).all()
+        nr_rezerwacji = nowa_podroz.nr_rezerwacji
 
         index = -1
         literki = ['A', 'B', 'C', 'D', 'E', 'F']
@@ -1228,7 +1235,11 @@ def dodaj_podroz(lista_lotow, cena, user_id):
                                          kolejnosc=index, podroz_nr_rezerwacji=nr_rezerwacji,
                                          realizacja_lotu_id_rlotu=id_lotu)
             db_session.add(nowe_polaczenie)
-        return ["success", "Podróż została dodana"]
+            db_session.commit()
+        if rabat:
+            usun_rabat(rabat)
+        print(dodaj_rabat(user_id=user_id, znizka=5, data_waznosci=datetime.datetime.strftime((datetime.datetime.now()+datetime.timedelta(days=30)), '%Y-%m-%d')))
+        return ["success", f"Podróż została dodana, Numer twojej rezerwacji: {nr_rezerwacji}"]
 
 
 def usun_podroz(nr_rezerwacji):
@@ -1256,6 +1267,6 @@ db.create_all()
 
 if __name__ == '__main__':
     # db.drop_all()
-    print(dodaj_podroz([121], 1500, 4))
+    print(dodaj_podroz([5], 1500, 1))
     # usun_podroz(10)
     pass
