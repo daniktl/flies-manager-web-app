@@ -125,7 +125,6 @@ class Rabat(db.Model):
     kod = Column('kod', String(10), primary_key=True, nullable=False)
     procent = Column('procent', Integer, nullable=False)
     data_waznosci = Column('data_waznosci', DateTime, nullable=False)
-    data_rezerwacji = Column('data_rezerwacji', DateTime, nullable=False)
 
     user_id = Column("user_id_u", Integer, ForeignKey(User.user_id), nullable=False)
     user = relationship("User")
@@ -256,6 +255,7 @@ class Podroz(db.Model):
 
     nr_rezerwacji = Column('nr_rezerwacji', Integer, primary_key=True, autoincrement=True)
     cena = Column('cena', Float(2), nullable=False)
+    data_rezerwacji = Column('data_rezerwacji', DateTime, nullable=False)
 
     user_id_u = Column('user_id_u', Integer, ForeignKey(User.user_id), nullable=False)
     user = relationship('User')
@@ -1227,8 +1227,6 @@ def dodaj_podroz(lista_lotow, cena, user_id, rabat=None):
         nowa_podroz = Podroz(cena=cena, user_id_u=user_id, data_rezerwacji=datetime.datetime.now())
         db_session.add(nowa_podroz)
         db_session.commit()
-        # rezerwacje = db_session.query(Podroz). \
-        #     filter(Podroz.user_id_u == user_id).order_by(Podroz.nr_rezerwacji).all()
         nr_rezerwacji = nowa_podroz.nr_rezerwacji
 
         index = -1
@@ -1250,7 +1248,7 @@ def dodaj_podroz(lista_lotow, cena, user_id, rabat=None):
             db_session.commit()
         if rabat:
             usun_rabat(rabat)
-        print(dodaj_rabat(user_id=user_id, znizka=5, data_waznosci=datetime.datetime.strftime((datetime.datetime.now()+datetime.timedelta(days=30)), '%Y-%m-%d')))
+        dodaj_rabat(user_id=user_id, znizka=5, data_waznosci=datetime.datetime.strftime((datetime.datetime.now()+datetime.timedelta(days=30)), '%Y-%m-%d'))
         return ["success", f"Podróż została dodana, Numer twojej rezerwacji: {nr_rezerwacji}"]
 
 
@@ -1278,8 +1276,12 @@ def pokaz_podroz(user_id=None, nr_podrozy=None):
             podroze = []
         return podroze
 
-Rabat.__table__.drop(db.engine)
+
+
+Polaczenie.__table__.drop(db.engine)
+Podroz.__table__.drop(db.engine)
 db.create_all()
+
 
 if __name__ == '__main__':
     # db.drop_all()
