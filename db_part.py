@@ -1207,18 +1207,26 @@ def dodaj_podroz(lista_lotow, cena, user_id):
                 return brak_biletu
 
         nowa_podroz = Podroz(cena=cena, user_id_u=user_id)
-        nr_rezerwacji = nowa_podroz.nr_rezerwacji
         db_session.add(nowa_podroz)
+        rezerwacje = db_session.query(Podroz). \
+            filter(Podroz.user_id_u == user_id).order_by(Podroz.nr_rezerwacji).all()
+        nr_rezerwacji = rezerwacje[-1].nr_rezerwacji
 
         index = -1
+        literki = ['A', 'B', 'C', 'D', 'E', 'F']
         for id_lotu in lista_lotow:
             index += 1
-            nowe_polaczenie = Polaczenie(nr_miejsca=None, bagaz='podręczny',
-                                         kolejnosc=index, podroz_nr_rezerwacji=nr_rezerwacji,
-                                         realizacja_lotu_id_rlotu=id_lotu)
             dany_lot = db_session.query(RealizacjaLotu). \
                 filter(RealizacjaLotu.id_rlotu == id_lotu).first()
+
+            rzad = dany_lot.ilosc_pasazerow // 6 + 1
+            siedzenie = dany_lot.ilosc_pasazerow % 6
+            miejsce = str(rzad) + literki[siedzenie]
             dany_lot.ilosc_pasazerow += 1
+
+            nowe_polaczenie = Polaczenie(nr_miejsca=miejsce, bagaz='pod',
+                                         kolejnosc=index, podroz_nr_rezerwacji=nr_rezerwacji,
+                                         realizacja_lotu_id_rlotu=id_lotu)
             db_session.add(nowe_polaczenie)
         return ["success", "Podróż została dodana"]
 
@@ -1248,5 +1256,6 @@ db.create_all()
 
 if __name__ == '__main__':
     # db.drop_all()
-    print((sprawdz_dostepnosc_biletu(122)))
+    print(dodaj_podroz([121], 1500, 4))
+    # usun_podroz(10)
     pass
