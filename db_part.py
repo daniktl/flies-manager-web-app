@@ -1068,7 +1068,12 @@ def szukaj_podrozy(start_code, finish_code, data_str):
                     wszytskie_trasy[index] = None
                     break
 
-                przesiadka = czas_startu - czas_ladowania
+                if ladowanie[0].start_godzina > ladowanie[0].get_finish_godzina():
+                    diff = datetime.timedelta(days=-1)
+                    przesiadka = czas_startu - czas_ladowania + diff
+                else:
+                    przesiadka = czas_startu - czas_ladowania
+
                 if not min_przesiadka <= przesiadka <= max_przesiadka:
                     wszytskie_trasy[index] = None
                     break
@@ -1164,6 +1169,8 @@ def policz_czas_podrozy(lista_lotow):
     day_int = (end_data - start_date).days
     start = lista_lotow[0][0].harmonogram.start_godzina
     end = lista_lotow[-1][0].harmonogram.get_finish_godzina()
+    if lista_lotow[-1][0].harmonogram.start_godzina > end:
+        day_int += 1
     start_timezone = lista_lotow[0][0].harmonogram.start_lotnisko.strefa_czasowa
     end_timezone = lista_lotow[-1][0].harmonogram.finish_lotnisko.strefa_czasowa
     delta = time_timedelta(start, end, day_int, start_timezone, end_timezone)
@@ -1175,7 +1182,14 @@ def policz_czas_przesiadki(lot1, lot2):
         return None
     end = lot2.harmonogram.start_godzina
     start = lot1.harmonogram.get_finish_godzina()
-    delta = time_timedelta(start, end, 0)
+
+    start_date = lot1.data
+    end_data = lot2.data
+    day_int = (end_data - start_date).days
+    if lot1.harmonogram.start_godzina > lot1.harmonogram.get_finish_godzina():
+        day_int -= 1
+
+    delta = time_timedelta(start, end, day_int)
     return int(delta//60), int(delta % 60)
 
 
@@ -1289,21 +1303,10 @@ def pokaz_podroz(user_id=None, nr_podrozy=None):
         return podroze
 
 
-
-#Polaczenie.__table__.drop(db.engine)
-#Podroz.__table__.drop(db.engine)
 db.create_all()
 
 
 if __name__ == '__main__':
     # db.drop_all()
-    # print(dodaj_podroz([5], 1500, 1))
-    # usun_podroz(10)
-    # print(dodaj_podroz([122], 1500, 5))
-    # print(user_ma_lot(4, 121))
-    # x = szukaj_podrozy("PZN", "DBX", "2020-01-28")
-    # print(x)
-    # policz_czas_podrozy([x[0][0]])
-  #  print(policz_czas_przesiadki(x[0][0][0], x[0][1][0]))
-  #   print(time_timedelta(datetime.time(hour=22, minute=00), datetime.time(hour=12, minute=40), 1, 1, 4)//60)
+
     pass
