@@ -350,7 +350,7 @@ def licz_odleglosc(start, finish):
 #         return liczba
 
 
-def check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, for_edit=False):
+def check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, zasieg, for_edit=False):
     with session_handler() as db_session:
         if not for_edit:
             samolot = db_session.query(Samolot).filter(Samolot.nr_boczny == nr_boczny).first()
@@ -363,15 +363,25 @@ def check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, for_edit
             return ['danger', f"Linia lotnicza {linia_nazwa} nie istnieje. Spróbuj jeszcze raz"]
         if not isinstance(pojemnosc, int):
             if isinstance(pojemnosc, str):
+                if int(pojemnosc) <= 0:
+                    return ['danger', "Pojemnośc powinna być dodatnia"]
                 if not pojemnosc.isnumeric():
                     return ['danger', "Pojemnośc powinna być liczbą"]
             else:
                 return ['danger', "Pojemnośc powinna być liczbą"]
+        if zasieg and not isinstance(zasieg, int):
+            if isinstance(zasieg, str):
+                if int(zasieg) <= 0:
+                    return ['danger', "Zasieg powinien być dodatni"]
+                if not zasieg.isnumeric():
+                    return ['danger', "Zasięg powinien być liczbą"]
+            else:
+                return ['danger', "Zasięg powinien być liczbą"]
         return None
 
 
 def dodaj_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, zasieg=None):
-    error = check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc)
+    error = check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, zasieg)
     if error:
         return error
     with session_handler() as db_session:
@@ -384,7 +394,7 @@ def dodaj_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, zasieg=None):
 
 
 def zmodyfikuj_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, zasieg=None):
-    error = check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, for_edit=True)
+    error = check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, zasieg, for_edit=True)
     if error:
         return error
     with session_handler() as db_session:
@@ -454,6 +464,9 @@ def zmodyfikuj_linie(nazwa, new_nazwa, new_kraj):
         linia = db_session.query(LiniaLotnicza).filter(LiniaLotnicza.nazwa == nazwa).first()
         if not linia:
             return ['danger', "Linia lotnicza z taką nazwą nie istnieje"]
+        nowa_linia = db_session.query(LiniaLotnicza).filter(LiniaLotnicza.nazwa == new_nazwa).first()
+        if nowa_linia:
+            return ['danger', "Linia lotnicza z taką nazwą już istnieje"]
         linia.nazwa = new_nazwa
         linia.kraj = new_kraj
         return ['success', f"Dane o linii {nazwa} zostały zmodyfikowane"]
@@ -538,6 +551,19 @@ def check_data_lotnisko(kod, m_na_mapie, kraj, miasto, strefa_czasowa):
         return ["danger", "Strefa czasowa jest pusta"]
     if not strefa_czasowa.isnumeric():
         return ['danger', "Strefa czasowa musi być liczbą"]
+    if m_na_mapie.find(",") == -1:
+        return ['danger', "Niepoprawny format lokalizacji"]
+    else:
+        x = m_na_mapie.split(",")
+        if len(x) != 2:
+            return ['danger', "Niepoprawny format lokalizacji"]
+        for i in range(len(x)):
+            if not isinstance(x[i], str):
+                return ['danger', "Niepoprawny format lokalizacji"]
+            try:
+                x[i] = float(x[i])
+            except:
+                return ['danger', "Niepoprawny format lokalizacji"]
     return None
 
 
@@ -1003,6 +1029,16 @@ def find_all_routes(source_code, destination_code):
     return all_routes_list
 
 
+def usun_powtorki(lista_tras):
+    for i in range(len(lista_tras)):
+        lista_tras[i] = tuple(lista_tras[i])
+    lista_tras_set = set(lista_tras)
+    lista_tras = list(lista_tras_set)
+    for i in range(len(lista_tras)):
+        lista_tras[i] = list(lista_tras[i])
+    return lista_tras
+
+
 # ############ podroz
 
 def szukaj_podrozy(start_code, finish_code, data_str):
@@ -1016,6 +1052,7 @@ def szukaj_podrozy(start_code, finish_code, data_str):
         if data.date() < teraz.date():
             data = teraz
         wszytskie_trasy = find_all_routes(start_code, finish_code)
+        wszytskie_trasy = usun_powtorki(wszytskie_trasy)
         bezposredni = db_session.query(Harmonogram).filter(Harmonogram.start_lotnisko_nazwa == start_code). \
             filter(Harmonogram.finish_lotnisko_nazwa == finish_code).first()
         if bezposredni is not None and [start_code, finish_code] not in wszytskie_trasy:
@@ -1027,18 +1064,19 @@ def szukaj_podrozy(start_code, finish_code, data_str):
         for trasa in wszytskie_trasy:
             index += 1
             for i in range(len(trasa) - 2):
-                if index == 0:
+                if i == 0:
                     ladowanie = db_session.query(Harmonogram, RealizacjaLotu). \
                         filter(Harmonogram.start_lotnisko_nazwa == trasa[i]). \
                         filter(Harmonogram.finish_lotnisko_nazwa == trasa[i + 1]). \
                         filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
-                        filter(RealizacjaLotu.data == data).first()
+                        filter(RealizacjaLotu.data == data).order_by(Harmonogram.cena_podstawowa).first()
                 else:
                     ladowanie = db_session.query(Harmonogram, RealizacjaLotu). \
                         filter(Harmonogram.start_lotnisko_nazwa == trasa[i]). \
                         filter(Harmonogram.finish_lotnisko_nazwa == trasa[i + 1]). \
                         filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
-                        filter(RealizacjaLotu.data >= data).first()
+                        filter(RealizacjaLotu.data >= data). \
+                        order_by(RealizacjaLotu.data, Harmonogram.cena_podstawowa).first()
 
                 if ladowanie:
                     czas_ladowania = datetime.datetime(100, 1, 1).replace(year=ladowanie[1].data.year,
@@ -1053,7 +1091,8 @@ def szukaj_podrozy(start_code, finish_code, data_str):
                     filter(Harmonogram.start_lotnisko_nazwa == trasa[i + 1]). \
                     filter(Harmonogram.finish_lotnisko_nazwa == trasa[i + 2]). \
                     filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
-                    filter(RealizacjaLotu.data >= data).first()
+                    filter(RealizacjaLotu.data >= data). \
+                    order_by(RealizacjaLotu.data, Harmonogram.cena_podstawowa).first()
 
                 if nastepne_startowanie:
                     czas_startu = datetime.datetime(100, 1, 1).replace(year=nastepne_startowanie[1].data.year,
@@ -1091,13 +1130,15 @@ def szukaj_podrozy(start_code, finish_code, data_str):
                             filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
                             filter(Harmonogram.start_lotnisko_nazwa == trasa[i]). \
                             filter(Harmonogram.finish_lotnisko_nazwa == trasa[i + 1]). \
-                            filter(RealizacjaLotu.data == data).all()
+                            filter(RealizacjaLotu.data == data). \
+                            order_by(RealizacjaLotu.data, Harmonogram.cena_podstawowa).all()
                     else:
                         res = db_session.query(RealizacjaLotu, Harmonogram). \
                             filter(RealizacjaLotu.harmonogram_nr_lotu == Harmonogram.nr_lotu). \
                             filter(Harmonogram.start_lotnisko_nazwa == trasa[i]). \
                             filter(Harmonogram.finish_lotnisko_nazwa == trasa[i + 1]). \
-                            filter(RealizacjaLotu.data >= data).all()
+                            filter(RealizacjaLotu.data >= data). \
+                            order_by(RealizacjaLotu.data, Harmonogram.cena_podstawowa).all()
 
                     if not res:
                         byl_break = True
@@ -1308,5 +1349,5 @@ db.create_all()
 
 if __name__ == '__main__':
     # db.drop_all()
-
+    # szukaj_podrozy("LTN", "PZN", "2020-01-28")
     pass
