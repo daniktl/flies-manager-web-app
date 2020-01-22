@@ -1139,23 +1139,22 @@ def suma_biletow(lista_lotow, pol_only=False):
 def time_timedelta(start, end, day_difference, start_timezone=0, end_timezone=0):
     days2min = day_difference * 24 * 60
     reverse = False
-    print(day_difference)
-    if start > end and day_difference == 0:
-        start, end = end, start
-        reverse = True
-   # print(start, end, day_difference)
-
+    if start > end:
+        if not day_difference:
+            return 0
+        # start, end = end, start
+        # reverse = True
     delta = ((end.hour - end_timezone) - (start.hour - start_timezone)) * 60 + end.minute - start.minute + (
                 end.second - start.second) / 60.0 + days2min
-    print(delta)
+    # print(delta, reverse)
 
     # if day_difference > 0:
     #     return delta
     # print("del1", delta)
-    if reverse and day_difference == 0:
-        delta = 24 * 60 - delta
-    elif reverse and day_difference > 0:
-        delta = day_difference * 24 * 60 - delta
+    # if reverse:
+    #     delta = 24 * 60 - delta
+    # elif reverse and day_difference > 0:
+    #     delta = day_difference * 24 * 60 - delta
     return delta
 
 
@@ -1302,8 +1301,9 @@ if __name__ == '__main__':
     # usun_podroz(10)
     # print(dodaj_podroz([122], 1500, 5))
     # print(user_ma_lot(4, 121))
-    x = szukaj_podrozy("PZN", "DBX", "2020-01-28")
-    print(x)
-    policz_czas_podrozy([x[0][0]])
+    # x = szukaj_podrozy("PZN", "DBX", "2020-01-28")
+    # print(x)
+    # policz_czas_podrozy([x[0][0]])
   #  print(policz_czas_przesiadki(x[0][0][0], x[0][1][0]))
+  #   print(time_timedelta(datetime.time(hour=22, minute=00), datetime.time(hour=12, minute=40), 1, 1, 4)//60)
     pass
