@@ -1136,25 +1136,38 @@ def suma_biletow(lista_lotow, pol_only=False):
     return int(suma)
 
 
-def time_timedelta(start, end, start_timezone=0, end_timezone=0):
+def time_timedelta(start, end, day_difference, start_timezone=0, end_timezone=0):
+    days2min = day_difference * 24 * 60
     reverse = False
-    if start > end:
+    print(day_difference)
+    if start > end and day_difference == 0:
         start, end = end, start
         reverse = True
+   # print(start, end, day_difference)
 
     delta = ((end.hour - end_timezone) - (start.hour - start_timezone)) * 60 + end.minute - start.minute + (
-                end.second - start.second) / 60.0
-    if reverse:
+                end.second - start.second) / 60.0 + days2min
+    print(delta)
+
+    # if day_difference > 0:
+    #     return delta
+    # print("del1", delta)
+    if reverse and day_difference == 0:
         delta = 24 * 60 - delta
+    elif reverse and day_difference > 0:
+        delta = day_difference * 24 * 60 - delta
     return delta
 
 
 def policz_czas_podrozy(lista_lotow):
+    start_date = lista_lotow[0][0].data
+    end_data = lista_lotow[-1][0].data
+    day_int = (end_data - start_date).days
     start = lista_lotow[0][0].harmonogram.start_godzina
     end = lista_lotow[-1][0].harmonogram.get_finish_godzina()
     start_timezone = lista_lotow[0][0].harmonogram.start_lotnisko.strefa_czasowa
     end_timezone = lista_lotow[-1][0].harmonogram.finish_lotnisko.strefa_czasowa
-    delta = time_timedelta(start, end, start_timezone, end_timezone)
+    delta = time_timedelta(start, end, day_int, start_timezone, end_timezone)
     return int(delta//60), int(delta % 60)
 
 
@@ -1163,7 +1176,7 @@ def policz_czas_przesiadki(lot1, lot2):
         return None
     end = lot2.harmonogram.start_godzina
     start = lot1.harmonogram.get_finish_godzina()
-    delta = time_timedelta(start, end)
+    delta = time_timedelta(start, end, 0)
     return int(delta//60), int(delta % 60)
 
 
@@ -1278,8 +1291,8 @@ def pokaz_podroz(user_id=None, nr_podrozy=None):
 
 
 
-Polaczenie.__table__.drop(db.engine)
-Podroz.__table__.drop(db.engine)
+#Polaczenie.__table__.drop(db.engine)
+#Podroz.__table__.drop(db.engine)
 db.create_all()
 
 
@@ -1289,4 +1302,8 @@ if __name__ == '__main__':
     # usun_podroz(10)
     # print(dodaj_podroz([122], 1500, 5))
     # print(user_ma_lot(4, 121))
+    x = szukaj_podrozy("PZN", "DBX", "2020-01-28")
+    print(x)
+    policz_czas_podrozy([x[0][0]])
+  #  print(policz_czas_przesiadki(x[0][0][0], x[0][1][0]))
     pass
