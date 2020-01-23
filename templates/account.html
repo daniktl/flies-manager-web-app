@@ -67,19 +67,22 @@
                         <div class="user-data-block">
                             <div class="key"><label for="user-password">Nowe hasło</label></div>
                             <div class="value">
-                                <input id="user-password" type="password" name="new-password" class="form-control" placeholder="Password1234">
+                                <input id="user-password" type="password" name="new-password" class="form-control"
+                                       placeholder="Password1234">
                             </div>
                         </div>
                         <div class="user-data-block">
                             <div class="key"><label for="user-rpassword">Powtórz hasło</label></div>
                             <div class="value">
-                                <input id="user-rpassword" type="password" name="new-password-repeat" class="form-control" placeholder="Password1234" onkeyup="checkPasswordMatch('user-password', this)">
+                                <input id="user-rpassword" type="password" name="new-password-repeat"
+                                       class="form-control" placeholder="Password1234"
+                                       onkeyup="checkPasswordMatch('user-password', this)">
                             </div>
                         </div>
                         <div class="user-data-block">
-                        <button type="submit" class="btn btn-primary btn-block" name="edit-user">
-                            Wyślij
-                        </button>
+                            <button type="submit" class="btn btn-primary btn-block" name="edit-user">
+                                Wyślij
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -91,70 +94,80 @@
                             Twoje podrózy
                         {% endif %}
                     </div>
+                    {% if not podroze|length %}
+                    <div class="no-content"></div>
+                {% else %}
+                    {% for podroz in podroze %}
 
-                    <table class="table table-sm table-hover">
-                        <thead>
-                        <tr>
-                            <th>
-                                Nr
-                            </th>
-                            <th>
-                                Data
-                            </th>
-                            <th>
-                                Godzina
-                            </th>
-                            <th>
-                                Skąd
-                            </th>
-                            <th>
-                                Dokąd
-                            </th>
-                            <th>
-                                Cena
-                            </th>
-                            <th>
-                                Data zamówienia
-                            </th>
-                            <th>
+                        <div class="account-order-block">
+                            <div class="account-order-header">
+                                <div class="account-order-title">
+                                    Rezerwacja #{{ podroz.nr_rezerwacji }}
+                                </div>
+                                <div class="account-order-date">
+                                    zrealizowane w dniu {{ podroz.get_data_rezerwacji() }}
+                                </div>
+                            </div>
+                            <div class="account-order-subtitle">{{ podroze[podroz][0].realizacja_lotu.get_from() }}
+                                - {{ podroze[podroz][-1].realizacja_lotu.get_to() }} w
+                                dniu {{ podroze[podroz][0].realizacja_lotu.get_data_show() }}</div>
+                            <div class="account-order-list">
+                                {% for idx, polaczenie in enumerate(podroze[podroz]) %}
+                                    <div class="account-order-item">
+                                        <div class="account-order-left">
+                                            <div class="account-order-key">
+                                                <div>Z</div>
+                                                <div>Do</div>
+                                            </div>
+                                            <div class="account-order-value">
+                                                <div class="account-order-item-from">{{ polaczenie.realizacja_lotu.get_time_show() }} {{ polaczenie.realizacja_lotu.get_from() }}</div>
+                                                <div class="account-order-item-to">{{ polaczenie.realizacja_lotu.get_finish_show() }} {{ polaczenie.realizacja_lotu.get_to() }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="account-order-middle">
+                                            <div class="account-order-key">
+                                                <div>Miejsce</div>
+                                                <div>Bagaż</div>
+                                            </div>
+                                            <div class="account-order-value">
+                                                <div>{{ polaczenie.nr_miejsca }}</div>
+                                                <div>{{ polaczenie.get_bagaz_show() }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="account-order-right">
+                                            <div class="account-order-key">
+                                                <div>Trwanie lotu</div>
+                                            </div>
+                                            <div class="account-order-value">
+                                                <div>{{ polaczenie.realizacja_lotu.get_czas_trwania()[0] }}h {{ polaczenie.realizacja_lotu.get_czas_trwania()[1] }}min</div>
+                                            </div>
+                                        </div>
+                                        <div class="account-order-right">
 
-                            </th>
+                                        </div>
+                                    </div>
+                                    {% if polaczenie != podroze[podroz][-1] %}
+                                        <div class="shift {% if czas_przesiadki(podroze[podroz][idx].realizacja_lotu, podroze[podroz][idx + 1].realizacja_lotu)[0] < 1 %}danger{% endif %}">
+                                            przesiadka {{ czas_przesiadki(podroze[podroz][idx].realizacja_lotu, podroze[podroz][idx + 1].realizacja_lotu)[0] }}h {{ czas_przesiadki(podroze[podroz][idx].realizacja_lotu, podroze[podroz][idx + 1].realizacja_lotu)[1] }}min
+                                            w {{ podroze[podroz][idx].realizacja_lotu.get_to() }}</div>
+                                    {% endif %}
+                                {% endfor %}
 
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for podroz in podroze %}
-                        <tr>
-                            <th>
-                                {{ podroz.nr_rezerwacji }}
-                            </th>
-                            <th>
-                                27.01.2020
-                            </th>
-                            <th>
-                                10:15
-                            </th>
-                            <th>
-                                Poznań
-                            </th>
-                            <th>
-                                Warszawa
-                            </th>
-                            <th>
-                                {{ podroz.cena }}zł
-                            </th>
-                            <th>
-                                1.1.2019
-                            </th>
-                            <th>
-                                <button class="more-button action-button"></button>
-                            </th>
+                            </div>
+                            <div class="account-order-footer">
+                                {% if podroze[podroz][0].realizacja_lotu.expired() %}
+                                    <button class="btn btn-warning" data-toggle="modal"
+                                                data-target="#modal-podroz-remove-{{ podroz.nr_rezerwacji }}">Remove order</button>
+                                {% else %}
+                                     <button class="btn btn-danger" data-toggle="modal"
+                                                data-target="#modal-podroz-cancel-{{ podroz.nr_rezerwacji }}">Cancel order</button>
+                                {% endif %}
+                            </div>
+                        </div>
 
-                        </tr>
-                        {% endfor %}
-                        </tbody>
 
-                    </table>
+                    {% endfor %}
+                {% endif %}
 
                 </div>
                 <div class="tab-pane fade" id="list-messages" role="tabpanel">
@@ -316,5 +329,56 @@
             </div>
 
         {% endfor %}
+
+    {% for podroz in podroze %}
+
+        <div class="modal fade" id="modal-podroz-cancel-{{ podroz.nr_rezerwacji }}" tabindex="-1" role="dialog"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <form class="modal-content" method="post" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalCenterTitle">Rezerwacja #{{ podroz.nr_rezerwacji }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Napewno chcesz anulować rezerwację o numerze {{ podroz.nr_rezerwacji }}?<br>
+                            Nie dostaniesz żadnych zwrotów za to, natomiast nie będziezs mógł już tego przewrócić
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-danger" name="cancel-podroz" value="{{ podroz.nr_rezerwacji }}">
+                                Usuń
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+         <div class="modal fade" id="modal-podroz-remove-{{ podroz.nr_rezerwacji }}" tabindex="-1" role="dialog"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <form class="modal-content" method="post" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalCenterTitle">Rezerwacja #{{ podroz.nr_rezerwacji }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Napewno chcesz usunąć z listy zakupów rezerwację o numerze {{ podroz.nr_rezerwacji }}?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-danger" name="remove-podroz" value="{{ podroz.nr_rezerwacji }}">
+                                Usuń
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+    {% endfor %}
 
 {% endblock %}

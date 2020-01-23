@@ -56,7 +56,7 @@
 
 {% block content %}
     {% if isinstance(result, list) %}
-        <div class="subsection-header">Wyniki wyszukiwań
+        <div class="subsection-header">Wyniki wyszukiwania
             <a style="font-size: 1.3rem; font-weight: 400">({{ list(filter(check_city_code(request_data["from"]), lotniska))[0].miasto }} - {{ list(filter(check_city_code(request_data["to"]), lotniska))[0].miasto }} {{ request_data["go-date"] }})</a>
         </div>
         {% if result|length == 0 %}
@@ -121,7 +121,7 @@
                                         </div>
                                     </div>
                                     {% if polaczenie != option[-1] %}
-                                        <div class="shift {% if czas_przesiadki(option[idx][0], option[idx + 1][0])[0] < 1 %}danger{% endif %}">przesiadka {{ czas_przesiadki(option[idx][0], option[idx + 1][0])[0] }}h {{ czas_przesiadki(option[idx][0], option[idx + 1][0])[1] }}min</div>
+                                        <div class="shift {% if czas_przesiadki(option[idx][0], option[idx + 1][0])[0] < 1 %}danger{% endif %}">przesiadka {{ czas_przesiadki(option[idx][0], option[idx + 1][0])[0] }}h {{ czas_przesiadki(option[idx][0], option[idx + 1][0])[1] }}min w {{ option[idx][0].harmonogram.finish_lotnisko.miasto }}</div>
                                     {% endif %}
                                 {% endfor %}
                             {% if user_type == "user" %}

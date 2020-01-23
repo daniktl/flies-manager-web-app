@@ -212,6 +212,10 @@ def account(user_id=None):
             notification = zmodyfikuj_user(user_id=user_id, imie=req['imie'], nazwisko=req['nazwisko'],
                                            email=req['email'], new_password=req['new-password'],
                                            new_r_password=req['new-password-repeat'])
+        elif "cancel-podroz" in req:
+            notification = usun_podroz(nr_rezerwacji=req['cancel-podroz'])
+        elif "remove-podroz" in req:
+            notification = usun_podroz(nr_rezerwacji=req['cancel-podroz'])
     admin = False
     u_id = get_current_user_id()
     if not isinstance(user_id, type(None)):
@@ -220,7 +224,13 @@ def account(user_id=None):
         user = pokaz_user(user_id=u_id)
         admin = True
     rabaty = pokaz_rabaty(user.user_id)
-    podroze = pokaz_podroz(user_id=user.user_id)
+    podroze_tmp = pokaz_podroz(user_id=user.user_id)
+    podroze = {}
+    for podroz in podroze_tmp:
+        if podroz[0] not in podroze.keys():
+            podroze[podroz[0]] = [podroz[1]]
+        else:
+            podroze[podroz[0]].append(podroz[1])
     return render_template('account.html', user=user, rabaty=rabaty, u_id=u_id, notification=notification, admin=admin,
                            podroze=podroze)
 

@@ -44,6 +44,12 @@ db = SQLAlchemy(app)
 
 WEEKS_TO_SCHEDULE = 20
 
+type_of_baggage = {
+    "basic":"Bagaż podręczny",
+    "middle":"Bagaż średni",
+    "big":"Duży bagaż"
+}
+
 
 def check_empty(x):
     if isinstance(x, list):
@@ -262,6 +268,9 @@ class Podroz(db.Model):
 
     polaczenie = relationship('Polaczenie', cascade="all")
 
+    def get_data_rezerwacji(self):
+        return datetime.datetime.strftime(self.data_rezerwacji, "%d.%m.%Y")
+
 
 class RealizacjaLotu(db.Model):
     __tablename__ = 'realizacja_lotu'
@@ -285,6 +294,25 @@ class RealizacjaLotu(db.Model):
     def get_data_show(self):
         return datetime.date.strftime(self.data, "%d.%m.%Y")
 
+    def get_time_show(self):
+        return self.harmonogram.get_start_godzina_show()
+
+    def get_finish_show(self):
+        return self.harmonogram.get_finish_godzina_show()
+
+    def get_from(self):
+        return self.harmonogram.start_lotnisko.miasto
+
+    def get_to(self):
+        return self.harmonogram.finish_lotnisko.miasto
+
+    def get_czas_trwania(self):
+        tmp = self.harmonogram.czas_trwania
+        return tmp // 60, tmp % 60
+
+    def expired(self):
+        return self.data < (datetime.datetime.now() - datetime.timedelta(days=1)).date()
+
 
 class Polaczenie(db.Model):
     __tabelname__ = 'polaczenie'
@@ -300,6 +328,9 @@ class Polaczenie(db.Model):
     podroz_nr_rezerwacji = Column('podroz_nr_rezerwacji', Integer,
                                   ForeignKey(Podroz.nr_rezerwacji), primary_key=True, nullable=False)
     podroz = relationship('Podroz')
+
+    def get_bagaz_show(self):
+        return type_of_baggage[self.bagaz] if self.bagaz in type_of_baggage else type_of_baggage['basic']
 
 
 ##############################################
@@ -339,6 +370,7 @@ def licz_odleglosc(start, finish):
         return 0
 
 
+
 # ######### samoloty
 
 '''
@@ -351,6 +383,8 @@ def licz_odleglosc(start, finish):
 
 
 def check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, zasieg, for_edit=False):
+    if check_empty([nr_boczny, marka, model, linia_nazwa, pojemnosc, zasieg]):
+        return ["danger", "Wypełnij wszystkie obowiązkowe pola"]
     with session_handler() as db_session:
         if not for_edit:
             samolot = db_session.query(Samolot).filter(Samolot.nr_boczny == nr_boczny).first()
@@ -371,21 +405,22 @@ def check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, zasieg, 
                 return ['danger', "Pojemnośc powinna być liczbą"]
         if zasieg and not isinstance(zasieg, int):
             if isinstance(zasieg, str):
-                if int(zasieg) <= 0:
-                    return ['danger', "Zasieg powinien być dodatni"]
                 if not zasieg.isnumeric():
                     return ['danger', "Zasięg powinien być liczbą"]
+                if int(zasieg) <= 0:
+                    return ['danger', "Zasieg powinien być dodatni"]
             else:
                 return ['danger', "Zasięg powinien być liczbą"]
         return None
 
 
-def dodaj_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, zasieg=None):
+def dodaj_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, zasieg):
     error = check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, zasieg)
     if error:
         return error
     with session_handler() as db_session:
         pojemnosc = int(pojemnosc)
+        zasieg = int(zasieg)
         nowy_samolot = Samolot(nr_boczny=nr_boczny, marka=marka, model=model, pojemnosc=pojemnosc,
                                linia_lotnicza_nazwa=linia_nazwa, max_zasieg=zasieg)
         db_session.add(nowy_samolot)
@@ -406,7 +441,7 @@ def zmodyfikuj_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, zasieg=N
         samolot.model = model
         samolot.pojemnosc = pojemnosc
         samolot.linia_lotnicza_nazwa = linia_nazwa
-        samolot.max_zasieg = zasieg
+        samolot.max_zasieg = zasieg if zasieg else samolot.max_zasieg
         return ['success', f"Dane o samolocie {nr_boczny} zostały zmodyfikowane"]
 
 
@@ -429,6 +464,11 @@ def pokaz_samoloty(linia=None):
 
 
 # ######## linie
+
+
+def check_data_linie():
+    # TODO (don't forger about check empty)
+    pass
 
 
 def dodaj_linie(nazwa, kraj=None, data_zalozenia=datetime.datetime.now()):
@@ -487,6 +527,8 @@ def pokaz_pilotow(linia=None):
 def check_data_pilot(imie, nazwisko):
     if not isinstance(imie, str) or not isinstance(nazwisko, str):
         return ['danger', "Niepoprawny format dla pól imię i nazwisko"]
+    if check_empty([imie, nazwisko]):
+        return ["danger", "Pola imię i nazwisko muszą być wypełnione"]
     if len(imie) > 30 or len(nazwisko) > 30:
         return ['danger', "Imię lub nazwisko ma długość większą niż to jest dozwolone (30 znaków)"]
 
@@ -537,7 +579,7 @@ def pokaz_lotniska():
 
 
 def check_data_lotnisko(kod, m_na_mapie, kraj, miasto, strefa_czasowa):
-    if any([x == "" for x in [kod, m_na_mapie, kraj, miasto, strefa_czasowa]]):
+    if check_empty([kod, m_na_mapie, kraj, miasto, strefa_czasowa]):
         return ['danger', "Żadne pole nie może być puste"]
     if len(kod) > 4:
         return ["danger", "Długość kodu międzynarodowego jest większa od dozwolonej (4)"]
@@ -785,6 +827,8 @@ def zmodyfikuj_user(user_id, imie, nazwisko, email, new_password, new_r_password
 
 
 def check_user_credentials(email, password):
+    if check_empty([email, password]):
+        return None, ["danger", "Żadne pole nie może być puste"]
     with session_handler() as db_session:
         user = db_session.query(User).filter(User.email == email).first()
         if not user:
@@ -798,10 +842,15 @@ def check_user_credentials(email, password):
 
 def dodaj_rabat(user_id, znizka, data_waznosci):
     with session_handler() as db_session:
+        if check_empty([znizka, data_waznosci]):
+            return ["danger", "Procent zniżki oraz data ważności nie mogą być puste"]
         kod_rabatowy = ''.join(random.choice(ascii_letters) for i in range(10)).upper()
         while db_session.query(Rabat).filter(Rabat.kod == kod_rabatowy).first():
             kod_rabatowy = ''.join(random.choice(ascii_letters) for i in range(10)).upper()
-        data_formated = datetime.datetime.strptime(data_waznosci, "%Y-%m-%d").date()
+        try:
+            data_formated = datetime.datetime.strptime(data_waznosci, "%Y-%m-%d").date()
+        except:
+            return ["danger", "Niepoprawny format daty ważności"]
         if data_formated < datetime.datetime.now().date():
             return ["danger", "Data ważności upłyneła przed chwilą... Spróbuj ponownie"]
         success = db_session.execute(func.dodaj_rabat(user_id, kod_rabatowy, znizka, data_formated)).scalar()
@@ -841,11 +890,6 @@ def usun_rabat(kod):
 def check_data_realizacje_lotu(data, numer_lotu, samolot, pilot1, pilot2):
     if check_empty([data, numer_lotu, samolot, pilot1, pilot2]):
         return ["danger", "Wszystkie atrybuty są obowiązkowe"]
-    try:
-        data_f = datetime.datetime.strptime(data, "%d")
-
-    except:
-        return ['danger', "Niepoprawny format daty"]
 
 
 def pokaz_realizacje_lotow(data=None, start=None, finish=None, nr_lotu=None, old_too=False, id_rlotu=None):
@@ -1277,7 +1321,7 @@ def user_ma_lot(user_id, id_rlotu):
             return ['danger', 'Nie możesz kupić dwóch biletów na jeden lot!']
 
 
-def dodaj_podroz(lista_lotow, cena, user_id, rabat=None):
+def dodaj_podroz(lista_lotow, cena, user_id, bagaz='basic', rabat=None):
     with session_handler() as db_session:
         error = check_data_podroz(lista_lotow, cena, user_id)
         if error:
@@ -1308,7 +1352,7 @@ def dodaj_podroz(lista_lotow, cena, user_id, rabat=None):
             miejsce = str(rzad) + literki[siedzenie]
             dany_lot.ilosc_pasazerow += 1
 
-            nowe_polaczenie = Polaczenie(nr_miejsca=miejsce, bagaz='pod',
+            nowe_polaczenie = Polaczenie(nr_miejsca=miejsce, bagaz='basic',
                                          kolejnosc=index, podroz_nr_rezerwacji=nr_rezerwacji,
                                          realizacja_lotu_id_rlotu=id_lotu)
             db_session.add(nowe_polaczenie)
@@ -1350,4 +1394,14 @@ db.create_all()
 if __name__ == '__main__':
     # db.drop_all()
     # szukaj_podrozy("LTN", "PZN", "2020-01-28")
+    pass
+    # print(dodaj_podroz([5], 1500, 1))
+    # usun_podroz(10)
+    # print(dodaj_podroz([122], 1500, 5))
+    # print(user_ma_lot(4, 121))
+    # x = szukaj_podrozy("PZN", "DBX", "2020-01-28")
+    # print(x)
+    # policz_czas_podrozy([x[0][0]])
+  #  print(policz_czas_przesiadki(x[0][0][0], x[0][1][0]))
+  #   print(time_timedelta(datetime.time(hour=22, minute=00), datetime.time(hour=12, minute=40), 1, 1, 4)//60)
     pass
