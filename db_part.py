@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, String, Integer, Column, DateTime, Boolean, Text, desc, func, ForeignKey, \
-    ForeignKeyConstraint, Float, Time, Date
+    ForeignKeyConstraint, Float, Time, Date, PrimaryKeyConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exc import IntegrityError, DisconnectionError, ProgrammingError, OperationalError
 from sqlalchemy.orm import sessionmaker, relationship, scoped_session, backref
@@ -132,7 +132,7 @@ class Rabat(db.Model):
     procent = Column('procent', Integer, nullable=False)
     data_waznosci = Column('data_waznosci', DateTime, nullable=False)
 
-    user_id = Column("user_id_u", Integer, ForeignKey(User.user_id), nullable=False)
+    user_id = Column("user_id_u", Integer, ForeignKey(User.user_id, ondelete='CASCADE'), nullable=False)
     user = relationship("User")
 
     def get_data_waznosci(self):
@@ -177,7 +177,7 @@ class Samolot(db.Model):
     przebieg = Column('przebieg', Integer, default=0)
     pojemnosc = Column('pojemnosc', Integer, nullable=False)
 
-    linia_lotnicza_nazwa = Column('linia_lotnicza_nazwa', String(25), ForeignKey(LiniaLotnicza.nazwa), nullable=False)
+    linia_lotnicza_nazwa = Column('linia_lotnicza_nazwa', String(25), ForeignKey(LiniaLotnicza.nazwa, ondelete='CASCADE'), nullable=False)
     linia_lotnicza = relationship('LiniaLotnicza')
     realizacja_lotu = relationship('RealizacjaLotu')
 
@@ -190,11 +190,11 @@ class Pilot(db.Model):
     nazwisko = Column('nazwisko', String(30), nullable=False)
     data_dolaczenia = Column('data_dolaczenia', DateTime)
 
-    linia_lotnicza_nazwa = Column('linia_lotnicza_nazwa', String(25), ForeignKey(LiniaLotnicza.nazwa), nullable=False)
+    linia_lotnicza_nazwa = Column('linia_lotnicza_nazwa', String(25), ForeignKey(LiniaLotnicza.nazwa, ondelete='CASCADE'), nullable=False)
     linia_lotnicza = relationship('LiniaLotnicza')
 
-    realizacja1 = relationship("RealizacjaLotu", foreign_keys="[RealizacjaLotu.pilot_id_pil1]", cascade="all")
-    realizacja2 = relationship("RealizacjaLotu", foreign_keys="[RealizacjaLotu.pilot_id_pil2]", cascade="all")
+    realizacja1 = relationship("RealizacjaLotu", foreign_keys="[RealizacjaLotu.pilot_id_pil1]")
+    realizacja2 = relationship("RealizacjaLotu", foreign_keys="[RealizacjaLotu.pilot_id_pil2]")
 
     def get_data_dolaczenia(self):
         return self.data_dolaczenia.date()
@@ -209,10 +209,8 @@ class Lotnisko(db.Model):
     miasto = Column('miasto', String(20), nullable=False)
     strefa_czasowa = Column('strefa_czasowa', Integer, nullable=False)
 
-    harmonogram_start = relationship("Harmonogram", foreign_keys="[Harmonogram.start_lotnisko_nazwa]",
-                                     cascade="all")
-    harmonogram_finish = relationship("Harmonogram", foreign_keys="[Harmonogram.finish_lotnisko_nazwa]",
-                                      cascade="all")
+    harmonogram_start = relationship("Harmonogram", foreign_keys="[Harmonogram.start_lotnisko_nazwa]")
+    harmonogram_finish = relationship("Harmonogram", foreign_keys="[Harmonogram.finish_lotnisko_nazwa]")
 
 
 class Harmonogram(db.Model):
@@ -225,17 +223,17 @@ class Harmonogram(db.Model):
     # finish_godzina = Column("finish_godzina", Time, nullable=False)
     cena_podstawowa = Column("cena_podstawowa", Float(precision=2), nullable=False)
 
-    start_lotnisko_nazwa = Column("start_lotnisko", ForeignKey(Lotnisko.kod), nullable=False)
+    start_lotnisko_nazwa = Column("start_lotnisko", ForeignKey(Lotnisko.kod, ondelete='CASCADE'), nullable=False)
     start_lotnisko = relationship("Lotnisko", foreign_keys=[start_lotnisko_nazwa])
 
-    finish_lotnisko_nazwa = Column("finish_lotnisko", ForeignKey(Lotnisko.kod), nullable=False)
+    finish_lotnisko_nazwa = Column("finish_lotnisko", ForeignKey(Lotnisko.kod, ondelete='CASCADE'), nullable=False)
     finish_lotnisko = relationship("Lotnisko", foreign_keys=[finish_lotnisko_nazwa],
                                    backref=backref("finish_lotnisko_nazwa"))
 
-    linia_lotnicza_nazwa = Column("linia_lotnicza", ForeignKey(LiniaLotnicza.nazwa), nullable=False)
+    linia_lotnicza_nazwa = Column("linia_lotnicza", ForeignKey(LiniaLotnicza.nazwa, ondelete='CASCADE'), nullable=False)
     linia_lotnicza = relationship("LiniaLotnicza", foreign_keys=[linia_lotnicza_nazwa])
 
-    realizacja_lotu = relationship("RealizacjaLotu", cascade="all")
+    realizacja_lotu = relationship("RealizacjaLotu")
 
     def get_dzien_tygodnia(self):
         return days_pl[self.dzien_tygodnia]
@@ -263,10 +261,10 @@ class Podroz(db.Model):
     cena = Column('cena', Float(2), nullable=False)
     data_rezerwacji = Column('data_rezerwacji', DateTime, nullable=False)
 
-    user_id_u = Column('user_id_u', Integer, ForeignKey(User.user_id), nullable=False)
+    user_id_u = Column('user_id_u', Integer, ForeignKey(User.user_id, ondelete='CASCADE'), nullable=False)
     user = relationship('User')
 
-    polaczenie = relationship('Polaczenie', cascade="all")
+    polaczenie = relationship('Polaczenie')
 
     def get_data_rezerwacji(self):
         return datetime.datetime.strftime(self.data_rezerwacji, "%d.%m.%Y")
@@ -279,16 +277,16 @@ class RealizacjaLotu(db.Model):
     data = Column('data', Date, nullable=False)
     ilosc_pasazerow = Column('ilosc_pasazerow', Integer, nullable=False)
 
-    harmonogram_nr_lotu = Column('harmonogram_nr_lotu', String(9), ForeignKey(Harmonogram.nr_lotu), nullable=False)
+    harmonogram_nr_lotu = Column('harmonogram_nr_lotu', String(9), ForeignKey(Harmonogram.nr_lotu, ondelete='CASCADE'), nullable=False)
     harmonogram = relationship('Harmonogram')
 
-    samolot_nr_boczny = Column('samolot_nr_boczny', String(10), ForeignKey(Samolot.nr_boczny))
+    samolot_nr_boczny = Column('samolot_nr_boczny', String(10), ForeignKey(Samolot.nr_boczny, ondelete='SET NULL'))
     samolot = relationship('Samolot')
 
-    pilot_id_pil1 = Column("pilot_id_pil1", Integer, ForeignKey(Pilot.id_pil))
+    pilot_id_pil1 = Column("pilot_id_pil1", Integer, ForeignKey(Pilot.id_pil, ondelete='SET NULL'))
     pilot1 = relationship("Pilot", foreign_keys=[pilot_id_pil1])
 
-    pilot_id_pil2 = Column("pilot_id_pil2", Integer, ForeignKey(Pilot.id_pil))
+    pilot_id_pil2 = Column("pilot_id_pil2", Integer, ForeignKey(Pilot.id_pil, ondelete='SET NULL'))
     pilot2 = relationship("Pilot", foreign_keys=[pilot_id_pil2], backref=backref("pilot_id_pil2"))
 
     def get_data_show(self):
@@ -315,6 +313,7 @@ class RealizacjaLotu(db.Model):
 
 
 class Polaczenie(db.Model):
+    __table__ = polaczenia
     __tabelname__ = 'polaczenie'
 
     nr_miejsca = Column('nr_miejsca', String(3), nullable=False)
@@ -322,12 +321,15 @@ class Polaczenie(db.Model):
     kolejnosc = Column('kolejnosc', Integer, nullable=False)
 
     realizacja_lotu_id_rlotu = Column('realizacja_lotu_id_rlotu',
-                                      Integer, ForeignKey(RealizacjaLotu.id_rlotu), primary_key=True, nullable=False)
+                                      Integer, ForeignKey(RealizacjaLotu.id_rlotu, ondelete='SET NULL'))
     realizacja_lotu = relationship('RealizacjaLotu')
 
     podroz_nr_rezerwacji = Column('podroz_nr_rezerwacji', Integer,
-                                  ForeignKey(Podroz.nr_rezerwacji), primary_key=True, nullable=False)
+                                  ForeignKey(Podroz.nr_rezerwacji, ondelete='CASCADE'), nullable=False)
     podroz = relationship('Podroz')
+
+    __mapper_args__ = {'primary_key': ['polaczenie.realizacja_lotu_id_rlotu', 'polaczenie.podroz_nr_rezerwacji']}
+   # PrimaryKeyConstraint('realizacja_lotu_id_rlotu', 'podroz_nr_rezerwacji')
 
     def get_bagaz_show(self):
         return type_of_baggage[self.bagaz] if self.bagaz in type_of_baggage else type_of_baggage['basic']
@@ -1388,11 +1390,11 @@ def pokaz_podroz(user_id=None, nr_podrozy=None):
         return podroze
 
 
-db.create_all()
+#db.create_all()
 
 
 if __name__ == '__main__':
-    # db.drop_all()
+    db.drop_all()
     # szukaj_podrozy("LTN", "PZN", "2020-01-28")
     pass
     # print(dodaj_podroz([5], 1500, 1))
