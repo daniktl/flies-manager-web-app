@@ -676,8 +676,16 @@ html {
 }
 
 .account-order-item {
-    margin: 20px 0;
+    margin-top: 30px;
     display: flex;
+    margin-bottom: 10px;
+}
+
+.account-order-footer {
+    margin-bottom: 10px;
+    font-weight: 300;
+    font-size: 18px;
+    text-align: right;
 }
 
 .account-order-left {
