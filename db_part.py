@@ -798,7 +798,13 @@ def usun_user(user_id):
         else:
             name = user.imie
             surname = user.nazwisko
+            podroze = db_session.query(Podroz).filter(Podroz.user_id_u == user_id).all()
+            if podroze:
+                for podroz in podroze:
+                    nr_podrozy = podroz.nr_rezerwacji
+                    odejmij_pasazera(nr_podrozy)
             db_session.delete(user)
+            db_session.commit()
             return ["success", f"Użytkownik {name} {surname} został usunięty"]
 
 
@@ -1367,7 +1373,10 @@ def usun_podroz(nr_rezerwacji):
         if not podroz:
             return ['danger', 'Podróż już została usunięta lub nie istenieje']
         else:
+            odejmij_pasazera(nr_rezerwacji)
+            db_session.commit()
             db_session.delete(podroz)
+            db_session.commit()
             return ['success', "Podróż została usunięta"]
 
 
@@ -1386,6 +1395,19 @@ def pokaz_podroz(user_id=None, nr_podrozy=None):
         return podroze
 
 
+def odejmij_pasazera(nr_podrozy):
+    with session_handler() as db_session:
+        polaczenia = db_session.query(Polaczenie.realizacja_lotu_id_rlotu). \
+            filter(Polaczenie.podroz_nr_rezerwacji == nr_podrozy).all()
+        if polaczenia:
+            for i in polaczenia:
+                i = i[0]
+                realizacja = db_session.query(RealizacjaLotu).filter(RealizacjaLotu.id_rlotu == i).first()
+                if realizacja:
+                    realizacja.ilosc_pasazerow -= 1
+                    db_session.commit()
+
+
 def create():
     db.create_all()
     dodaj_user('admin','admin','admin@admin.pl','QWErty123','QWErty123','admin')
@@ -1397,6 +1419,11 @@ def create():
     dodaj_samolot("W54875","Boeaing","737","Wizz",120,15000)
     dodaj_samolot("W54844","Boeaing","737","Wizz",120,15000)
     dodaj_pilota("Szymon", "Michalak", "Wizz")
+    dodaj_pilota("Sebastian", "Marciniak", "Wizz")
+    dodaj_harmonogram("W1234546", "Wizz", "WAW", "PZN", "0", "12:00", 120, 60.0)
+    zauktualizuj_realizacje_lotow()
+    for i in range (1,21):
+        zmodyfikuj_realizacje_lotu(i,"W54875",1,2)
 
 
 if __name__ == '__main__':
