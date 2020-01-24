@@ -224,11 +224,10 @@ class Harmonogram(db.Model):
     cena_podstawowa = Column("cena_podstawowa", Float(precision=2), nullable=False)
 
     start_lotnisko_nazwa = Column("start_lotnisko", ForeignKey(Lotnisko.kod, ondelete='CASCADE'), nullable=False)
-    start_lotnisko = relationship("Lotnisko", foreign_keys=[start_lotnisko_nazwa])
+    start_lotnisko = relationship("Lotnisko", foreign_keys=[start_lotnisko_nazwa], backref=backref("start_lotnisko_nazwa", cascade="all,delete"))
 
     finish_lotnisko_nazwa = Column("finish_lotnisko", ForeignKey(Lotnisko.kod, ondelete='CASCADE'), nullable=False)
-    finish_lotnisko = relationship("Lotnisko", foreign_keys=[finish_lotnisko_nazwa],
-                                   backref=backref("finish_lotnisko_nazwa"))
+    finish_lotnisko = relationship("Lotnisko", foreign_keys=[finish_lotnisko_nazwa], backref=backref("finish_lotnisko_nazwa", cascade="all,delete"))
 
     linia_lotnicza_nazwa = Column("linia_lotnicza", ForeignKey(LiniaLotnicza.nazwa, ondelete='CASCADE'), nullable=False)
     linia_lotnicza = relationship("LiniaLotnicza", foreign_keys=[linia_lotnicza_nazwa])
@@ -278,7 +277,7 @@ class RealizacjaLotu(db.Model):
     ilosc_pasazerow = Column('ilosc_pasazerow', Integer, nullable=False)
 
     harmonogram_nr_lotu = Column('harmonogram_nr_lotu', String(9), ForeignKey(Harmonogram.nr_lotu, ondelete='CASCADE'), nullable=False)
-    harmonogram = relationship('Harmonogram')
+    harmonogram = relationship('Harmonogram', backref=backref("harmonogram_nr_lotu", cascade="all,delete"))
 
     samolot_nr_boczny = Column('samolot_nr_boczny', String(10), ForeignKey(Samolot.nr_boczny, ondelete='SET NULL'))
     samolot = relationship('Samolot')
@@ -313,23 +312,20 @@ class RealizacjaLotu(db.Model):
 
 
 class Polaczenie(db.Model):
-    __table__ = polaczenia
     __tabelname__ = 'polaczenie'
 
+    sztuczne_id = Column('sztuczne_id', Integer, primary_key=True, autoincrement=True)
     nr_miejsca = Column('nr_miejsca', String(3), nullable=False)
     bagaz = Column('bagaz', String(5), nullable=False)
     kolejnosc = Column('kolejnosc', Integer, nullable=False)
 
-    realizacja_lotu_id_rlotu = Column('realizacja_lotu_id_rlotu',
-                                      Integer, ForeignKey(RealizacjaLotu.id_rlotu, ondelete='SET NULL'))
+    realizacja_lotu_id_rlotu = Column('realizacja_lotu_id_rlotu', Integer,
+                                      ForeignKey(RealizacjaLotu.id_rlotu, ondelete='SET NULL'))
     realizacja_lotu = relationship('RealizacjaLotu')
 
     podroz_nr_rezerwacji = Column('podroz_nr_rezerwacji', Integer,
                                   ForeignKey(Podroz.nr_rezerwacji, ondelete='CASCADE'), nullable=False)
-    podroz = relationship('Podroz')
-
-    __mapper_args__ = {'primary_key': ['polaczenie.realizacja_lotu_id_rlotu', 'polaczenie.podroz_nr_rezerwacji']}
-   # PrimaryKeyConstraint('realizacja_lotu_id_rlotu', 'podroz_nr_rezerwacji')
+    podroz = relationship('Podroz', backref=backref("podroz_nr_rezerwacji", cascade="all,delete"))
 
     def get_bagaz_show(self):
         return type_of_baggage[self.bagaz] if self.bagaz in type_of_baggage else type_of_baggage['basic']
@@ -1390,20 +1386,20 @@ def pokaz_podroz(user_id=None, nr_podrozy=None):
         return podroze
 
 
-#db.create_all()
+def create():
+    db.create_all()
+    dodaj_user('admin','admin','admin@admin.pl','QWErty123','QWErty123','admin')
+    dodaj_user('user','user','user@user.pl','QWErty123','QWErty123','user')
+    dodaj_lotnisko('PZN','45.2, 65.0',"Polska","Poznań","1")
+    dodaj_lotnisko('WAW','40.2, 60.0',"Polska","Warszawa","1")
+    dodaj_lotnisko('LTN','4.2, 0.0',"UK","Londyn","0")
+    dodaj_linie("Wizz")
+    dodaj_samolot("W54875","Boeaing","737","Wizz",120,15000)
+    dodaj_samolot("W54844","Boeaing","737","Wizz",120,15000)
+    dodaj_pilota("Szymon", "Michalak", "Wizz")
 
 
 if __name__ == '__main__':
     db.drop_all()
-    # szukaj_podrozy("LTN", "PZN", "2020-01-28")
-    pass
-    # print(dodaj_podroz([5], 1500, 1))
-    # usun_podroz(10)
-    # print(dodaj_podroz([122], 1500, 5))
-    # print(user_ma_lot(4, 121))
-    # x = szukaj_podrozy("PZN", "DBX", "2020-01-28")
-    # print(x)
-    # policz_czas_podrozy([x[0][0]])
-  #  print(policz_czas_przesiadki(x[0][0][0], x[0][1][0]))
-  #   print(time_timedelta(datetime.time(hour=22, minute=00), datetime.time(hour=12, minute=40), 1, 1, 4)//60)
+    create()
     pass
