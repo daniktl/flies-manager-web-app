@@ -142,7 +142,7 @@ class LiniaLotnicza(db.Model):
     __tablename__ = 'linia_lotnicza'
 
     nazwa = Column('nazwa', String(25), primary_key=True, nullable=False)
-    kraj = Column('kraj', String(25))
+    kraj = Column('kraj', String(30))
     data_zalozenia = Column('data_zalozenie', DateTime, nullable=False)
 
     samolot = relationship('Samolot', cascade="all")
@@ -276,6 +276,7 @@ class RealizacjaLotu(db.Model):
     id_rlotu = Column('id_rlotu', Integer, primary_key=True, autoincrement=True)
     data = Column('data', Date, nullable=False)
     ilosc_pasazerow = Column('ilosc_pasazerow', Integer, nullable=False)
+    check = Column('dystans', Integer, nullable=False, default=0)
 
     harmonogram_nr_lotu = Column('harmonogram_nr_lotu', String(9), ForeignKey(Harmonogram.nr_lotu, ondelete='CASCADE'), nullable=False)
     harmonogram = relationship('Harmonogram', backref=backref("harmonogram_nr_lotu", cascade="all,delete"))
@@ -364,7 +365,7 @@ def licz_odleglosc(start, finish):
         x2_f = float(x2)
         y1_f = float(y1)
         y2_f = float(y2)
-        return ((x2_f - x1_f) ** 2 + (y2_f - y1_f) ** 2) ** (1 / 2) * 100
+        return ((x2_f - x1_f) ** 2 + (y2_f - y1_f) ** 2) ** (1 / 2) * 65
     except (TypeError, ValueError) as e:
         return 0
 
@@ -1022,6 +1023,27 @@ def zauktualizuj_realizacje_lotow():
                                             RealizacjaLotu.harmonogram_nr_lotu == harm_note.nr_lotu).first():
                     new_note = RealizacjaLotu(data=tmp, ilosc_pasazerow=0, harmonogram_nr_lotu=harm_note.nr_lotu)
                     db_session.add(new_note)
+
+        flights = db_session.query(RealizacjaLotu).filter(RealizacjaLotu.data <= datetime.datetime.now().date()). \
+            filter(RealizacjaLotu.check == 0).all()
+        if flights:
+            for flight in flights:
+                sam_nr = flight.samolot_nr_boczny
+                harmonogram = flight.harmonogram_nr_lotu
+                lotnisko_start = db_session.query(Harmonogram.start_lotnisko_nazwa). \
+                    filter(Harmonogram.nr_lotu == harmonogram).scalar()
+                lotnisko_finish = db_session.query(Harmonogram.finish_lotnisko_nazwa). \
+                    filter(Harmonogram.nr_lotu == harmonogram).scalar()
+                start = db_session.query(Lotnisko.m_na_mapie). \
+                    filter(Lotnisko.kod == lotnisko_start).scalar()
+                finish = db_session.query(Lotnisko.m_na_mapie). \
+                    filter(Lotnisko.kod == lotnisko_finish).scalar()
+                samolot = db_session.query(Samolot).filter(Samolot.nr_boczny == sam_nr).first()
+                if samolot:
+                    samolot.przebieg += licz_odleglosc(start, finish)
+                    flight.check = 1
+                    db_session.commit()
+
     return ['success',
             "Wszystkie brakujące realizacje lotów zostali wygenerowane. Uzupełnij ręcznie pilotów i samoloty"]
 
@@ -1408,20 +1430,26 @@ def odejmij_pasazera(nr_podrozy):
 
 def create():
     db.create_all()
-    dodaj_user('admin','admin','admin@admin.pl','QWErty123','QWErty123','admin')
-    dodaj_user('user','user','user@user.pl','QWErty123','QWErty123','user')
-    dodaj_lotnisko('PZN','45.2, 65.0',"Polska","Poznań","1")
-    dodaj_lotnisko('WAW','40.2, 60.0',"Polska","Warszawa","1")
-    dodaj_lotnisko('LTN','4.2, 0.0',"UK","Londyn","0")
-    dodaj_linie("Wizz")
-    dodaj_samolot("W54875","Boeaing","737","Wizz",120,15000)
-    dodaj_samolot("W54844","Boeaing","737","Wizz",120,15000)
+    dodaj_user('admin', 'admin', 'admin@admin.pl', 'QWErty123', 'QWErty123', 'admin')
+    dodaj_user('user', 'user', 'user@user.pl', 'QWErty123', 'QWErty123', 'user')
+    dodaj_lotnisko('PZN', '52.406942, 16.936701', "Polska", "Poznań", "1")
+    dodaj_lotnisko('WAW', '52.226983, 21.013592', "Polska", "Warszawa", "1")
+    dodaj_lotnisko('LTN', '51.489895, -0.127017', "UK", "Londyn", "0")
+    dodaj_linie("Wizz", "Węgry")
+    dodaj_linie("Emirates", "Zjednoczone Emiraty Arabskie")
+    dodaj_samolot("W54875", "Boeaing", "737", "Wizz", 120, 15000)
+    dodaj_samolot("W54844", "Boeaing", "737", "Wizz", 120, 15000)
     dodaj_pilota("Szymon", "Michalak", "Wizz")
-    dodaj_pilota("Sebastian", "Marciniak", "Wizz")
-    dodaj_harmonogram("W1234546", "Wizz", "WAW", "PZN", "0", "12:00", 120, 60.0)
+    dodaj_pilota("Danik", "XXX", "Emirates")
+    dodaj_harmonogram("W1234546", "Wizz", "WAW", "PZN", "0", "12:00", 40, 60.0)
+    dodaj_harmonogram("W1234541", "Wizz", "PZN", "LTN", "0", "15:00", 120, 100.0)
     zauktualizuj_realizacje_lotow()
-    for i in range (1,21):
-        zmodyfikuj_realizacje_lotu(i,"W54875",1,2)
+    for i in range(1, 21):
+        zmodyfikuj_realizacje_lotu(i, "W54875", "", "")
+    for i in range(21, 41):
+        zmodyfikuj_realizacje_lotu(i, "W54844", "", "")
+    dodaj_podroz([23, 3], 100, 2)
+    dodaj_rabat(2, 30, "2021-01-01")
 
 
 if __name__ == '__main__':
