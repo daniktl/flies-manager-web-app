@@ -357,13 +357,12 @@
                             </button>
                         </div>
                         <div class="modal-body">
-                            Czy napewno chcesz usunąć harmonogram o numerze <span class="main-info">{{ wpis.nr_lotu }}</span>
+                            Czy na pewno chcesz usunąć harmonogram o numerze <span class="main-info">{{ wpis.nr_lotu }}</span>
                             z <span class="main-info">{{ wpis.start_lotnisko.miasto }}</span>
                             do <span class="main-info">{{ wpis.finish_lotnisko.miasto }}</span>
                             w dniu <span class="main-info">{{ wpis.get_dzien_tygodnia() }}</span>
-                            o godzinie <span class="main-info">{{ wpis.get_start_godzina_show() }}</span>? To
-                            spowoduje że wszystkie realizacji, związane z tym
-                            wpisem zostaną usunięte, a wszystkie zakupy klientów na te loty anulowane.
+                            o godzinie <span class="main-info">{{ wpis.get_start_godzina_show() }}</span>?
+                            Wszytskie realizacje lotu zostaną odwołane, a zakupione bilety anulowane!
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>

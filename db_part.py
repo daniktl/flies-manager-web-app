@@ -46,7 +46,7 @@ WEEKS_TO_SCHEDULE = 20
 type_of_baggage = {
     "basic": "Bagaż podręczny",
     "middle": "Bagaż średni",
-    "big": "Duży bagaż"
+    "big": "Bagaż duży"
 }
 
 
@@ -457,12 +457,16 @@ def pokaz_samoloty(linia=None):
 # ######## linie
 
 
-def check_data_linie():
-    # TODO (don't forger about check empty)
-    pass
+def check_data_linie(nazwa):
+    if len(nazwa) == 0 or len(nazwa) > 24:
+        return ['danger', "Niepoprawna długość dla nazwy linii lotniczej"]
+    return None
 
 
 def dodaj_linie(nazwa, kraj=None, data_zalozenia=datetime.datetime.now()):
+    error = check_data_linie(nazwa)
+    if error:
+        return error
     with session_handler() as db_session:
         linia_nazwa = db_session.query(LiniaLotnicza).filter(LiniaLotnicza.nazwa == nazwa).first()
         if linia_nazwa:
@@ -495,6 +499,9 @@ def zmodyfikuj_linie(nazwa, new_nazwa, new_kraj):
         linia = db_session.query(LiniaLotnicza).filter(LiniaLotnicza.nazwa == nazwa).first()
         if not linia:
             return ['danger', "Linia lotnicza z taką nazwą nie istnieje"]
+        error = check_data_linie(new_nazwa)
+        if error:
+            return error
         nowa_linia = db_session.query(LiniaLotnicza).filter(LiniaLotnicza.nazwa == new_nazwa).first()
         if nowa_linia:
             return ['danger', "Linia lotnicza z taką nazwą już istnieje"]
@@ -614,7 +621,9 @@ def dodaj_lotnisko(kod, m_na_mapie, kraj, miasto, strefa_czasowa):
 
 
 def zmodyfikuj_lotnisko(kod, nowy_kod, m_na_mapie, kraj, miasto, strefa_czasowa):
-    check_data_lotnisko(nowy_kod, m_na_mapie, kraj, miasto, strefa_czasowa)
+    err = check_data_lotnisko(nowy_kod, m_na_mapie, kraj, miasto, strefa_czasowa)
+    if err:
+        return err
     with session_handler() as db_session:
         ex_lotnisko = db_session.query(Lotnisko).filter(Lotnisko.kod == kod).first()
         if not ex_lotnisko:
@@ -764,7 +773,7 @@ def pokaz_user(user_id=None, email=None):
 def dodaj_user(imie, nazwisko, email, password, password_repeat, u_type):
     if check_empty([imie, nazwisko, email, password, password_repeat, type]):
         return ["danger", "Wszystkie atrybuty są obowiązkowe"]
-    if not isinstance(email, str) or email.index("@") == -1:
+    if not isinstance(email, str) or email.find("@") == -1:
         return ['danger', "Niepoprawny format email"]
     if not re.search(r'\d', password) or not re.search(r'[A-Z]', password) or not re.search(r'[a-z]', password):
         return ["danger",
@@ -773,6 +782,12 @@ def dodaj_user(imie, nazwisko, email, password, password_repeat, u_type):
         return ["danger", "Hasła wprowadzone w dwóch polach nie są równe"]
     if u_type not in ["user", "admin"]:
         return ["danger", "Niepoprawny typ hasła"]
+    if len(imie) > 31:
+        return ['danger', 'Imię jest za długie']
+    if len(nazwisko) > 31:
+        return ['danger', 'Nazwisko jest za długie']
+    if len(email) > 31:
+        return ['danger', 'Email jest za długi']
     with session_handler() as db_session:
         ex_user = db_session.query(User).filter(User.email == email).first()
         if ex_user:
@@ -816,7 +831,7 @@ def zmodyfikuj_user(user_id, imie, nazwisko, email, new_password, new_r_password
                             "Hasło jest bardzo słabe. Musi zawierać conajmniej 1 liczbę, co najmniej 1 dużą literę i co najmniej jedbą małą"]
                 ex_user.haslo = bcrypt.encrypt(new_password)
             else:
-                return ["danger", "Hasło wprowadzone pierwsy raz musi się zgadzać z wprowadzonym drugi raz"]
+                return ["danger", "Hasło wprowadzone pierwszy raz musi się zgadzać z wprowadzonym drugi raz"]
         ex_user.imie = imie
         ex_user.nazwisko = nazwisko
         ex_user.email = email
@@ -970,7 +985,7 @@ def zmodyfikuj_realizacje_lotu(id_rlotu, new_samolot, new_pilot1, new_pilot2):
                     (RealizacjaLotu.pilot_id_pil1 == pil or RealizacjaLotu.pilot_id_pil2 == pil)).first()
                 if not realizacje_pilot_tmp:
                     return ['danger',
-                            f"Pilot {pil_tmp.imie} {pil_tmp.nazwisko} jest już zajęty w tym dniu i nie może latać więcej niż raz w tym samym dniu"]
+                            f"Pilot {pil_tmp.imie} {pil_tmp.nazwisko} jest już zajęty w tym dniu i nie może latać więcej"]
 
         samolot = db_session.query(Samolot).filter(Samolot.nr_boczny == new_samolot).first()
         if samolot:
@@ -992,7 +1007,7 @@ def zmodyfikuj_realizacje_lotu(id_rlotu, new_samolot, new_pilot1, new_pilot2):
                                                                      RealizacjaLotu.data == realizacja.data).first()
             if samolot_zajety:
                 return ['danger',
-                        f"Samolot o numerze bocznym {samolot.nr_boczny} jest zejęty w dniu {realizacja.data}. Nie można wykorzystywać ten sam samolot więcej niż raz w tym samym dniu"]
+                        f"Samolot o numerze bocznym {samolot.nr_boczny} jest zejęty w dniu {realizacja.data}. Nie można wykorzystywać tego samolotu więcej niż raz w tym samym dniu"]
         if new_samolot != '':
             realizacja.samolot_nr_boczny = new_samolot
         else:
@@ -1249,23 +1264,13 @@ def suma_biletow(lista_lotow, pol_only=False):
 
 def time_timedelta(start, end, day_difference, start_timezone=0, end_timezone=0):
     days2min = day_difference * 24 * 60
-    reverse = False
     if start > end:
         if not day_difference:
             return 0
-        # start, end = end, start
-        # reverse = True
+
     delta = ((end.hour - end_timezone) - (start.hour - start_timezone)) * 60 + end.minute - start.minute + (
                 end.second - start.second) / 60.0 + days2min
-    # print(delta, reverse)
 
-    # if day_difference > 0:
-    #     return delta
-    # print("del1", delta)
-    # if reverse:
-    #     delta = 24 * 60 - delta
-    # elif reverse and day_difference > 0:
-    #     delta = day_difference * 24 * 60 - delta
     return delta
 
 
@@ -1384,7 +1389,7 @@ def dodaj_podroz(lista_lotow, cena, user_id, bagaz='basic', rabat=None):
         dodaj_rabat(user_id=user_id, znizka=5,
                     data_waznosci=datetime.datetime.strftime((datetime.datetime.now() + datetime.timedelta(days=30)),
                                                              '%Y-%m-%d'))
-        return ["success", f"Podróż została dodana, Numer twojej rezerwacji: {nr_rezerwacji}"]
+        return ["success", f"Podróż została dodana, Numer rezerwacji: {nr_rezerwacji}"]
 
 
 def usun_podroz(nr_rezerwacji):

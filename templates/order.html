@@ -77,8 +77,8 @@
                             name="bagaz"
                             onchange="recountPrice()">
                         <option data-placeholder="0" value="basic">Bagaż podręczny (za darmo)</option>
-                        <option data-placeholder="1" value="middle">Bagaż sredni (+50zł)</option>
-                        <option data-placeholder="2" value="big">Bagaż duży (+100zł)</option>
+                        <option data-placeholder="1" value="middle">Bagaż średni (+50zł/lot)</option>
+                        <option data-placeholder="2" value="big">Bagaż duży (+100zł/lot)</option>
                     </select>
                 </div>
             </div>
@@ -128,10 +128,10 @@
     {% if notification and notification[0] == "success" %}
         <div class="order-success">
             <div class="order-success-title">
-                Dziękujemy za skorzystanie naszym serwisem!
+                Dziękujemy za skorzystanie z usług naszego serwisu!
             </div>
             <div class="order-success-content">
-                Bardzo się cieszymy, że jesteś z nami. Masz rabat 5% na kolejne podróży do wykorzystania w ciągu 30 dni. Mozesz go (zarówno jak i dane, dotyczące swojej podróży) znależć na stronie <a href="{{ url_for("account") }}">Moje konto</a>.
+                Bardzo się cieszymy, że jesteś z nami. W ramach podziękowania dostajesz 5% rabat na kolejną podróż do wykorzystania w ciągu 30 dni. Informacje o podróżach oraz rabatach znajdują się w zakładce <a href="{{ url_for("account") }}">Moje konto</a>.
             </div>
             <div class="order-success-footer">
                 Udanej podróży!

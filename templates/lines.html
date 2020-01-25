@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    Linii lotnicze
+    Linie lotnicze
 {% endblock %}
 
 {% block header %}
     <div class="container">
         <div class="header-text">
-            Linii lotnicze
+            Linie lotnicze
         </div>
     </div>
 
@@ -45,7 +45,7 @@
     </form>
 
     <div class="subsection-header">
-        Linii lotnicze:
+        Linie lotnicze:
     </div>
     {% if not linie %}
         <div class="no-content"></div>
@@ -165,9 +165,9 @@
                             </button>
                         </div>
                         <div class="modal-body">
-                            Czy napewno chcesz usunąć linię lotniczą <span class="main-info">{{ linia.nazwa }}</span>?
-                            To spowoduję, że zostaną usunięte wszystkie harmonogramy związane z tą linią, realizacji lotów,
-                            co oznacza, że wszystkie zamówienia, związane z tymi realizacjami zostaną anulowane.
+                            Czy na pewno chcesz usunąć linię lotniczą <span class="main-info">{{ linia.nazwa }}</span>?
+                            Wszystkie harmonogramy zostaną usunięte, realizacje lotów odwołane, a dokonane przez klientów rezerwacje anulowane.
+                            Dodatkowo spowoduje to usunięcie samolotów i pilotów związanych z tą linią.
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>

@@ -29,7 +29,7 @@
                 <a class="list-group-item list-group-item-action active" id="list-home-list" data-toggle="list"
                    href="#list-data" role="tab" aria-controls="data">Dane</a>
                 <a class="list-group-item list-group-item-action" id="list-profile-list" data-toggle="list"
-                   href="#list-trips" role="tab" aria-controls="trips">Podrózy</a>
+                   href="#list-trips" role="tab" aria-controls="trips">Podróże</a>
                 <a class="list-group-item list-group-item-action" id="list-messages-list" data-toggle="list"
                    href="#list-messages" role="tab" aria-controls="discounts">Rabaty</a>
             </div>
@@ -91,7 +91,7 @@
                         {% if admin %}
                             Podróży użytkownika
                         {% else %}
-                            Twoje podrózy
+                            Twoje podróże
                         {% endif %}
                     </div>
                     {% if not podroze|length %}
@@ -105,7 +105,7 @@
                                         Rezerwacja #{{ podroz.nr_rezerwacji }}
                                     </div>
                                     <div class="account-order-date">
-                                        zrealizowane w dniu {{ podroz.get_data_rezerwacji() }}
+                                        Data zakupu {{ podroz.get_data_rezerwacji() }}
                                     </div>
                                 </div>
                                 {% if podroze[podroz] %}
@@ -137,7 +137,7 @@
                                                 </div>
                                                 <div class="account-order-right">
                                                     <div class="account-order-key">
-                                                        <div>Trwanie lotu</div>
+                                                        <div>Długość lotu</div>
                                                     </div>
                                                     <div class="account-order-value">
                                                         <div>{{ polaczenie.realizacja_lotu.get_czas_trwania()[0] }}h {{ polaczenie.realizacja_lotu.get_czas_trwania()[1] }}min</div>
