@@ -66,7 +66,22 @@
             {% endif %}
         {% endfor %}
 
+        <div class="info-title">Dodatkowe</div>
+
         <form method="post" enctype="multipart/form-data">
+
+            <div class="discounts-block">
+                <div class="form-group">
+                    <label for="baggage">Wybierz typ bagażu:</label>
+                    <select class="form-control" id="baggage"
+                            name="bagaz"
+                            onchange="recountPrice()">
+                        <option data-placeholder="0" value="basic">Bagaż podręczny (za darmo)</option>
+                        <option data-placeholder="1" value="middle">Bagaż sredni (+50zł)</option>
+                        <option data-placeholder="2" value="big">Bagaż duży (+100zł)</option>
+                    </select>
+                </div>
+            </div>
 
             <div class="discounts-block">
                 <div class="form-group">

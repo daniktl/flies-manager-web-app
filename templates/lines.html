@@ -72,6 +72,7 @@
                     Data założenia
                 </th>
                 <th></th>
+                <th></th>
             </tr>
             </thead>
             <tbody>
@@ -97,7 +98,11 @@
                     </th>
                     <th>
                         <button class="edit-button action-button" data-toggle="modal"
-                                data-target="#modal-linia-{{ linia.get_nazwa_safe() }}"></button>
+                                data-target="#modal-edit-linia-{{ linia.get_nazwa_safe() }}"></button>
+                    </th>
+                    <th>
+                        <button class="delete-button action-button" data-toggle="modal"
+                                data-target="#modal-delete-linia-{{ linia.get_nazwa_safe() }}"></button>
                     </th>
                 </tr>
             {% endfor %}
@@ -107,7 +112,7 @@
         </table>
         {% for linia in linie %}
 
-            <div class="modal fade" id="modal-linia-{{ linia.get_nazwa_safe() }}" tabindex="-1" role="dialog"
+            <div class="modal fade" id="modal-edit-linia-{{ linia.get_nazwa_safe() }}" tabindex="-1" role="dialog"
                  aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered" role="document">
                     <form class="modal-content" method="post" enctype="multipart/form-data">
@@ -141,10 +146,32 @@
                             </table>
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" class="btn btn-danger" name="remove" value="{{ linia.nazwa }}">Usuń
-                            </button>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
                             <button type="submit" class="btn btn-primary" name="edit" value="{{ linia.nazwa }}">Zapisz
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="modal fade" id="modal-delete-linia-{{ linia.get_nazwa_safe() }}" tabindex="-1" role="dialog"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <form class="modal-content" method="post" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalCenterTitle">Usuń linię {{ linia.nazwa }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Czy napewno chcesz usunąć linię lotniczą <span class="main-info">{{ linia.nazwa }}</span>?
+                            To spowoduję, że zostaną usunięte wszystkie harmonogramy związane z tą linią, realizacji lotów,
+                            co oznacza, że wszystkie zamówienia, związane z tymi realizacjami zostaną anulowane.
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+                            <button type="submit" class="btn btn-danger" name="remove" value="{{ linia.nazwa }}">Usuń
                             </button>
                         </div>
                     </form>

@@ -104,6 +104,7 @@
                 </th>
 
                 <th></th>
+                <th></th>
             </tr>
             </thead>
             <tbody>
@@ -127,7 +128,11 @@
 
                     <th>
                         <button class="edit-button action-button" data-toggle="modal"
-                                data-target="#modal-samolot-{{ samolot.nr_boczny }}"></button>
+                                data-target="#modal-edit-samolot-{{ samolot.nr_boczny }}"></button>
+                    </th>
+                    <th>
+                        <button class="delete-button action-button" data-toggle="modal"
+                                data-target="#modal-delete-samolot-{{ samolot.nr_boczny }}"></button>
                     </th>
                 </tr>
             {% endfor %}
@@ -137,7 +142,7 @@
         </table>
         {% for samolot in samoloty %}
 
-            <div class="modal fade" id="modal-samolot-{{ samolot.nr_boczny }}" tabindex="-1" role="dialog"
+            <div class="modal fade" id="modal-edit-samolot-{{ samolot.nr_boczny }}" tabindex="-1" role="dialog"
                  aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered" role="document">
                     <form class="modal-content" method="post" enctype="multipart/form-data">
@@ -205,12 +210,34 @@
                             </table>
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" class="btn btn-danger" name="remove-samolot"
-                                    value="{{ samolot.nr_boczny }}">Usuń
-                            </button>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
                             <button type="submit" class="btn btn-primary" name="edit-samolot"
                                     value="{{ samolot.nr_boczny }}">Zapisz
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="modal fade" id="modal-delete-samolot-{{ samolot.nr_boczny }}" tabindex="-1" role="dialog"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <form class="modal-content" method="post" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalCenterTitle">Usuń
+                                samolot {{ samolot.nr_boczny }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Czy napewno chcesz usunąć samolot o numerze bocznym <span class="main-info">{{ samolot.nr_boczny }}</span>?
+                            Loty, do których ten samolot został przydzielony zostaną zmienione i nikt nie będzie mógł dokonać zakupu biletu dopóki nie przydzielisz nowego.
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+                            <button type="submit" class="btn btn-danger" name="remove-samolot"
+                                    value="{{ samolot.nr_boczny }}">Usuń
                             </button>
                         </div>
                     </form>
@@ -233,11 +260,11 @@
             </div>
             <div class="form-row">
                 <div class="form-group col-md-6">
-                    <label for="from">Imię</label>
+                    <label for="new-imie">Imię</label>
                     <input type="text" class="form-control" id="new-imie" name="imie" placeholder="Grzegosz">
                 </div>
                 <div class="form-group col-md-6">
-                    <label for="from">Nazwisko</label>
+                    <label for="new-nazwisko">Nazwisko</label>
                     <input type="text" class="form-control" id="new-nazwisko" name="nazwisko"
                            placeholder="Brzęczyszczykiewicz">
                 </div>
@@ -270,6 +297,7 @@
 
 
                 <th></th>
+                <th></th>
             </tr>
             </thead>
             <tbody>
@@ -291,7 +319,11 @@
 
                     <th>
                         <button class="edit-button action-button" data-toggle="modal"
-                                data-target="#modal-samolot-{{ pilot.id_pil }}"></button>
+                                data-target="#modal-edit-pilot-{{ pilot.id_pil }}"></button>
+                    </th>
+                    <th>
+                        <button class="delete-button action-button" data-toggle="modal"
+                                data-target="#modal-delete-pilot-{{ pilot.id_pil }}"></button>
                     </th>
                 </tr>
             {% endfor %}
@@ -301,7 +333,7 @@
         </table>
         {% for pilot in piloci %}
 
-            <div class="modal fade" id="modal-samolot-{{ pilot.id_pil }}" tabindex="-1" role="dialog"
+            <div class="modal fade" id="modal-edit-pilot-{{ pilot.id_pil }}" tabindex="-1" role="dialog"
                  aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered" role="document">
                     <form class="modal-content" method="post" enctype="multipart/form-data">
@@ -340,14 +372,38 @@
                             </table>
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" class="btn btn-danger" name="remove-pilot" value="{{ pilot.id_pil }}">
-                                Usuń
-                            </button>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">
                                 Zamknij
                             </button>
                             <button type="submit" class="btn btn-primary" name="edit-pilot" value="{{ pilot.id_pil }}">
                                 Zapisz
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="modal fade" id="modal-delete-pilot-{{ pilot.id_pil }}" tabindex="-1" role="dialog"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <form class="modal-content" method="post" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalCenterTitle">Usuń
+                                pilota {{ pilot.imie }} {{ pilot.nazwisko }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Czy napewno chcesz usunąć pilota <span class="main-info">{{ pilot.imie }} {{ pilot.nazwisko }}</span>?
+                            Loty, do których ten pilot został przydzielony zostaną zmienione i będziesz musiał ponownie dokonać przydziału.
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                Zamknij
+                            </button>
+                            <button type="submit" class="btn btn-danger" name="remove-pilot" value="{{ pilot.id_pil }}">
+                                Usuń
                             </button>
                         </div>
                     </form>

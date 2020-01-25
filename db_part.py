@@ -39,15 +39,14 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://{username}:{password}@{host}/{d
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-
 db = SQLAlchemy(app)
 
 WEEKS_TO_SCHEDULE = 20
 
 type_of_baggage = {
-    "basic":"Bagaż podręczny",
-    "middle":"Bagaż średni",
-    "big":"Duży bagaż"
+    "basic": "Bagaż podręczny",
+    "middle": "Bagaż średni",
+    "big": "Duży bagaż"
 }
 
 
@@ -177,7 +176,8 @@ class Samolot(db.Model):
     przebieg = Column('przebieg', Integer, default=0)
     pojemnosc = Column('pojemnosc', Integer, nullable=False)
 
-    linia_lotnicza_nazwa = Column('linia_lotnicza_nazwa', String(25), ForeignKey(LiniaLotnicza.nazwa, ondelete='CASCADE'), nullable=False)
+    linia_lotnicza_nazwa = Column('linia_lotnicza_nazwa', String(25),
+                                  ForeignKey(LiniaLotnicza.nazwa, ondelete='CASCADE'), nullable=False)
     linia_lotnicza = relationship('LiniaLotnicza')
     realizacja_lotu = relationship('RealizacjaLotu')
 
@@ -190,7 +190,8 @@ class Pilot(db.Model):
     nazwisko = Column('nazwisko', String(30), nullable=False)
     data_dolaczenia = Column('data_dolaczenia', DateTime)
 
-    linia_lotnicza_nazwa = Column('linia_lotnicza_nazwa', String(25), ForeignKey(LiniaLotnicza.nazwa, ondelete='CASCADE'), nullable=False)
+    linia_lotnicza_nazwa = Column('linia_lotnicza_nazwa', String(25),
+                                  ForeignKey(LiniaLotnicza.nazwa, ondelete='CASCADE'), nullable=False)
     linia_lotnicza = relationship('LiniaLotnicza')
 
     realizacja1 = relationship("RealizacjaLotu", foreign_keys="[RealizacjaLotu.pilot_id_pil1]")
@@ -368,16 +369,7 @@ def licz_odleglosc(start, finish):
         return 0
 
 
-
 # ######### samoloty
-
-'''
-    @deprecated
-'''
-# def pokaz_samoloty_linia(nazwa):
-#     with session_handler() as db_session:
-#         liczba = len(db_session.query(Samolot).filter(Samolot.linia_lotnicza_nazwa == nazwa).all())
-#         return liczba
 
 
 def check_data_samolot(nr_boczny, marka, model, linia_nazwa, pojemnosc, zasieg, for_edit=False):
@@ -817,8 +809,10 @@ def zmodyfikuj_user(user_id, imie, nazwisko, email, new_password, new_r_password
             return ['danger', f"Użytkownik o id {user_id} nie istnieje"]
         if new_password != "":
             if new_password == new_r_password:
-                if not re.search(r'\d', new_password) or not re.search(r'[A-Z]', new_password) or not re.search(r'[a-z]', new_password):
-                    return ["danger", "Hasło jest bardzo słabe. Musi zawierać conajmniej 1 liczbę, co najmniej 1 dużą literę i co najmniej jedbą małą"]
+                if not re.search(r'\d', new_password) or not re.search(r'[A-Z]', new_password) or not re.search(
+                        r'[a-z]', new_password):
+                    return ["danger",
+                            "Hasło jest bardzo słabe. Musi zawierać conajmniej 1 liczbę, co najmniej 1 dużą literę i co najmniej jedbą małą"]
                 ex_user.haslo = bcrypt.encrypt(new_password)
             else:
                 return ["danger", "Hasło wprowadzone pierwsy raz musi się zgadzać z wprowadzonym drugi raz"]
@@ -1131,7 +1125,8 @@ def szukaj_podrozy(start_code, finish_code, data_str):
                                                                           month=ladowanie[1].data.month,
                                                                           day=ladowanie[1].data.day,
                                                                           hour=ladowanie[0].get_finish_godzina().hour,
-                                                                          minute=ladowanie[0].get_finish_godzina().minute)
+                                                                          minute=ladowanie[
+                                                                              0].get_finish_godzina().minute)
                 else:
                     czas_ladowania = 0
 
@@ -1263,7 +1258,7 @@ def policz_czas_podrozy(lista_lotow):
     start_timezone = lista_lotow[0][0].harmonogram.start_lotnisko.strefa_czasowa
     end_timezone = lista_lotow[-1][0].harmonogram.finish_lotnisko.strefa_czasowa
     delta = time_timedelta(start, end, day_int, start_timezone, end_timezone)
-    return int(delta//60), int(delta % 60)
+    return int(delta // 60), int(delta % 60)
 
 
 def policz_czas_przesiadki(lot1, lot2):
@@ -1279,7 +1274,7 @@ def policz_czas_przesiadki(lot1, lot2):
         day_int -= 1
 
     delta = time_timedelta(start, end, day_int)
-    return int(delta//60), int(delta % 60)
+    return int(delta // 60), int(delta % 60)
 
 
 # ############ podrózy
@@ -1304,7 +1299,8 @@ def sprawdz_dostepnosc_biletu(id_rlotu):
         przypisany_samolot = db_session.query(RealizacjaLotu.samolot_nr_boczny). \
             filter(RealizacjaLotu.id_rlotu == id_rlotu).scalar()
         if not przypisany_samolot:
-            return ['danger', 'Przewoźnik nie dodał jeszcze maszyny do lotu. Brak możliwosci kupna biletu. Zapraszamy później.']
+            return ['danger',
+                    'Przewoźnik nie dodał jeszcze maszyny do lotu. Brak możliwosci kupna biletu. Zapraszamy później.']
         samolot_pojemnosc = db_session.query(Samolot.pojemnosc). \
             filter(Samolot.nr_boczny == przypisany_samolot).scalar()
         obecna_ilosc = db_session.query(RealizacjaLotu.ilosc_pasazerow). \
@@ -1363,7 +1359,9 @@ def dodaj_podroz(lista_lotow, cena, user_id, bagaz='basic', rabat=None):
             db_session.commit()
         if rabat:
             usun_rabat(rabat)
-        dodaj_rabat(user_id=user_id, znizka=5, data_waznosci=datetime.datetime.strftime((datetime.datetime.now()+datetime.timedelta(days=30)), '%Y-%m-%d'))
+        dodaj_rabat(user_id=user_id, znizka=5,
+                    data_waznosci=datetime.datetime.strftime((datetime.datetime.now() + datetime.timedelta(days=30)),
+                                                             '%Y-%m-%d'))
         return ["success", f"Podróż została dodana, Numer twojej rezerwacji: {nr_rezerwacji}"]
 
 

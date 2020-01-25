@@ -69,14 +69,19 @@ function recountPrice(){
     let discount_select = document.getElementById('discounts');
     let current_discount_str = discount_select.options[discount_select.selectedIndex].getAttribute("data-placeholder");
     let price = parseInt(price_div.getAttribute("data-placeholder"));
+    let baggage_select = document.getElementById('baggage');
+    let current_baggage_str = baggage_select.options[baggage_select.selectedIndex].getAttribute("data-placeholder");
     let current_discount = parseInt(current_discount_str);
-    if (!current_discount){
+    let current_baggage = parseInt(current_baggage_str);
+    if (!current_discount && !current_baggage){
         document.getElementById("basic-price").classList.remove("bitted");
         document.getElementById("new-price").classList.remove("show");
     }else {
         document.getElementById("basic-price").classList.add("bitted");
         document.getElementById("new-price").classList.add("show");
     }
+    let order_block_counter = document.getElementsByClassName("order-block").length;
+    price += 50 * current_baggage * order_block_counter;
     let price_after = (price - price * (current_discount / 100)).toString();
     document.getElementById("new-price-int").innerHTML = price_after;
     document.getElementById("hidden-price").setAttribute("value", price_after);

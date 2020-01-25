@@ -91,6 +91,7 @@
                     Strefa czasowa
                 </th>
                 <th></th>
+                <th></th>
             </tr>
             </thead>
             <tbody>
@@ -113,7 +114,11 @@
                     </th>
                     <th>
                         <button class="edit-button action-button" data-toggle="modal"
-                                data-target="#modal-lotnisko-{{ lotnisko.kod }}"></button>
+                                data-target="#modal-edit-lotnisko-{{ lotnisko.kod }}"></button>
+                    </th>
+                    <th>
+                        <button class="delete-button action-button" data-toggle="modal"
+                                data-target="#modal-delete-lotnisko-{{ lotnisko.kod }}"></button>
                     </th>
                 </tr>
             {% endfor %}
@@ -122,7 +127,7 @@
 
         </table>
         {% for lotnisko in lotniska %}
-            <div class="modal fade" id="modal-lotnisko-{{ lotnisko.kod }}" tabindex="-1" role="dialog"
+            <div class="modal fade" id="modal-edit-lotnisko-{{ lotnisko.kod }}" tabindex="-1" role="dialog"
                  aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered" role="document">
                     <form class="modal-content" method="post" enctype="multipart/form-data">
@@ -135,15 +140,6 @@
                         <div class="modal-body">
                             <table class="table">
                                 <tbody>
-                                {#                                <tr>#}
-                                {#                                    <th>#}
-                                {#                                        <label for="edit-code">Kod</label>#}
-                                {#                                    </th>#}
-                                {#                                    <th>#}
-                                {#                                        <input class="form-control" type="text" name="code" id="edit-code"#}
-                                {#                                               value="{{ lotnisko.kod }}">#}
-                                {#                                    </th>#}
-                                {#                                </tr>#}
                                 <tr>
                                     <th>
                                         <label for="edit-country">Kraj</label>
@@ -198,14 +194,40 @@
                             </table>
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" class="btn btn-danger" name="remove" value="{{ lotnisko.kod }}">
-                                Usuń
-                            </button>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">
                                 Zamknij
                             </button>
                             <button type="submit" class="btn btn-primary" name="edit" value="{{ lotnisko.kod }}">
                                 Zapisz
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+             <div class="modal fade" id="modal-delete-lotnisko-{{ lotnisko.kod }}" tabindex="-1" role="dialog"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <form class="modal-content" method="post" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalCenterTitle">Usuń lotnisko {{ lotnisko.kod }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Czy napewno chcesz usunąć lotnisko <span class="main-info">{{ lotnisko.kod }}</span>
+                            w miescie <span class="main-info">{{ lotnisko.miasto }}, {{ lotnisko.kraj }}</span>?
+                            To spowoduję, że zostaną usunięte wszystkie harmonogramy związane z tym lotniskiem, realizacji lotów,
+                            co oznacza, że wszystkie zamówienia, związane z tymi realizacjami zostaną anulowane.
+                        </div>
+                        <div class="modal-footer">
+
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                Zamknij
+                            </button>
+                            <button type="submit" class="btn btn-danger" name="remove" value="{{ lotnisko.kod }}">
+                                Usuń
                             </button>
                         </div>
                     </form>

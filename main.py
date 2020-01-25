@@ -67,7 +67,7 @@ def order():
                     notification = ["danger", "Musisz potwierdzić warunki korzystania z serwisu"]
                 else:
                     notification = dodaj_podroz(r_nums.split(";")[:-1], req['cena'], get_current_user_id(),
-                                                rabat=req['discount'] if 'dicount' in req else None)
+                                                rabat=req['discount'] if 'dicount' in req else None, bagaz=req['bagaz'])
             else:
                 notification = ["danger", "Loty nie zostali wybrane. Spróbuj ponownie"]
         elif request.method == "GET" or to_reconfirm:
@@ -220,17 +220,20 @@ def account(user_id=None):
     u_id = get_current_user_id()
     if not isinstance(user_id, type(None)):
         user = pokaz_user(user_id=user_id)
+        admin = True
     else:
         user = pokaz_user(user_id=u_id)
-        admin = True
     rabaty = pokaz_rabaty(user.user_id)
     podroze_tmp = pokaz_podroz(user_id=user.user_id)
     podroze = {}
     for podroz in podroze_tmp:
+        if not podroz[1].realizacja_lotu:
+            podroze[podroz[0]] = None
         if podroz[0] not in podroze.keys():
             podroze[podroz[0]] = [podroz[1]]
         else:
-            podroze[podroz[0]].append(podroz[1])
+            if isinstance(podroze[podroz[0]], list):
+                podroze[podroz[0]].append(podroz[1])
     return render_template('account.html', user=user, rabaty=rabaty, u_id=u_id, notification=notification, admin=admin,
                            podroze=podroze)
 

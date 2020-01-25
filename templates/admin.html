@@ -85,6 +85,7 @@
                 </th>
                 <th></th>
                 <th></th>
+                <th></th>
             </tr>
             </thead>
             <tbody>
@@ -111,7 +112,11 @@
                     </th>
                     <th>
                         <button class="edit-button action-button" data-toggle="modal"
-                                data-target="#modal-user-{{ user.user_id }}"></button>
+                                data-target="#modal-user-edit-{{ user.user_id }}"></button>
+                    </th>
+                    <th>
+                        <button class="delete-button action-button" data-toggle="modal"
+                                data-target="#modal-user-delete-{{ user.user_id }}"></button>
                     </th>
                 </tr>
             {% endfor %}
@@ -121,7 +126,7 @@
         </table>
         {% for user in users %}
 
-            <div class="modal fade" id="modal-user-{{ user.user_id }}" tabindex="-1" role="dialog"
+            <div class="modal fade" id="modal-user-edit-{{ user.user_id }}" tabindex="-1" role="dialog"
                  aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered" role="document">
                     <form class="modal-content" method="post" enctype="multipart/form-data">
@@ -195,10 +200,31 @@
                             </table>
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" class="btn btn-danger" name="remove" value="{{ user.user_id }}">Usuń
-                            </button>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
                             <button type="submit" class="btn btn-primary" name="edit" value="{{ user.user_id }}">Zapisz
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="modal fade" id="modal-user-delete-{{ user.user_id }}" tabindex="-1" role="dialog"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <form class="modal-content" method="post" enctype="multipart/form-data">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalCenterTitle">Usuń użytkownika {{ user.imie }} {{ user.nazwisko }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Czy napewno chcesz usunąć użytkownika <span class="main-info">{{ user.imie }} {{ user.nazwisko }}</span>?
+                            To spowoduję że wszystkie zakupy zostaną anulowane, rabaty usunięte.
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+                            <button type="submit" class="btn btn-danger" name="remove" value="{{ user.user_id }}">Usuń
                             </button>
                         </div>
                     </form>

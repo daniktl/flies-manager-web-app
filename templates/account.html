@@ -108,69 +108,77 @@
                                         zrealizowane w dniu {{ podroz.get_data_rezerwacji() }}
                                     </div>
                                 </div>
-                                <div class="account-order-subtitle">{{ podroze[podroz][0].realizacja_lotu.get_from() }}
-                                    - {{ podroze[podroz][-1].realizacja_lotu.get_to() }} w
-                                    dniu {{ podroze[podroz][0].realizacja_lotu.get_data_show() }}</div>
-                                <div class="account-order-list">
-                                    {% for idx, polaczenie in enumerate(podroze[podroz]) %}
-                                        <div class="account-order-item">
-                                            <div class="account-order-left">
-                                                <div class="account-order-key">
-                                                    <div>Z</div>
-                                                    <div>Do</div>
+                                {% if podroze[podroz] %}
+                                    <div class="account-order-subtitle">{{ podroze[podroz][0].realizacja_lotu.get_from() }}
+                                        - {{ podroze[podroz][-1].realizacja_lotu.get_to() }} w
+                                        dniu {{ podroze[podroz][0].realizacja_lotu.get_data_show() }}</div>
+                                    <div class="account-order-list">
+                                        {% for idx, polaczenie in enumerate(podroze[podroz]) %}
+                                            <div class="account-order-item">
+                                                <div class="account-order-left">
+                                                    <div class="account-order-key">
+                                                        <div>Z</div>
+                                                        <div>Do</div>
+                                                    </div>
+                                                    <div class="account-order-value">
+                                                        <div class="account-order-item-from">{{ polaczenie.realizacja_lotu.get_time_show() }} {{ polaczenie.realizacja_lotu.get_from() }}</div>
+                                                        <div class="account-order-item-to">{{ polaczenie.realizacja_lotu.get_finish_show() }} {{ polaczenie.realizacja_lotu.get_to() }}</div>
+                                                    </div>
                                                 </div>
-                                                <div class="account-order-value">
-                                                    <div class="account-order-item-from">{{ polaczenie.realizacja_lotu.get_time_show() }} {{ polaczenie.realizacja_lotu.get_from() }}</div>
-                                                    <div class="account-order-item-to">{{ polaczenie.realizacja_lotu.get_finish_show() }} {{ polaczenie.realizacja_lotu.get_to() }}</div>
+                                                <div class="account-order-middle">
+                                                    <div class="account-order-key">
+                                                        <div>Miejsce</div>
+                                                        <div>Bagaż</div>
+                                                    </div>
+                                                    <div class="account-order-value">
+                                                        <div>{{ polaczenie.nr_miejsca }}</div>
+                                                        <div>{{ polaczenie.get_bagaz_show() }}</div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="account-order-middle">
-                                                <div class="account-order-key">
-                                                    <div>Miejsce</div>
-                                                    <div>Bagaż</div>
+                                                <div class="account-order-right">
+                                                    <div class="account-order-key">
+                                                        <div>Trwanie lotu</div>
+                                                    </div>
+                                                    <div class="account-order-value">
+                                                        <div>{{ polaczenie.realizacja_lotu.get_czas_trwania()[0] }}h {{ polaczenie.realizacja_lotu.get_czas_trwania()[1] }}min</div>
+                                                    </div>
                                                 </div>
-                                                <div class="account-order-value">
-                                                    <div>{{ polaczenie.nr_miejsca }}</div>
-                                                    <div>{{ polaczenie.get_bagaz_show() }}</div>
+                                                <div class="account-order-right">
+
                                                 </div>
-                                            </div>
-                                            <div class="account-order-right">
-                                                <div class="account-order-key">
-                                                    <div>Trwanie lotu</div>
-                                                </div>
-                                                <div class="account-order-value">
-                                                    <div>{{ polaczenie.realizacja_lotu.get_czas_trwania()[0] }}h {{ polaczenie.realizacja_lotu.get_czas_trwania()[1] }}min</div>
-                                                </div>
-                                            </div>
-                                            <div class="account-order-right">
 
                                             </div>
+                                            <div class="account-order-footer">
+                                                {{ polaczenie.realizacja_lotu.harmonogram_nr_lotu }}
+                                            </div>
 
-                                        </div>
-                                        <div class="account-order-footer">
-                                            {{ polaczenie.realizacja_lotu.harmonogram_nr_lotu }}
-                                        </div>
+                                            {% if polaczenie != podroze[podroz][-1] %}
+                                                <div class="shift {% if czas_przesiadki(podroze[podroz][idx].realizacja_lotu, podroze[podroz][idx + 1].realizacja_lotu)[0] < 1 %}danger{% endif %}">
+                                                    przesiadka {{ czas_przesiadki(podroze[podroz][idx].realizacja_lotu, podroze[podroz][idx + 1].realizacja_lotu)[0] }}h {{ czas_przesiadki(podroze[podroz][idx].realizacja_lotu, podroze[podroz][idx + 1].realizacja_lotu)[1] }}min
+                                                    w {{ podroze[podroz][idx].realizacja_lotu.get_to() }}</div>
+                                            {% endif %}
+                                        {% endfor %}
 
-                                        {% if polaczenie != podroze[podroz][-1] %}
-                                            <div class="shift {% if czas_przesiadki(podroze[podroz][idx].realizacja_lotu, podroze[podroz][idx + 1].realizacja_lotu)[0] < 1 %}danger{% endif %}">
-                                                przesiadka {{ czas_przesiadki(podroze[podroz][idx].realizacja_lotu, podroze[podroz][idx + 1].realizacja_lotu)[0] }}h {{ czas_przesiadki(podroze[podroz][idx].realizacja_lotu, podroze[podroz][idx + 1].realizacja_lotu)[1] }}min
-                                                w {{ podroze[podroz][idx].realizacja_lotu.get_to() }}</div>
-                                        {% endif %}
-                                    {% endfor %}
 
-                                </div>
+                                    </div>
+                                {% else %}
+                                    <div class="canceled-flight">Wygląda na to, że przynajmniej jeden lot z Twojej podróży został anulowany. W przypadku stracenia biletu prosimy o kontaktowanie się z nami</div>
+                                {% endif %}
                                 <div class="account-order-footer">
-                                    {% if podroze[podroz][0].realizacja_lotu.expired() %}
-                                        <button class="btn btn-warning" data-toggle="modal"
-                                                data-target="#modal-podroz-remove-{{ podroz.nr_rezerwacji }}">Usuń
-                                            rezerwację
-                                        </button>
-                                    {% else %}
-                                        <button class="btn btn-danger" data-toggle="modal"
-                                                data-target="#modal-podroz-cancel-{{ podroz.nr_rezerwacji }}">Anuluj
-                                            rezerwację
-                                        </button>
-                                    {% endif %}
+                                    <div class="price">Cena: <span class="price-int">{{ podroz.cena }}zł</span></div>
+                                    <div class="action-button">
+                                        {% if not podroze[podroz] or podroze[podroz][0].realizacja_lotu.expired() %}
+                                            <button class="btn btn-warning" data-toggle="modal"
+                                                    data-target="#modal-podroz-remove-{{ podroz.nr_rezerwacji }}">Usuń
+                                                rezerwację
+                                            </button>
+                                        {% else %}
+                                            <button class="btn btn-danger" data-toggle="modal"
+                                                    data-target="#modal-podroz-cancel-{{ podroz.nr_rezerwacji }}">Anuluj
+                                                rezerwację
+                                            </button>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
 

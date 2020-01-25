@@ -132,6 +132,10 @@ html {
     background-image: url("/static/pencil.png");
 }
 
+.delete-button {
+    background-image: url("/static/bin.png");
+}
+
 .more-button {
     background-image: url("/static/more.png");
 }
@@ -510,6 +514,7 @@ html {
     font-size: 1rem;
     font-weight: 600;
     text-align: right;
+    padding: 10px;
 }
 
 .order-block {
@@ -718,7 +723,31 @@ html {
     font-weight: 600;
 }
 
-.account-order-footer button {
-    position: relative;
-    right: 0;
+.account-order-footer  {
+    display: flex;
+}
+
+.account-order-footer .price {
+    flex: 0 1 80%;
+    text-align: right;
+    font-size: 25px;
+    font-weight: 600;
+}
+
+.price-int {
+    color: #57abff;
+}
+
+.account-order-footer .action-button {
+    flex: 0 1 20%;
+}
+
+
+.canceled-flight {
+    font-weight: 300;
+    font-size: 22px;
+}
+
+.main-info {
+    font-weight: 600;
 }
