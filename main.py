@@ -208,7 +208,7 @@ def account(user_id=None):
         elif "remove-rabat" in req:
             notification = usun_rabat(req['remove-rabat'])
         elif "edit-user" in req:
-            notification = zmodyfikuj_user(user_id=user_id, imie=req['imie'], nazwisko=req['nazwisko'],
+            notification = zmodyfikuj_user(user_id=req['edit-user'], imie=req['imie'], nazwisko=req['nazwisko'],
                                            email=req['email'], new_password=req['new-password'],
                                            new_r_password=req['new-password-repeat'])
         elif "cancel-podroz" in req:
