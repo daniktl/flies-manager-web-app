@@ -318,7 +318,7 @@ class Polaczenie(db.Model):
 
     sztuczne_id = Column('sztuczne_id', Integer, primary_key=True, autoincrement=True)
     nr_miejsca = Column('nr_miejsca', String(3), nullable=False)
-    bagaz = Column('bagaz', String(5), nullable=False)
+    bagaz = Column('bagaz', String(6), nullable=False)
     kolejnosc = Column('kolejnosc', Integer, nullable=False)
 
     realizacja_lotu_id_rlotu = Column('realizacja_lotu_id_rlotu', Integer,
@@ -1379,7 +1379,7 @@ def dodaj_podroz(lista_lotow, cena, user_id, bagaz='basic', rabat=None):
             miejsce = str(rzad) + literki[siedzenie]
             dany_lot.ilosc_pasazerow += 1
 
-            nowe_polaczenie = Polaczenie(nr_miejsca=miejsce, bagaz='basic',
+            nowe_polaczenie = Polaczenie(nr_miejsca=miejsce, bagaz=bagaz,
                                          kolejnosc=index, podroz_nr_rezerwacji=nr_rezerwacji,
                                          realizacja_lotu_id_rlotu=id_lotu)
             db_session.add(nowe_polaczenie)
