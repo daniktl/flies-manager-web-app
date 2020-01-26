@@ -203,7 +203,7 @@ def account(user_id=None):
     if request.method == "POST":
         req = request.values.to_dict()
         if "new" in req:
-            notification = dodaj_rabat(user_id if user_id else get_current_user_id(), req['procent'],
+            notification = dodaj_rabat(user_id, req['procent'],
                                        req['data_waznosci'])
         elif "remove-rabat" in req:
             notification = usun_rabat(req['remove-rabat'])

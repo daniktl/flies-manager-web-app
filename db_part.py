@@ -856,6 +856,8 @@ def check_user_credentials(email, password):
 
 def dodaj_rabat(user_id, znizka, data_waznosci):
     with session_handler() as db_session:
+        if not user_id:
+            return ["danger", "Tylko administrator może dodawać rabaty!"]
         if check_empty([znizka, data_waznosci]):
             return ["danger", "Procent zniżki oraz data ważności nie mogą być puste"]
         if isinstance(znizka, str):
