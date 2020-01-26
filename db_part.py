@@ -318,7 +318,7 @@ class Polaczenie(db.Model):
 
     sztuczne_id = Column('sztuczne_id', Integer, primary_key=True, autoincrement=True)
     nr_miejsca = Column('nr_miejsca', String(3), nullable=False)
-    bagaz = Column('bagaz', String(5), nullable=False)
+    bagaz = Column('bagaz', String(6), nullable=False)
     kolejnosc = Column('kolejnosc', Integer, nullable=False)
 
     realizacja_lotu_id_rlotu = Column('realizacja_lotu_id_rlotu', Integer,
@@ -858,6 +858,9 @@ def dodaj_rabat(user_id, znizka, data_waznosci):
     with session_handler() as db_session:
         if check_empty([znizka, data_waznosci]):
             return ["danger", "Procent zniżki oraz data ważności nie mogą być puste"]
+        if isinstance(znizka, str):
+            if len(znizka) > 3:
+                return ['danger', 'Maksymalny ilość cyfr w zniżce to 3']
         kod_rabatowy = ''.join(random.choice(ascii_letters) for i in range(10)).upper()
         while db_session.query(Rabat).filter(Rabat.kod == kod_rabatowy).first():
             kod_rabatowy = ''.join(random.choice(ascii_letters) for i in range(10)).upper()
@@ -1314,7 +1317,7 @@ def check_data_podroz(lista_lotow, cena, user_id):
             if cena.isnumeric():
                 cena = int(cena)
         if isinstance(cena, int):
-            if cena <= 0:
+            if cena < 0:
                 return ['danger', "Problem z wyznaczeniem ceny podroży"]
         user = db_session.query(User).filter(User.user_id == user_id).first()
         if not user:
@@ -1379,7 +1382,7 @@ def dodaj_podroz(lista_lotow, cena, user_id, bagaz='basic', rabat=None):
             miejsce = str(rzad) + literki[siedzenie]
             dany_lot.ilosc_pasazerow += 1
 
-            nowe_polaczenie = Polaczenie(nr_miejsca=miejsce, bagaz='basic',
+            nowe_polaczenie = Polaczenie(nr_miejsca=miejsce, bagaz=bagaz,
                                          kolejnosc=index, podroz_nr_rezerwacji=nr_rezerwacji,
                                          realizacja_lotu_id_rlotu=id_lotu)
             db_session.add(nowe_polaczenie)
