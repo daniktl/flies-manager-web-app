@@ -67,7 +67,7 @@ def order():
                     notification = ["danger", "Musisz potwierdzić warunki korzystania z serwisu"]
                 else:
                     notification = dodaj_podroz(r_nums.split(";")[:-1], req['cena'], get_current_user_id(),
-                                                rabat=req['discount'] if 'dicount' in req else None, bagaz=req['bagaz'])
+                                                rabat=req['discount'] if 'discount' in req else None, bagaz=req['bagaz'])
             else:
                 notification = ["danger", "Loty nie zostali wybrane. Spróbuj ponownie"]
         elif request.method == "GET" or to_reconfirm:
@@ -136,7 +136,6 @@ def lines():
         if 'new' in req:
             notification = dodaj_linie(req['nazwa'], req['kraj'])
         elif 'edit' in req:
-            # TODO
             notification = zmodyfikuj_linie(req['edit'], req['edit'], req['kraj'])
         if 'remove' in req:
             notification = usun_linie(nazwa=req['remove'])

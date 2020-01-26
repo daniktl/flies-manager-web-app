@@ -502,9 +502,9 @@ def zmodyfikuj_linie(nazwa, new_nazwa, new_kraj):
         error = check_data_linie(new_nazwa)
         if error:
             return error
-        nowa_linia = db_session.query(LiniaLotnicza).filter(LiniaLotnicza.nazwa == new_nazwa).first()
-        if nowa_linia:
-            return ['danger', "Linia lotnicza z taką nazwą już istnieje"]
+        # nowa_linia = db_session.query(LiniaLotnicza).filter(LiniaLotnicza.nazwa == new_nazwa).first()
+        # if nowa_linia:
+        #     return ['danger', "Linia lotnicza z taką nazwą już istnieje"]
         linia.nazwa = new_nazwa
         linia.kraj = new_kraj
         return ['success', f"Dane o linii {nazwa} zostały zmodyfikowane"]
