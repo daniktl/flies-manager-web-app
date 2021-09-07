@@ -1,12 +1,15 @@
-# fly_manager
+# Flights manager web app (college project)
 
-SQL project with Python SQLAlchemy module and Flask back-frontend
+Flask web-app with Jinja templates as a frontend.
 
-To run it you need to install next packages with pip:
+## Installing
 
-    1) Flask
-    2) SQLAlchemy
-    3) mysql package for python
-    4) numpy
-    
-Next from the main directory run it using `python3 main.py` if you're using Ubuntu.
+Please install the following requirements (`requirements.txt` file could be added soon).
+
+- Flask
+- SQLAlchemy
+- mysql package for python
+- numpy
+   
+## Running
+To start dev web server, execute the `python3 main.py` command in the root directory.
